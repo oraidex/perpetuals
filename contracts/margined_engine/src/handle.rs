@@ -18,9 +18,9 @@ use crate::{
     utils::{
         calc_remain_margin_with_funding_payment, direction_to_side, get_asset,
         get_margin_ratio_calc_option, get_position, get_position_notional_unrealized_pnl,
-        keccak_256, position_to_side, require_additional_margin, require_bad_debt,
-        require_insufficient_margin, require_non_zero_input, require_not_paused,
-        require_not_restriction_mode, require_position_not_zero, require_vamm, side_to_direction,
+        position_to_side, require_additional_margin, require_bad_debt, require_insufficient_margin,
+        require_non_zero_input, require_not_paused, require_not_restriction_mode,
+        require_position_not_zero, require_vamm, side_to_direction,
     },
 };
 use margined_common::{
@@ -123,7 +123,9 @@ pub fn open_position(
     require_not_paused(state.pause)?;
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
 
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
 
     require_not_restriction_mode(deps.storage, &position_key, &vamm, env.block.height)?;
     require_non_zero_input(margin_amount)?;
@@ -227,13 +229,17 @@ pub fn close_position(
     let trader = info.sender;
 
     // read the position for the trader from vamm
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
     let position = read_position(deps.storage, &position_key)?;
 
     // check the position isn't zero
     require_not_paused(state.pause)?;
     require_position_not_zero(position.size.value)?;
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
     require_not_restriction_mode(deps.storage, &position_key, &vamm, env.block.height)?;
 
     // if it is long position, close a position means short it (which means base dir is AddToAmm) and vice versa
@@ -348,7 +354,9 @@ pub fn liquidate(
     require_insufficient_margin(margin_ratio, config.maintenance_margin_ratio)?;
 
     // read the position for the trader from vamm
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
     let position = read_position(deps.storage, &position_key)?;
 
     // check the position isn't zero
@@ -429,7 +437,9 @@ pub fn deposit_margin(
             response = response.clone().add_submessage(msg);
         }
     };
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
     // read the position for the trader from vamm
     let mut position = read_position(deps.storage, &position_key)?;
 
@@ -468,7 +478,9 @@ pub fn withdraw_margin(
     require_non_zero_input(amount)?;
 
     // read the position for the trader from vamm
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
     let mut position = read_position(deps.storage, &position_key)?;
 
     let remain_margin = calc_remain_margin_with_funding_payment(
@@ -618,7 +630,9 @@ fn partial_liquidation(
     quote_asset_limit: Uint128,
 ) -> StdResult<SubMsg> {
     let config: Config = read_config(deps.storage)?;
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
     let position: Position = read_position(deps.storage, &position_key)?;
 
     let partial_position_size = position

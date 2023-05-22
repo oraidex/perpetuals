@@ -3,7 +3,6 @@ use cosmwasm_std::{
     SubMsgResponse, Uint128,
 };
 use margined_utils::contracts::helpers::{InsuranceFundController, VammController};
-use sha3::{Digest, Sha3_256};
 
 use std::str::FromStr;
 
@@ -22,17 +21,6 @@ use crate::{
     query::query_cumulative_premium_fraction,
     state::{read_config, read_position, read_state, read_vamm_map, store_state, State},
 };
-
-pub fn keccak_256(input: &[u8]) -> Vec<u8> {
-    // create a SHA3-256 object
-    let mut hasher = Sha3_256::new();
-
-    // write input message
-    hasher.update(input);
-
-    // read hash digest
-    hasher.finalize().to_vec()
-}
 
 // reads position from storage but also handles the case where there is no
 // previously stored position, i.e. a new position
@@ -165,7 +153,9 @@ pub fn get_margin_ratio_calc_option(
     calc_option: PnlCalcOption,
 ) -> StdResult<Integer> {
     let config = read_config(deps.storage)?;
-    let position_key = keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[vamm.as_bytes(), trader.as_bytes()].concat())?;
     // retrieve the latest position
     let position = read_position(deps.storage, &position_key)?;
 

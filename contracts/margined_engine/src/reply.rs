@@ -17,7 +17,7 @@ use crate::{
     },
     utils::{
         calc_remain_margin_with_funding_payment, check_base_asset_holding_cap, clear_position,
-        get_position, keccak_256, realize_bad_debt, require_additional_margin, side_to_direction,
+        get_position, realize_bad_debt, require_additional_margin, side_to_direction,
         update_open_interest_notional,
     },
 };
@@ -42,7 +42,9 @@ pub fn update_position_reply(
     let mut swap = read_tmp_swap(deps.storage)?;
     let mut funds = read_sent_funds(deps.storage)?;
 
-    let position_key = keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat())?;
 
     let mut position = get_position(
         deps.storage,
@@ -137,7 +139,9 @@ pub fn update_position_reply(
     position.last_updated_premium_fraction = latest_premium_fraction;
     position.block_number = env.block.height;
 
-    let position_key = keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat())?;
 
     store_position(deps.storage, &position_key, &position)?;
 
@@ -237,7 +241,9 @@ pub fn reverse_position_reply(
     let mut swap = read_tmp_swap(deps.storage)?;
     let mut funds = read_sent_funds(deps.storage)?;
 
-    let position_key = keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat())?;
 
     let mut position = get_position(
         deps.storage,
@@ -330,7 +336,9 @@ pub fn reverse_position_reply(
         store_sent_funds(deps.storage, &funds)?;
     }
 
-    let position_key = keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat())?;
     store_position(deps.storage, &position_key, &position)?;
     store_state(deps.storage, &state)?;
 
@@ -352,7 +360,9 @@ pub fn close_position_reply(
     let mut state = read_state(deps.storage)?;
     let swap = read_tmp_swap(deps.storage)?;
 
-    let position_key = keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat())?;
 
     let position = get_position(
         deps.storage,
@@ -428,7 +438,9 @@ pub fn close_position_reply(
         swap.trader,
     )?;
 
-    let position_key = keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat())?;
     remove_position(deps.storage, &position_key);
 
     store_state(deps.storage, &state)?;
@@ -454,7 +466,9 @@ pub fn partial_close_position_reply(
     let mut state: State = read_state(deps.storage)?;
 
     let swap: TmpSwapInfo = read_tmp_swap(deps.storage)?;
-    let position_key = keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat())?;
     let mut position = get_position(
         deps.storage,
         &position_key,
@@ -513,7 +527,9 @@ pub fn partial_close_position_reply(
     position.last_updated_premium_fraction = latest_premium_fraction;
     position.block_number = env.block.height;
 
-    let position_key = keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat())?;
     store_position(deps.storage, &position_key, &position)?;
     store_state(deps.storage, &state)?;
 
@@ -549,7 +565,9 @@ pub fn liquidate_reply(
     let swap = read_tmp_swap(deps.storage)?;
     let liquidator = read_tmp_liquidator(deps.storage)?;
 
-    let position_key = keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat())?;
     let position = get_position(
         deps.storage,
         &position_key,
@@ -621,7 +639,9 @@ pub fn liquidate_reply(
 
     store_state(deps.storage, &state)?;
 
-    let position_key = keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat())?;
     remove_position(deps.storage, &position_key);
     remove_tmp_swap(deps.storage);
     remove_tmp_liquidator(deps.storage);
@@ -654,7 +674,9 @@ pub fn partial_liquidation_reply(
 
     let liquidator = read_tmp_liquidator(deps.storage)?;
 
-    let position_key = keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[swap.vamm.as_bytes(), swap.trader.as_bytes()].concat())?;
 
     let mut position = get_position(
         deps.storage,
@@ -729,7 +751,9 @@ pub fn partial_liquidation_reply(
             Uint128::zero(),
         )?);
     }
-    let position_key = keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat());
+    let position_key = deps
+        .api
+        .keccak_256(&[position.vamm.as_bytes(), position.trader.as_bytes()].concat())?;
     store_position(deps.storage, &position_key, &position)?;
     store_state(deps.storage, &state)?;
 

@@ -24,16 +24,16 @@ exclude = [
 ]
 
 [workspace.dependencies]
-cosmwasm-schema = { version = "1.1.9" }
-cosmwasm-std = { version = "1.1.9" }
-cosmwasm-storage = { version = "1.1.9" }
+cosmwasm-schema = { git = "https://github.com/oraichain/cosmwasm.git" }
+cosmwasm-std = { git = "https://github.com/oraichain/cosmwasm.git" }
+cosmwasm-storage = { git = "https://github.com/oraichain/cosmwasm.git" }
 thiserror = "1.0.26"
-cw-controllers = "1.0.1"
-cw2 = "1.0.1"
-cw20 = { version = "1.0.1" }
-cw20-base = { version = "1.0.1" }
-cw-multi-test = { git = "https://github.com/oraichain/cw-multi-test.git" } # fix _contract_address attribute
-cw-utils = "1.0.1"
+cw-controllers = { git = "https://github.com/oraichain/cw-plus.git", branch = "oraichain" }
+cw2 = { git = "https://github.com/oraichain/cw-plus.git", branch = "oraichain" }
+cw20 = { git = "https://github.com/oraichain/cw-plus.git", branch = "oraichain" }
+cw20-base = { git = "https://github.com/oraichain/cw-plus.git", branch = "oraichain" }
+cw-multi-test = { git = "https://github.com/oraichain/cw-multi-test.git", branch = "oraichain" } # fix _contract_address attribute
+cw-utils = { git = "https://github.com/oraichain/cw-utils.git" }
 
 margined_utils = { path = "./packages/margined_utils" }
 margined_perp = { path = "./packages/margined_perp" }
@@ -48,7 +48,9 @@ mock_pricefeed = { path = "./contracts/mocks/mock_pricefeed" }
 
 # # override cosmwasm-std for all other packages
 # [patch.crates-io]
+# cosmwasm-schema = { git = "https://github.com/oraichain/cosmwasm.git" }
 # cosmwasm-std = { git = "https://github.com/oraichain/cosmwasm.git" }
+# cosmwasm-storage = { git = "https://github.com/oraichain/cosmwasm.git" }
 
 [profile.release]
 opt-level = 3

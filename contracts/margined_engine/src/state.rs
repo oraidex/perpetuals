@@ -1,7 +1,7 @@
 use cosmwasm_schema::cw_serde;
-use std::cmp::Ordering;
+use std::{any::type_name, cmp::Ordering};
 
-use cosmwasm_std::{Addr, StdError, StdResult, Storage, Uint128};
+use cosmwasm_std::{from_slice, to_vec, Addr, StdError, StdResult, Storage, Uint128};
 use cosmwasm_storage::{
     bucket, bucket_read, singleton, singleton_read, Bucket, ReadonlyBucket, Singleton,
 };
@@ -49,11 +49,15 @@ pub struct State {
 }
 
 pub fn store_state(storage: &mut dyn Storage, state: &State) -> StdResult<()> {
-    singleton(storage, KEY_STATE).save(state)
+    storage.set(KEY_STATE, &to_vec(state)?);
+    Ok(())
 }
 
 pub fn read_state(storage: &dyn Storage) -> StdResult<State> {
-    singleton_read(storage, KEY_STATE).load()
+    match storage.get(KEY_STATE) {
+        Some(data) => from_slice(&data),
+        None => Err(StdError::not_found(type_name::<State>())),
+    }
 }
 
 fn position_bucket(storage: &mut dyn Storage) -> Bucket<Position> {
@@ -104,12 +108,12 @@ impl SentFunds {
 }
 
 pub fn store_sent_funds(storage: &mut dyn Storage, funds: &SentFunds) -> StdResult<()> {
-    singleton(storage, KEY_SENT_FUNDS).save(funds)
+    storage.set(KEY_SENT_FUNDS, &to_vec(funds)?);
+    Ok(())
 }
 
 pub fn remove_sent_funds(storage: &mut dyn Storage) {
-    let mut store: Singleton<SentFunds> = singleton(storage, KEY_SENT_FUNDS);
-    store.remove()
+    storage.remove(KEY_SENT_FUNDS)
 }
 
 pub fn read_sent_funds(storage: &dyn Storage) -> StdResult<SentFunds> {
@@ -137,8 +141,7 @@ pub fn store_tmp_swap(storage: &mut dyn Storage, swap: &TmpSwapInfo) -> StdResul
 }
 
 pub fn remove_tmp_swap(storage: &mut dyn Storage) {
-    let mut store: Singleton<TmpSwapInfo> = singleton(storage, KEY_TMP_SWAP);
-    store.remove()
+    storage.remove(KEY_TMP_SWAP)
 }
 
 pub fn read_tmp_swap(storage: &dyn Storage) -> StdResult<TmpSwapInfo> {
@@ -152,8 +155,7 @@ pub fn store_tmp_liquidator(storage: &mut dyn Storage, liquidator: &Addr) -> Std
 }
 
 pub fn remove_tmp_liquidator(storage: &mut dyn Storage) {
-    let mut store: Singleton<Addr> = singleton(storage, KEY_TMP_LIQUIDATOR);
-    store.remove()
+    storage.remove(KEY_TMP_LIQUIDATOR)
 }
 
 pub fn read_tmp_liquidator(storage: &dyn Storage) -> StdResult<Addr> {
