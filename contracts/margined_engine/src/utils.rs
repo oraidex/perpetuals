@@ -5,7 +5,7 @@ use cosmwasm_std::{
 use margined_utils::contracts::helpers::{InsuranceFundController, VammController};
 use sha3::{Digest, Sha3_256};
 
-use std::str::FromStr;
+use core::str::FromStr;
 
 use margined_common::{
     asset::{Asset, AssetInfo},

@@ -1,10 +1,11 @@
+use core::cmp::Ordering;
 use cosmwasm_schema::cw_serde;
 use cosmwasm_schema::serde::{de::DeserializeOwned, Serialize};
 use cosmwasm_std::{
     from_slice, to_vec, Addr, Order as OrderBy, StdError, StdResult, Storage, Uint128,
 };
-use cosmwasm_storage::{singleton, singleton_read, Bucket, ReadonlyBucket};
-use std::cmp::Ordering;
+use cosmwasm_storage::{Bucket, ReadonlyBucket};
+use std::any::type_name;
 
 use margined_common::{asset::Asset, integer::Integer};
 use margined_perp::margined_engine::{ConfigResponse, Position, Side};
@@ -50,15 +51,20 @@ pub struct State {
 }
 
 pub fn init_last_position_id(storage: &mut dyn Storage) -> StdResult<()> {
-    singleton(storage, KEY_LAST_POSITION_ID).save(&0u64)
+    to_vec(&0u64).map(|v| storage.set(KEY_LAST_POSITION_ID, &v))
 }
 
 pub fn increase_last_position_id(storage: &mut dyn Storage) -> StdResult<u64> {
-    singleton(storage, KEY_LAST_POSITION_ID).update(|v| Ok(v + 1))
+    let v = read_last_position_id(storage)? + 1u64;
+    storage.set(KEY_LAST_POSITION_ID, &to_vec(&v)?);
+    Ok(v)
 }
 
 pub fn read_last_position_id(storage: &dyn Storage) -> StdResult<u64> {
-    singleton_read(storage, KEY_LAST_POSITION_ID).load()
+    match storage.get(KEY_LAST_POSITION_ID) {
+        Some(data) => from_slice::<u64>(&data),
+        None => return Err(StdError::not_found(type_name::<u64>())),
+    }
 }
 
 pub fn store_state(storage: &mut dyn Storage, state: &State) -> StdResult<()> {
@@ -97,30 +103,18 @@ pub fn store_position(
 
     Bucket::multilevel(
         storage,
-        &[
-            PREFIX_POSITION_BY_TRADER,
-            key,
-            position.trader.as_bytes(),
-        ],
+        &[PREFIX_POSITION_BY_TRADER, key, position.trader.as_bytes()],
     )
     .save(position_id_key, &position.side)?;
 
     Bucket::multilevel(
         storage,
-        &[
-            PREFIX_POSITION_BY_SIDE,
-            key,
-            &position.side.as_bytes(),
-        ],
+        &[PREFIX_POSITION_BY_SIDE, key, &position.side.as_bytes()],
     )
     .save(position_id_key, &position.side)?;
 
-    Bucket::multilevel(
-        storage, &[
-            PREFIX_POSITION_BY_PRICE,
-            key,
-            &price_key])
-    .save(position_id_key, &position.side)?;
+    Bucket::multilevel(storage, &[PREFIX_POSITION_BY_PRICE, key, &price_key])
+        .save(position_id_key, &position.side)?;
 
     Ok(total_tick_orders)
 }
@@ -156,29 +150,17 @@ pub fn remove_position(
 
     Bucket::<Side>::multilevel(
         storage,
-        &[
-            PREFIX_POSITION_BY_TRADER,
-            key,
-            position.trader.as_bytes(),
-        ],
+        &[PREFIX_POSITION_BY_TRADER, key, position.trader.as_bytes()],
     )
     .remove(position_id_key);
 
     Bucket::<Side>::multilevel(
         storage,
-        &[
-            PREFIX_POSITION_BY_SIDE,
-            key,
-            &position.side.as_bytes(),
-        ],
+        &[PREFIX_POSITION_BY_SIDE, key, &position.side.as_bytes()],
     )
     .remove(position_id_key);
 
-    Bucket::<Side>::multilevel(
-        storage, &[
-            PREFIX_POSITION_BY_PRICE,
-            key,
-            &price_key,])
+    Bucket::<Side>::multilevel(storage, &[PREFIX_POSITION_BY_PRICE, key, &price_key])
         .remove(position_id_key);
 
     // return total orders belong to the tick
@@ -289,11 +271,11 @@ pub struct TmpSwapInfo {
     pub position_notional: Uint128, // notional of existing position, inclusing funding
     pub unrealized_pnl: Integer,    // any pnl due
     pub margin_to_vault: Integer,   // margin to be sent to vault
-    pub fees_paid: bool,            // true if fees have been paid, used in case of reversing position
-    pub take_profit: Uint128,       // take profit price of position
+    pub fees_paid: bool, // true if fees have been paid, used in case of reversing position
+    pub take_profit: Uint128, // take profit price of position
     pub stop_loss: Option<Uint128>, // stop loss price of position
-    pub spread_fee: Uint128,        // spread fee
-    pub toll_fee: Uint128,          // toll fee
+    pub spread_fee: Uint128, // spread fee
+    pub toll_fee: Uint128, // toll fee
 }
 
 pub fn store_tmp_swap(storage: &mut dyn Storage, swap: &TmpSwapInfo) -> StdResult<()> {

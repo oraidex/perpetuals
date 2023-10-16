@@ -1,3 +1,7 @@
+use core::cmp::Ordering;
+use core::fmt;
+use core::fmt::Write;
+use core::str::FromStr;
 use cosmwasm_std::{
     DivideByZeroError, OverflowError,
     OverflowOperation::{Add, Mul, Sub},
@@ -5,9 +9,6 @@ use cosmwasm_std::{
 };
 use schemars::JsonSchema;
 use serde::{de, ser, Deserialize, Deserializer, Serialize};
-use std::fmt::Write;
-use std::str::FromStr;
-use std::{cmp::Ordering, fmt};
 
 /// Signed wrapper of Uint128
 /// very minimalist only has bare minimum functions for
@@ -470,7 +471,7 @@ mod test {
     use schemars::_serde_json::{from_str, to_value};
 
     use super::Integer;
-    use std::str::FromStr;
+    use core::str::FromStr;
 
     #[test]
     fn integer_default() {

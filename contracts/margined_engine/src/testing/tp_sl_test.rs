@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use core::str::FromStr;
 
 use cosmwasm_std::{StdError, Uint128};
 
@@ -117,8 +117,10 @@ fn test_takeprofit() {
         )
         .unwrap();
     router.execute(alice.clone(), msg).unwrap();
-    
-    let mut tp_sl_status = engine.get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1).unwrap();
+
+    let mut tp_sl_status = engine
+        .get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1)
+        .unwrap();
     println!("tp_sl_status: {:?}", tp_sl_status);
     assert_eq!(tp_sl_status.is_tpsl, false);
 
@@ -158,7 +160,9 @@ fn test_takeprofit() {
     assert_eq!(price, Uint128::from(15_875_999_999u128));
     println!("[LOG] [2] spot price: {:?}", price);
 
-    tp_sl_status = engine.get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1).unwrap();
+    tp_sl_status = engine
+        .get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1)
+        .unwrap();
     println!("tp_sl_status: {:?}", tp_sl_status);
     assert_eq!(tp_sl_status.is_tpsl, true);
 
@@ -221,8 +225,10 @@ fn test_stoploss() {
         )
         .unwrap();
     router.execute(alice.clone(), msg).unwrap();
-    
-    let mut tp_sl_status = engine.get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1).unwrap();
+
+    let mut tp_sl_status = engine
+        .get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1)
+        .unwrap();
     println!("tp_sl_status: {:?}", tp_sl_status);
     assert_eq!(tp_sl_status.is_tpsl, false);
 
@@ -262,7 +268,9 @@ fn test_stoploss() {
     assert_eq!(price, Uint128::from(10_815_999_999u128));
     println!("[LOG] [2] spot price: {:?}", price);
 
-    tp_sl_status = engine.get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1).unwrap();
+    tp_sl_status = engine
+        .get_tp_sl_status(&router.wrap(), vamm.addr().to_string(), 1)
+        .unwrap();
     println!("tp_sl_status: {:?}", tp_sl_status);
     assert_eq!(tp_sl_status.is_tpsl, true);
 

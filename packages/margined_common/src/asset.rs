@@ -1,5 +1,5 @@
+use core::fmt;
 use cosmwasm_schema::cw_serde;
-use std::fmt;
 
 use cosmwasm_std::{
     Addr, Api, BankMsg, Coin, CosmosMsg, MessageInfo, QuerierWrapper, StdError, StdResult, Uint128,
