@@ -1,15 +1,7 @@
 [workspace]
 resolver = '2'
 
-members = [
-  "packages/*",
-  "contracts/margined_engine",
-  "contracts/margined_fee_pool",
-  "contracts/margined_insurance_fund",
-  "contracts/margined_pricefeed",
-  "contracts/margined_vamm",
-  "contracts/mocks/*",
-]
+members = ["packages/*", "contracts/margined_*", "contracts/mocks/*"]
 
 [workspace.package]
 version = "0.1.0"
@@ -32,6 +24,7 @@ cw-controllers = "1.0.1"
 cw2 = "1.0.1"
 cw20 = { version = "1.0.1" }
 cw20-base = { version = "1.0.1" }
+cw-storage-plus = "1.0.1"
 cw-multi-test = { git = "https://github.com/oraichain/cw-multi-test.git" } # fix _contract_address attribute
 cw-utils = "1.0.1"
 subtle = "2.5"

@@ -1647,6 +1647,8 @@ version = "0.1.0"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
+ "cw-controllers",
+ "cw-storage-plus",
  "cw-utils",
  "cw20",
  "schemars",
@@ -1738,6 +1740,23 @@ dependencies = [
  "cw2",
  "margined_common",
  "margined_perp",
+ "thiserror",
+]
+
+[[package]]
+name = "margined_staking"
+version = "0.1.0"
+dependencies = [
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-controllers",
+ "cw-storage-plus",
+ "cw-utils",
+ "cw2",
+ "margined_common",
+ "margined_perp",
+ "margined_utils",
+ "osmosis-test-tube",
  "thiserror",
 ]
 
