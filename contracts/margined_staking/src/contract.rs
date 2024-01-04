@@ -2,7 +2,7 @@ use crate::{
     error::ContractError,
     handle::{
         handle_claim, handle_pause, handle_stake, handle_unpause, handle_unstake,
-        handle_update_config, handle_update_rewards,
+        handle_update_config, handle_update_rewards, receive_cw20,
     },
     query::{
         query_claimable, query_config, query_owner, query_state, query_total_staked_amount,
@@ -77,6 +77,7 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
+        ExecuteMsg::Receive(msg) => receive_cw20(deps, env, info, msg),
         ExecuteMsg::UpdateConfig {
             tokens_per_interval,
         } => handle_update_config(deps, info, tokens_per_interval),

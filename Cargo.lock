@@ -1753,6 +1753,7 @@ dependencies = [
  "cw-storage-plus",
  "cw-utils",
  "cw2",
+ "cw20",
  "margined_common",
  "margined_perp",
  "margined_utils",

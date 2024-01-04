@@ -10,39 +10,48 @@ pub enum ContractError {
     #[error("{0}")]
     Admin(#[from] AdminError),
 
+    #[error("invalid cw20 hook message")]
+    InvalidCw20Hook,
+
     #[error("{0} is not native token")]
     NotNativeToken(String),
 
+    #[error("{0} is not cw20 token")]
+    NotCw20Token(String),
+
     #[error("Zero Division Error")]
-    DivideByZero {},
+    DivideByZero,
 
     #[error("Expired")]
-    Expired {},
+    Expired,
 
     #[error("Invalid funds")]
-    InvalidFunds {},
+    InvalidFunds,
 
     #[error("Contract is already open")]
-    IsOpen {},
+    IsOpen,
+
+    #[error("Invalid cw20 token")]
+    InvalidCw20,
 
     #[error("Invalid duration cannot be greater than {0}")]
     InvalidDuration(u64),
 
     #[error("Invalid ownership, new owner cannot be the same as existing")]
-    InvalidOwnership {},
+    InvalidOwnership,
 
     #[error("Owner not set")]
-    NoOwner {},
+    NoOwner,
 
     #[error("Contract is not paused")]
-    NotPaused {},
+    NotPaused,
 
     #[error("Proposal not found")]
-    ProposalNotFound {},
+    ProposalNotFound,
 
     #[error("Cannot perform action as contract is paused")]
-    Paused {},
+    Paused,
 
     #[error("Unauthorized")]
-    Unauthorized {},
+    Unauthorized,
 }

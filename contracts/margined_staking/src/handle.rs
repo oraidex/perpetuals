@@ -5,9 +5,50 @@ use crate::{
     state::{UserStake, CONFIG, OWNER, STATE, TOTAL_STAKED, USER_STAKE},
 };
 
-use cosmwasm_std::{ensure, DepsMut, Env, Event, MessageInfo, Response, StdResult, Uint128};
+use cosmwasm_std::{
+    ensure, from_binary, Addr, DepsMut, Env, Event, MessageInfo, Response, StdResult, Uint128,
+};
+use cw20::Cw20ReceiveMsg;
 use cw_utils::{must_pay, nonpayable};
 use margined_common::asset::AssetInfo;
+use margined_perp::margined_staking::Cw20HookMsg;
+
+pub fn receive_cw20(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    cw20_msg: Cw20ReceiveMsg,
+) -> Result<Response, ContractError> {
+    match from_binary(&cw20_msg.msg) {
+        Ok(Cw20HookMsg::Stake {}) => {
+            let state = STATE.load(deps.storage)?;
+            ensure!(state.is_open, ContractError::Paused {});
+            let config = CONFIG.load(deps.storage)?;
+            let contract_addr = match config.deposit_token {
+                AssetInfo::Token { contract_addr } => contract_addr,
+                _ => return Err(ContractError::NotCw20Token("deposit token".to_string())),
+            };
+
+            // check if the cw20 caller is deposit token
+            if info.sender != contract_addr {
+                return Err(ContractError::InvalidCw20);
+            }
+            let sender = deps.api.addr_validate(cw20_msg.sender.as_str())?;
+            let sent_funds = cw20_msg.amount;
+
+            _handle_stake(
+                deps,
+                env,
+                sender,
+                sent_funds,
+                config.fee_pool,
+                config.reward_token,
+            )
+        }
+
+        Err(_) => Err(ContractError::InvalidCw20Hook {}),
+    }
+}
 
 pub fn handle_update_config(
     deps: DepsMut,
@@ -152,11 +193,9 @@ pub fn handle_claim(
 
 // this method is for native token, for cw20 token, need to write hook handle
 pub fn handle_stake(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
-    let config = CONFIG.load(deps.storage)?;
     let state = STATE.load(deps.storage)?;
-
     ensure!(state.is_open, ContractError::Paused {});
-
+    let config = CONFIG.load(deps.storage)?;
     let native_denom = match config.deposit_token {
         AssetInfo::NativeToken { denom } => denom,
         _ => return Err(ContractError::NotNativeToken("deposit token".to_string())),
@@ -167,35 +206,14 @@ pub fn handle_stake(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Respon
 
     let sender = info.sender;
 
-    let (deps, rewards) = update_rewards(deps, env.clone(), sender.clone())?;
-
-    USER_STAKE.update(deps.storage, sender.clone(), |res| -> StdResult<_> {
-        let mut stake = match res {
-            Some(stake) => stake,
-            None => UserStake::default(),
-        };
-
-        stake.staked_amounts = stake.staked_amounts.checked_add(sent_funds)?;
-
-        Ok(stake)
-    })?;
-
-    TOTAL_STAKED.update(deps.storage, |balance| -> StdResult<Uint128> {
-        Ok(balance.checked_add(sent_funds)?)
-    })?;
-
-    let response = create_distribute_message_and_update_response(
-        Response::new(),
+    _handle_stake(
+        deps,
+        env,
+        sender,
+        sent_funds,
         config.fee_pool,
         config.reward_token,
-        rewards,
-        env.contract.address.to_string(),
-    )?;
-
-    Ok(response.add_event(Event::new("stake").add_attributes([
-        ("amount", &sent_funds.to_string()),
-        ("user", &sender.to_string()),
-    ])))
+    )
 }
 
 pub fn handle_unstake(
@@ -250,4 +268,43 @@ pub fn handle_unstake(
             ("amount", &amount.to_string()),
             ("user", &sender.to_string()),
         ])))
+}
+
+fn _handle_stake(
+    deps: DepsMut,
+    env: Env,
+    sender: Addr,
+    sent_funds: Uint128,
+    fee_pool: Addr,
+    reward_token: AssetInfo,
+) -> Result<Response, ContractError> {
+    let (deps, rewards) = update_rewards(deps, env.clone(), sender.clone())?;
+
+    USER_STAKE.update(deps.storage, sender.clone(), |res| -> StdResult<_> {
+        let mut stake = match res {
+            Some(stake) => stake,
+            None => UserStake::default(),
+        };
+
+        stake.staked_amounts = stake.staked_amounts.checked_add(sent_funds)?;
+
+        Ok(stake)
+    })?;
+
+    TOTAL_STAKED.update(deps.storage, |balance| -> StdResult<Uint128> {
+        Ok(balance.checked_add(sent_funds)?)
+    })?;
+
+    let response = create_distribute_message_and_update_response(
+        Response::new(),
+        fee_pool,
+        reward_token,
+        rewards,
+        env.contract.address.to_string(),
+    )?;
+
+    Ok(response.add_event(Event::new("stake").add_attributes([
+        ("amount", &sent_funds.to_string()),
+        ("user", &sender.to_string()),
+    ])))
 }

@@ -1,5 +1,6 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Addr, Timestamp, Uint128};
+use cw20::Cw20ReceiveMsg;
 use margined_common::asset::AssetInfo;
 
 #[cw_serde]
@@ -11,7 +12,13 @@ pub struct InstantiateMsg {
 }
 
 #[cw_serde]
+pub enum Cw20HookMsg {
+    Stake {},
+}
+
+#[cw_serde]
 pub enum ExecuteMsg {
+    Receive(Cw20ReceiveMsg),
     UpdateConfig {
         tokens_per_interval: Option<Uint128>,
     },
