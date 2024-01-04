@@ -17,7 +17,7 @@ pub const USER_STAKE: Map<Addr, UserStake> = Map::new("staked_amounts");
 
 #[cw_serde]
 pub struct Config {
-    pub fee_collector: Addr,
+    pub fee_pool: Addr,
     pub deposit_token: AssetInfo,
     pub reward_token: AssetInfo,
     pub tokens_per_interval: Uint128,

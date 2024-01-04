@@ -11,8 +11,8 @@ fn test_update_owner_staking() {
 
     let wasm = Wasm::new(&env.app);
 
-    let fee_collector = env.deploy_fee_collector_contract(&wasm, "margined-collector".to_string());
-    let staking = env.deploy_staking_contract(&wasm, "margined-staking".to_string(), fee_collector);
+    let fee_pool = env.deploy_fee_pool_contract(&wasm, "margined-collector".to_string());
+    let staking = env.deploy_staking_contract(&wasm, "margined-staking".to_string(), fee_pool);
 
     // claim before a proposal is made
     {

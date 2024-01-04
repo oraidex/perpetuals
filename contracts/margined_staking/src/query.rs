@@ -18,7 +18,7 @@ pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
     let config = CONFIG.load(deps.storage)?;
 
     Ok(ConfigResponse {
-        fee_collector: config.fee_collector,
+        fee_pool: config.fee_pool,
         deposit_token: config.deposit_token,
         reward_token: config.reward_token,
         tokens_per_interval: config.tokens_per_interval,

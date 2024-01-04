@@ -1,10 +1,10 @@
-use cosmwasm_std::{to_binary, CosmosMsg, Response, StdResult, Uint128, WasmMsg};
+use cosmwasm_std::{Addr, Response, StdResult, Uint128};
 use margined_common::asset::AssetInfo;
-use margined_perp::margined_fee_pool::ExecuteMsg as FeeExecuteMsg;
+use margined_utils::contracts::helpers::FeePoolController;
 
 pub fn create_distribute_message_and_update_response(
     mut response: Response,
-    fee_collector: String,
+    fee_pool: Addr,
     asset_info: AssetInfo,
     amount: Uint128,
     recipient: String,
@@ -15,16 +15,8 @@ pub fn create_distribute_message_and_update_response(
     };
 
     if !amount.is_zero() {
-        let distribute_msg = CosmosMsg::Wasm(WasmMsg::Execute {
-            contract_addr: fee_collector,
-            msg: to_binary(&FeeExecuteMsg::SendToken {
-                token,
-                amount,
-                recipient,
-            })
-            .unwrap(),
-            funds: vec![],
-        });
+        let fee_pool_controller = FeePoolController(fee_pool);
+        let distribute_msg = fee_pool_controller.send_token(token, amount, recipient)?;
 
         response = response.add_message(distribute_msg);
     };

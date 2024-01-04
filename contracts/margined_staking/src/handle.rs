@@ -43,7 +43,7 @@ pub fn handle_update_rewards(deps: DepsMut, env: Env) -> Result<Response, Contra
 
     let response = create_distribute_message_and_update_response(
         Response::new(),
-        config.fee_collector.to_string(),
+        config.fee_pool,
         config.reward_token,
         rewards,
         env.contract.address.to_string(),
@@ -129,7 +129,7 @@ pub fn handle_claim(
 
     let mut response = create_distribute_message_and_update_response(
         Response::new(),
-        config.fee_collector.to_string(),
+        config.fee_pool,
         config.reward_token.clone(),
         rewards,
         env.contract.address.to_string(),
@@ -186,7 +186,7 @@ pub fn handle_stake(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Respon
 
     let response = create_distribute_message_and_update_response(
         Response::new(),
-        config.fee_collector.to_string(),
+        config.fee_pool,
         config.reward_token,
         rewards,
         env.contract.address.to_string(),
@@ -232,7 +232,7 @@ pub fn handle_unstake(
 
     let response = create_distribute_message_and_update_response(
         Response::new(),
-        config.fee_collector.to_string(),
+        config.fee_pool,
         config.reward_token,
         rewards,
         env.contract.address.to_string(),

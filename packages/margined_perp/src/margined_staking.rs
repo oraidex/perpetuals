@@ -4,7 +4,7 @@ use margined_common::asset::AssetInfo;
 
 #[cw_serde]
 pub struct InstantiateMsg {
-    pub fee_collector: String,
+    pub fee_pool: String,
     pub deposit_token: AssetInfo,
     pub reward_token: AssetInfo,
     pub tokens_per_interval: Uint128,
@@ -67,7 +67,7 @@ pub struct UserStakedResponse {
 
 #[cw_serde]
 pub struct ConfigResponse {
-    pub fee_collector: Addr,
+    pub fee_pool: Addr,
     pub deposit_token: AssetInfo,
     pub reward_token: AssetInfo,
     pub tokens_per_interval: Uint128,

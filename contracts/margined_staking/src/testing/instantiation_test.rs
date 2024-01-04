@@ -21,7 +21,7 @@ fn test_instantiation() {
     assert_eq!(
         config,
         Config {
-            fee_collector: Addr::unchecked(env.signer.address()),
+            fee_pool: Addr::unchecked(env.signer.address()),
             deposit_denom: DEPOSIT_DENOM.to_string(),
             deposit_decimals: 6u32,
             reward_denom: REWARD_DENOM.to_string(),

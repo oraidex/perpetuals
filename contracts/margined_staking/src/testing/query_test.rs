@@ -21,7 +21,7 @@ fn test_query_config() {
     assert_eq!(
         config,
         Config {
-            fee_collector: Addr::unchecked(env.signer.address()),
+            fee_pool: Addr::unchecked(env.signer.address()),
             deposit_denom: env.denoms["deposit"].to_string(),
             deposit_decimals: 6u32,
             reward_denom: env.denoms["reward"].to_string(),

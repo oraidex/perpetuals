@@ -46,7 +46,7 @@ pub fn instantiate(
     CONFIG.save(
         deps.storage,
         &Config {
-            fee_collector: deps.api.addr_validate(&msg.fee_collector)?,
+            fee_pool: deps.api.addr_validate(&msg.fee_pool)?,
             deposit_token: msg.deposit_token,
             reward_token: msg.reward_token,
             tokens_per_interval: msg.tokens_per_interval,

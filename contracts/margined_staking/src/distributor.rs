@@ -12,7 +12,7 @@ pub fn calculate_rewards(deps: Deps, env: Env) -> StdResult<Uint128> {
 
     let balance = config
         .reward_token
-        .query_balance(&deps.querier, config.fee_collector)?;
+        .query_balance(&deps.querier, config.fee_pool)?;
 
     Ok(block_rewards.min(balance))
 }
