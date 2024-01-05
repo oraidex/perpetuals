@@ -7,5 +7,5 @@ pub mod ownership;
 pub mod query;
 pub mod state;
 
-// #[cfg(test)]
-// mod testing;
+#[cfg(test)]
+mod testing;
