@@ -21,18 +21,21 @@ use osmosis_test_tube::{Module, OraichainTestApp, Wasm};
 use test_tube::{cosmrs::proto::cosmwasm::wasm::v1::MsgExecuteContractResponse, Account};
 use test_tube::{runner::Runner, SigningAccount};
 
-static CW20_BYTES: &[u8] = include_bytes!("../../../../testdata/cw20-base.wasm");
-static FEE_POOL_BYTES: &[u8] =
+pub const CW20_BYTES: &[u8] = include_bytes!("../../../../testdata/cw20-base.wasm");
+pub const FEE_POOL_BYTES: &[u8] =
     include_bytes!("../../../../contracts/margined_fee_pool/artifacts/margined_fee_pool.wasm");
-static ENGINE_BYTES: &[u8] =
+pub const ENGINE_BYTES: &[u8] =
     include_bytes!("../../../../contracts/margined_engine/artifacts/margined_engine.wasm");
-static VAMM_BYTES: &[u8] =
+pub const VAMM_BYTES: &[u8] =
     include_bytes!("../../../../contracts/margined_vamm/artifacts/margined_vamm.wasm");
-static INSURANCE_BYTES: &[u8] = include_bytes!(
+pub const INSURANCE_BYTES: &[u8] = include_bytes!(
     "../../../../contracts/margined_insurance_fund/artifacts/margined_insurance_fund.wasm"
 );
-static PRICE_FEED_BYTES: &[u8] =
+pub const PRICE_FEED_BYTES: &[u8] =
     include_bytes!("../../../../contracts/margined_pricefeed/artifacts/margined_pricefeed.wasm");
+
+pub const STAKING_CONTRACT_BYTES: &[u8] =
+    include_bytes!("../../../../contracts/margined_staking/artifacts/margined_staking.wasm");
 
 pub struct TestTubeScenario {
     pub router: OraichainTestApp,

@@ -1,18 +1,57 @@
 use cosmwasm_std::Addr;
 use margined_protocol::staking::{ExecuteMsg, OwnerProposalResponse, QueryMsg};
-use margined_testing::staking_env::StakingEnv;
+use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
 use osmosis_test_tube::{Account, Module, RunnerError, Wasm};
 
 const PROPOSAL_DURATION: u64 = 1000;
 
 #[test]
 fn test_update_owner_staking() {
-    let env = StakingEnv::new();
+    let TestTubeScenario {
+        router,
+        accounts,
+        usdc,
+        fee_pool,
+        ..
+    } = TestTubeScenario::default();
 
-    let wasm = Wasm::new(&env.app);
+    let signer = &accounts[0];
 
-    let fee_pool = env.deploy_fee_pool_contract(&wasm, "margined-collector".to_string());
-    let staking = env.deploy_staking_contract(&wasm, "margined-staking".to_string(), fee_pool);
+    let wasm = Wasm::new(&router);
+
+    let staking_code_id = wasm
+        .store_code(STAKING_CONTRACT_BYTES, None, signer)
+        .unwrap()
+        .data
+        .code_id;
+
+    let staking_address = wasm
+        .instantiate(
+            staking_code_id,
+            &InstantiateMsg {
+                fee_pool: fee_pool.addr().to_string(),
+                deposit_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                reward_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                // deposit_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // },
+                // reward_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // }, // should be ORAIX
+                tokens_per_interval: 1_000_000u128.into(),
+            },
+            None,
+            Some("margined-staking"),
+            &[],
+            signer,
+        )
+        .unwrap()
+        .data
+        .address;
 
     // claim before a proposal is made
     {

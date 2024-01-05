@@ -2,30 +2,68 @@ use crate::state::{Config, State};
 
 use cosmwasm_std::{Addr, Timestamp};
 use margined_protocol::staking::QueryMsg;
-use margined_testing::staking_env::StakingEnv;
+use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
 use osmosis_test_tube::{Account, Module, Wasm};
-
-const DEPOSIT_DENOM: &str = "umrg";
-const REWARD_DENOM: &str = "uusdc";
 
 #[test]
 fn test_instantiation() {
-    let env = StakingEnv::new();
+    let TestTubeScenario {
+        router,
+        accounts,
+        usdc,
+        fee_pool,
+        ..
+    } = TestTubeScenario::default();
 
-    let wasm = Wasm::new(&env.app);
+    let signer = &accounts[0];
 
-    let staking_address =
-        env.deploy_staking_contract(&wasm, "margined-staking".to_string(), env.signer.address());
+    let wasm = Wasm::new(&router);
+
+    let staking_code_id = wasm
+        .store_code(STAKING_CONTRACT_BYTES, None, signer)
+        .unwrap()
+        .data
+        .code_id;
+
+    let staking_address = wasm
+        .instantiate(
+            staking_code_id,
+            &InstantiateMsg {
+                fee_pool: fee_pool.addr().to_string(),
+                deposit_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                reward_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                // deposit_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // },
+                // reward_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // }, // should be ORAIX
+                tokens_per_interval: 1_000_000u128.into(),
+            },
+            None,
+            Some("margined-staking"),
+            &[],
+            signer,
+        )
+        .unwrap()
+        .data
+        .address;
 
     let config: Config = wasm.query(&staking_address, &QueryMsg::Config {}).unwrap();
     assert_eq!(
         config,
         Config {
             fee_pool: Addr::unchecked(env.signer.address()),
-            deposit_denom: DEPOSIT_DENOM.to_string(),
-            deposit_decimals: 6u32,
-            reward_denom: REWARD_DENOM.to_string(),
-            reward_decimals: 6u32,
+            deposit_token: AssetInfo::NativeToken {
+                denom: NATIVE_DENOM.to_string(),
+            },
+            reward_token: AssetInfo::NativeToken {
+                denom: NATIVE_DENOM.to_string(),
+            },
             tokens_per_interval: 1_000_000u128.into(),
         }
     );

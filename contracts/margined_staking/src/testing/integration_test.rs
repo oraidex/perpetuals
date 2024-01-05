@@ -2,27 +2,65 @@ use crate::state::{Config, UserStake};
 
 use cosmwasm_std::{coin, Uint128};
 use margined_protocol::staking::{ExecuteMsg, QueryMsg, UserStakedResponse};
-use margined_testing::staking_env::StakingEnv;
-use osmosis_test_tube::{
-    osmosis_std::types::cosmos::{bank::v1beta1::MsgSend, base::v1beta1::Coin},
-    Account, Bank, Module, Wasm,
-};
+use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
+use osmosis_test_tube::{Account, Bank, Module, Wasm};
 
 #[test]
 fn test_stake_unstake_claim() {
-    let env = StakingEnv::new();
+    let TestTubeScenario {
+        router,
+        accounts,
+        usdc,
+        fee_pool,
+        ..
+    } = TestTubeScenario::default();
 
-    let bank = Bank::new(&env.app);
-    let wasm = Wasm::new(&env.app);
+    let signer = &accounts[0];
 
-    let (staking_address, collector_address) = env.deploy_staking_contracts(&wasm);
+    let wasm = Wasm::new(&router);
 
-    // fund the fee collector
+    let staking_code_id = wasm
+        .store_code(STAKING_CONTRACT_BYTES, None, signer)
+        .unwrap()
+        .data
+        .code_id;
+
+    let staking_address = wasm
+        .instantiate(
+            staking_code_id,
+            &InstantiateMsg {
+                fee_pool: fee_pool.addr().to_string(),
+                deposit_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                reward_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                // deposit_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // },
+                // reward_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // }, // should be ORAIX
+                tokens_per_interval: 1_000_000u128.into(),
+            },
+            None,
+            Some("margined-staking"),
+            &[],
+            signer,
+        )
+        .unwrap()
+        .data
+        .address;
+
+    let bank = Bank::new(&router);
+
+    // fund the fee pool
     {
         bank.send(
             MsgSend {
                 from_address: env.signer.address(),
-                to_address: collector_address,
+                to_address: fee_pool,
                 amount: [Coin {
                     amount: 1_000_000_000_000u128.to_string(),
                     denom: env.denoms["reward"].to_string(),

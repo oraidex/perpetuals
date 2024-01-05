@@ -4,14 +4,8 @@ use cosmwasm_std::Uint128;
 
 use margined_common::asset::{AssetInfo, NATIVE_DENOM};
 use margined_perp::margined_staking::{ExecuteMsg, InstantiateMsg, QueryMsg, UserStakedResponse};
-use margined_utils::testing::test_tube::TestTubeScenario;
-use osmosis_test_tube::{
-    cosmrs::proto::cosmos::base::v1beta1::Coin, Account, Bank, Module, OraichainTestApp, Wasm,
-};
-
-const DEPOSIT_DENOM: &str = "umrg";
-
-static STAKING_CONTRACT_BYTES: &[u8] = include_bytes!("../../artifacts/margined_staking.wasm");
+use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
+use osmosis_test_tube::{cosmrs::proto::cosmos::base::v1beta1::Coin, Bank, Module, Wasm};
 
 #[test]
 fn test_unpause() {
@@ -23,12 +17,12 @@ fn test_unpause() {
         ..
     } = TestTubeScenario::default();
 
-    let owner = &accounts[0];
+    let signer = &accounts[0];
 
     let wasm = Wasm::new(&router);
 
     let staking_code_id = wasm
-        .store_code(STAKING_CONTRACT_BYTES, None, owner)
+        .store_code(STAKING_CONTRACT_BYTES, None, signer)
         .unwrap()
         .data
         .code_id;
@@ -55,7 +49,7 @@ fn test_unpause() {
             None,
             Some("margined-staking"),
             &[],
-            owner,
+            signer,
         )
         .unwrap()
         .data
@@ -67,7 +61,7 @@ fn test_unpause() {
     // cannot pause already paused
     {
         let err = wasm
-            .execute(&staking_address, &ExecuteMsg::Pause {}, &[], owner)
+            .execute(&staking_address, &ExecuteMsg::Pause {}, &[], signer)
             .unwrap_err();
         assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Cannot perform action as contract is paused: execute wasm contract failed");
     }
@@ -90,7 +84,7 @@ fn test_unpause() {
                     amount: "1_000".to_string(),
                     denom: NATIVE_DENOM.to_string(),
                 }],
-                owner,
+                signer,
             )
             .unwrap_err();
         assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Cannot perform action as contract is paused: execute wasm contract failed");
@@ -105,7 +99,7 @@ fn test_unpause() {
                     amount: Uint128::zero(),
                 },
                 &[],
-                owner,
+                signer,
             )
             .unwrap_err();
         assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Cannot perform action as contract is paused: execute wasm contract failed");
@@ -118,7 +112,7 @@ fn test_unpause() {
                 &staking_address,
                 &ExecuteMsg::Claim { recipient: None },
                 &[],
-                owner,
+                signer,
             )
             .unwrap_err();
         assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Cannot perform action as contract is paused: execute wasm contract failed");
@@ -126,7 +120,7 @@ fn test_unpause() {
 
     // should be able to unpause if owner
     {
-        wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], owner)
+        wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], signer)
             .unwrap();
     }
 
@@ -136,12 +130,51 @@ fn test_unpause() {
 
 // #[test]
 // fn test_pause() {
-//     let env = StakingEnv::new();
+// let TestTubeScenario {
+//         router,
+//         accounts,
+//         usdc,
+//         fee_pool,
+//         ..
+//     } = TestTubeScenario::default();
 
-//     let wasm = Wasm::new(&env.app);
+//     let signer = &accounts[0];
 
-//     let staking_address =
-//         env.deploy_staking_contract(&wasm, "margined-staking".to_string(), env.signer.address());
+//     let wasm = Wasm::new(&router);
+
+//     let staking_code_id = wasm
+//         .store_code(STAKING_CONTRACT_BYTES, None, signer)
+//         .unwrap()
+//         .data
+//         .code_id;
+
+//     let staking_address = wasm
+//         .instantiate(
+//             staking_code_id,
+//             &InstantiateMsg {
+//                 fee_pool: fee_pool.addr().to_string(),
+//                 deposit_token: AssetInfo::NativeToken {
+//                     denom: NATIVE_DENOM.to_string(),
+//                 },
+//                 reward_token: AssetInfo::NativeToken {
+//                     denom: NATIVE_DENOM.to_string(),
+//                 },
+//                 // deposit_token: AssetInfo::Token {
+//                 //     contract_addr: usdc.addr(),
+//                 // },
+//                 // reward_token: AssetInfo::Token {
+//                 //     contract_addr: usdc.addr(),
+//                 // }, // should be ORAIX
+//                 tokens_per_interval: 1_000_000u128.into(),
+//             },
+//             None,
+//             Some("margined-staking"),
+//             &[],
+//             signer,
+//         )
+//         .unwrap()
+//         .data
+//         .address;
 
 //     // should be able to unpause if owner
 //     {
@@ -177,12 +210,51 @@ fn test_unpause() {
 
 // #[test]
 // fn test_update_config() {
-//     let env = StakingEnv::new();
+// let TestTubeScenario {
+//     router,
+//     accounts,
+//     usdc,
+//     fee_pool,
+//     ..
+// } = TestTubeScenario::default();
 
-//     let wasm = Wasm::new(&env.app);
+// let signer = &accounts[0];
 
-//     let staking_address =
-//         env.deploy_staking_contract(&wasm, "margined-staking".to_string(), env.signer.address());
+// let wasm = Wasm::new(&router);
+
+// let staking_code_id = wasm
+//     .store_code(STAKING_CONTRACT_BYTES, None, signer)
+//     .unwrap()
+//     .data
+//     .code_id;
+
+// let staking_address = wasm
+//     .instantiate(
+//         staking_code_id,
+//         &InstantiateMsg {
+//             fee_pool: fee_pool.addr().to_string(),
+//             deposit_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             reward_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             // deposit_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // },
+//             // reward_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // }, // should be ORAIX
+//             tokens_per_interval: 1_000_000u128.into(),
+//         },
+//         None,
+//         Some("margined-staking"),
+//         &[],
+//         signer,
+//     )
+//     .unwrap()
+//     .data
+//     .address;
 //     let config_before: Config = wasm.query(&staking_address, &QueryMsg::Config {}).unwrap();
 
 //     // should update config if owner
@@ -221,17 +293,58 @@ fn test_unpause() {
 
 // #[test]
 // fn test_staking() {
-//     let env = StakingEnv::new();
+// let TestTubeScenario {
+//     router,
+//     accounts,
+//     usdc,
+//     fee_pool,
+//     ..
+// } = TestTubeScenario::default();
 
-//     let bank = Bank::new(&env.app);
-//     let wasm = Wasm::new(&env.app);
+// let signer = &accounts[0];
 
-//     let (staking_address, collector_address) = env.deploy_staking_contracts(&wasm);
+// let wasm = Wasm::new(&router);
+
+// let staking_code_id = wasm
+//     .store_code(STAKING_CONTRACT_BYTES, None, signer)
+//     .unwrap()
+//     .data
+//     .code_id;
+
+// let staking_address = wasm
+//     .instantiate(
+//         staking_code_id,
+//         &InstantiateMsg {
+//             fee_pool: fee_pool.addr().to_string(),
+//             deposit_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             reward_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             // deposit_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // },
+//             // reward_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // }, // should be ORAIX
+//             tokens_per_interval: 1_000_000u128.into(),
+//         },
+//         None,
+//         Some("margined-staking"),
+//         &[],
+//         signer,
+//     )
+//     .unwrap()
+//     .data
+//     .address;
+
+//     let bank = Bank::new(&router);
 
 //     bank.send(
 //         MsgSend {
 //             from_address: env.signer.address(),
-//             to_address: collector_address,
+//             to_address: fee_pool,
 //             amount: [Coin {
 //                 amount: 1_000_000_000u128.to_string(),
 //                 denom: env.denoms["reward"].to_string(),
@@ -342,11 +455,51 @@ fn test_unpause() {
 
 // #[test]
 // fn test_unstaking() {
-//     let env = StakingEnv::new();
+// let TestTubeScenario {
+//     router,
+//     accounts,
+//     usdc,
+//     fee_pool,
+//     ..
+// } = TestTubeScenario::default();
 
-//     let wasm = Wasm::new(&env.app);
+// let signer = &accounts[0];
 
-//     let (staking_address, _) = env.deploy_staking_contracts(&wasm);
+// let wasm = Wasm::new(&router);
+
+// let staking_code_id = wasm
+//     .store_code(STAKING_CONTRACT_BYTES, None, signer)
+//     .unwrap()
+//     .data
+//     .code_id;
+
+// let staking_address = wasm
+//     .instantiate(
+//         staking_code_id,
+//         &InstantiateMsg {
+//             fee_pool: fee_pool.addr().to_string(),
+//             deposit_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             reward_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             // deposit_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // },
+//             // reward_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // }, // should be ORAIX
+//             tokens_per_interval: 1_000_000u128.into(),
+//         },
+//         None,
+//         Some("margined-staking"),
+//         &[],
+//         signer,
+//     )
+//     .unwrap()
+//     .data
+//     .address;
 
 //     wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &env.signer)
 //         .unwrap();
@@ -424,17 +577,57 @@ fn test_unpause() {
 
 // #[test]
 // fn test_claim() {
-//     let env = StakingEnv::new();
+// let TestTubeScenario {
+//     router,
+//     accounts,
+//     usdc,
+//     fee_pool,
+//     ..
+// } = TestTubeScenario::default();
 
-//     let wasm = Wasm::new(&env.app);
-//     let bank = Bank::new(&env.app);
+// let signer = &accounts[0];
 
-//     let (staking_address, collector_address) = env.deploy_staking_contracts(&wasm);
+// let wasm = Wasm::new(&router);
+
+// let staking_code_id = wasm
+//     .store_code(STAKING_CONTRACT_BYTES, None, signer)
+//     .unwrap()
+//     .data
+//     .code_id;
+
+// let staking_address = wasm
+//     .instantiate(
+//         staking_code_id,
+//         &InstantiateMsg {
+//             fee_pool: fee_pool.addr().to_string(),
+//             deposit_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             reward_token: AssetInfo::NativeToken {
+//                 denom: NATIVE_DENOM.to_string(),
+//             },
+//             // deposit_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // },
+//             // reward_token: AssetInfo::Token {
+//             //     contract_addr: usdc.addr(),
+//             // }, // should be ORAIX
+//             tokens_per_interval: 1_000_000u128.into(),
+//         },
+//         None,
+//         Some("margined-staking"),
+//         &[],
+//         signer,
+//     )
+//     .unwrap()
+//     .data
+//     .address;
+//     let bank = Bank::new(&router);
 
 //     bank.send(
 //         MsgSend {
 //             from_address: env.signer.address(),
-//             to_address: collector_address,
+//             to_address: fee_pool,
 //             amount: [Coin {
 //                 amount: 1_000_000_000u128.to_string(),
 //                 denom: env.denoms["reward"].to_string(),
