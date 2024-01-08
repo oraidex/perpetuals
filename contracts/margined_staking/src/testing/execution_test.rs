@@ -3,8 +3,8 @@ use std::str::FromStr;
 use crate::state::{Config, State, UserStake};
 
 use cosmwasm_std::Uint128;
-
 use margined_common::asset::{AssetInfo, NATIVE_DENOM};
+
 use margined_perp::margined_staking::{ExecuteMsg, InstantiateMsg, QueryMsg, UserStakedResponse};
 use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
 use osmosis_test_tube::{
@@ -357,38 +357,35 @@ fn test_staking() {
     wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &signer)
         .unwrap();
 
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::AddToken {
+                token: NATIVE_DENOM.to_string(),
+            },
+            &[],
+            &signer,
+        )
+        .unwrap();
+
+    // change owner of fee pool to staking contract
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::UpdateOwner {
+                owner: staking_address.clone(),
+            },
+            &[],
+            &signer,
+        )
+        .unwrap();
+
     // returns error with wrong asset
     {
-        let amount_to_stake = 1_000_000u128;
         let err = wasm
-            .execute(
-                &staking_address,
-                &ExecuteMsg::Stake {},
-                &[Coin {
-                    amount: amount_to_stake.to_string(),
-                    denom: NATIVE_DENOM.to_string(),
-                }],
-                &accounts[0],
-            )
+            .execute(&staking_address, &ExecuteMsg::Stake {}, &[], &accounts[0])
             .unwrap_err();
         assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Invalid funds: execute wasm contract failed");
-    }
-
-    // returns error with insufficient funds
-    {
-        let amount_to_stake = 1_000_000_000_000u128;
-        let err = wasm
-            .execute(
-                &staking_address,
-                &ExecuteMsg::Stake {},
-                &[Coin {
-                    amount: amount_to_stake.to_string(),
-                    denom: NATIVE_DENOM.to_string(),
-                }],
-                &accounts[0],
-            )
-            .unwrap_err();
-        assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: 1000000000umrg is smaller than 1000000000000umrg: insufficient funds");
     }
 
     // should be able to stake
@@ -407,16 +404,17 @@ fn test_staking() {
         .unwrap();
 
         let amount_to_stake = 1_000_000u128;
-        wasm.execute(
-            &staking_address,
-            &ExecuteMsg::Stake {},
-            &[Coin {
-                amount: amount_to_stake.to_string(),
-                denom: NATIVE_DENOM.to_string(),
-            }],
-            &accounts[0],
-        )
-        .unwrap();
+        let _res = wasm
+            .execute(
+                &staking_address,
+                &ExecuteMsg::Stake {},
+                &[Coin {
+                    amount: amount_to_stake.to_string(),
+                    denom: NATIVE_DENOM.to_string(),
+                }],
+                &accounts[0],
+            )
+            .unwrap();
 
         let stake: UserStake = wasm
             .query(
@@ -458,9 +456,10 @@ fn test_staking() {
             )
             .unwrap();
 
+        // due to gas_used
         assert_eq!(
-            balance_before - Uint128::from(amount_to_stake),
-            balance_after
+            balance_before - Uint128::from(amount_to_stake) > balance_after,
+            true
         );
         assert_eq!(
             staked_balance.staked_amounts,

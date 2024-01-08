@@ -1,6 +1,7 @@
 use cosmwasm_schema::cw_serde;
 use margined_perp::margined_fee_pool::{
-    AllTokenResponse, ConfigResponse, ExecuteMsg, QueryMsg, TokenLengthResponse, TokenResponse,
+    AllTokenResponse, ConfigResponse, ExecuteMsg, OwnerResponse, QueryMsg, TokenLengthResponse,
+    TokenResponse,
 };
 
 use cosmwasm_std::{Addr, CosmosMsg, QuerierWrapper, StdResult, Uint128};
@@ -58,6 +59,12 @@ impl FeePoolController {
     /// get margin fee pool configuration
     pub fn config(&self, querier: &QuerierWrapper) -> StdResult<ConfigResponse> {
         let msg = QueryMsg::Config {};
+
+        querier.query_wasm_smart(&self.0, &msg)
+    }
+
+    pub fn get_owner(&self, querier: &QuerierWrapper) -> StdResult<OwnerResponse> {
+        let msg = QueryMsg::GetOwner {};
 
         querier.query_wasm_smart(&self.0, &msg)
     }
