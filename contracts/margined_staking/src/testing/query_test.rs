@@ -1,16 +1,19 @@
 use crate::state::{Config, State, UserStake};
 
-use cosmwasm_std::{coin, Addr, Timestamp, Uint128};
-use margined_perp::margined_staking::{ExecuteMsg, QueryMsg, TotalStakedResponse};
+use cosmwasm_std::{Addr, Timestamp, Uint128};
+use margined_common::asset::{AssetInfo, NATIVE_DENOM};
+use margined_perp::margined_staking::{ExecuteMsg, InstantiateMsg, QueryMsg, TotalStakedResponse};
 use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
-use osmosis_test_tube::{Account, Bank, Module, Wasm};
+use osmosis_test_tube::{
+    cosmrs::proto::cosmos::{bank::v1beta1::MsgSend, base::v1beta1::Coin},
+    Account, Bank, Module, Wasm,
+};
 
 #[test]
 fn test_query_config() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -57,7 +60,7 @@ fn test_query_config() {
     assert_eq!(
         config,
         Config {
-            fee_pool: Addr::unchecked(env.signer.address()),
+            fee_pool: fee_pool.addr(),
             deposit_token: AssetInfo::NativeToken {
                 denom: NATIVE_DENOM.to_string(),
             },
@@ -74,7 +77,6 @@ fn test_query_state() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -122,7 +124,7 @@ fn test_query_state() {
         state,
         State {
             is_open: false,
-            last_distribution: Timestamp::from_nanos(env.app.get_block_time_nanos() as u64),
+            last_distribution: Timestamp::from_nanos(router.get_block_time_nanos() as u64),
         }
     );
 }
@@ -132,7 +134,6 @@ fn test_query_owner() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -176,7 +177,7 @@ fn test_query_owner() {
         .address;
 
     let owner: Addr = wasm.query(&staking_address, &QueryMsg::Owner {}).unwrap();
-    assert_eq!(owner, Addr::unchecked(env.signer.address()));
+    assert_eq!(owner, Addr::unchecked(signer.address()));
 }
 
 #[test]
@@ -184,7 +185,6 @@ fn test_query_get_claimable() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -231,15 +231,15 @@ fn test_query_get_claimable() {
 
     bank.send(
         MsgSend {
-            from_address: env.signer.address(),
+            from_address: signer.address(),
             to_address: staking_address.clone(),
             amount: [Coin {
                 amount: 10u128.to_string(),
-                denom: env.denoms["reward"].to_string(),
+                denom: NATIVE_DENOM.to_string(),
             }]
             .to_vec(),
         },
-        &env.signer,
+        &signer,
     )
     .unwrap();
 
@@ -247,31 +247,34 @@ fn test_query_get_claimable() {
         .query(
             &staking_address,
             &QueryMsg::GetClaimable {
-                user: env.traders[0].address(),
+                user: accounts[0].address(),
             },
         )
         .unwrap();
     assert_eq!(amount, Uint128::zero());
 
-    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &env.signer)
+    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &signer)
         .unwrap();
 
     let amount_to_stake = 1_000_000u128;
     wasm.execute(
         &staking_address,
         &ExecuteMsg::Stake {},
-        &[coin(amount_to_stake, env.denoms["deposit"].to_string())],
-        &env.traders[0],
+        &[Coin {
+            amount: amount_to_stake.to_string(),
+            denom: NATIVE_DENOM.to_string(),
+        }],
+        &accounts[0],
     )
     .unwrap();
 
-    env.app.increase_time(5u64);
+    router.increase_time(5u64);
 
     let amount: Uint128 = wasm
         .query(
             &staking_address,
             &QueryMsg::GetClaimable {
-                user: env.traders[0].address(),
+                user: accounts[0].address(),
             },
         )
         .unwrap();
@@ -283,7 +286,6 @@ fn test_query_get_user_staked_amount() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -330,15 +332,15 @@ fn test_query_get_user_staked_amount() {
 
     bank.send(
         MsgSend {
-            from_address: env.signer.address(),
-            to_address: fee_pool,
+            from_address: signer.address(),
+            to_address: fee_pool.0.to_string(),
             amount: [Coin {
                 amount: 1_000_000_000u128.to_string(),
-                denom: env.denoms["reward"].to_string(),
+                denom: NATIVE_DENOM.to_string(),
             }]
             .to_vec(),
         },
-        &env.signer,
+        &signer,
     )
     .unwrap();
 
@@ -346,31 +348,57 @@ fn test_query_get_user_staked_amount() {
         .query(
             &staking_address,
             &QueryMsg::GetUserStakedAmount {
-                user: env.traders[0].address(),
+                user: accounts[0].address(),
             },
         )
         .unwrap();
     assert_eq!(amount, UserStake::default());
 
-    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &env.signer)
+    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &signer)
+        .unwrap();
+
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::AddToken {
+                token: NATIVE_DENOM.to_string(),
+            },
+            &[],
+            &signer,
+        )
+        .unwrap();
+
+    // change owner of fee pool to staking contract
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::UpdateOwner {
+                owner: staking_address.clone(),
+            },
+            &[],
+            &signer,
+        )
         .unwrap();
 
     let amount_to_stake = 1_000_000u128;
     wasm.execute(
         &staking_address,
         &ExecuteMsg::Stake {},
-        &[coin(amount_to_stake, env.denoms["deposit"].to_string())],
-        &env.traders[0],
+        &[Coin {
+            amount: amount_to_stake.to_string(),
+            denom: NATIVE_DENOM.to_string(),
+        }],
+        &accounts[0],
     )
     .unwrap();
 
-    env.app.increase_time(5u64);
+    router.increase_time(5u64);
 
     let amount: UserStake = wasm
         .query(
             &staking_address,
             &QueryMsg::GetUserStakedAmount {
-                user: env.traders[0].address(),
+                user: accounts[0].address(),
             },
         )
         .unwrap();
@@ -388,7 +416,7 @@ fn test_query_get_user_staked_amount() {
         &staking_address,
         &ExecuteMsg::Claim { recipient: None },
         &[],
-        &env.traders[0],
+        &accounts[0],
     )
     .unwrap();
 
@@ -396,7 +424,7 @@ fn test_query_get_user_staked_amount() {
         .query(
             &staking_address,
             &QueryMsg::GetUserStakedAmount {
-                user: env.traders[0].address(),
+                user: accounts[0].address(),
             },
         )
         .unwrap();
@@ -416,7 +444,6 @@ fn test_query_get_total_staked_amount() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -463,15 +490,15 @@ fn test_query_get_total_staked_amount() {
 
     bank.send(
         MsgSend {
-            from_address: env.signer.address(),
-            to_address: fee_pool,
+            from_address: signer.address(),
+            to_address: fee_pool.0.to_string(),
             amount: [Coin {
                 amount: 1_000_000_000u128.to_string(),
-                denom: env.denoms["reward"].to_string(),
+                denom: NATIVE_DENOM.to_string(),
             }]
             .to_vec(),
         },
-        &env.signer,
+        &signer,
     )
     .unwrap();
 
@@ -480,19 +507,45 @@ fn test_query_get_total_staked_amount() {
         .unwrap();
     assert_eq!(res.amount, Uint128::zero());
 
-    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &env.signer)
+    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &signer)
+        .unwrap();
+
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::AddToken {
+                token: NATIVE_DENOM.to_string(),
+            },
+            &[],
+            &signer,
+        )
+        .unwrap();
+
+    // change owner of fee pool to staking contract
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::UpdateOwner {
+                owner: staking_address.clone(),
+            },
+            &[],
+            &signer,
+        )
         .unwrap();
 
     let amount_to_stake = 1_000_000u128;
     wasm.execute(
         &staking_address,
         &ExecuteMsg::Stake {},
-        &[coin(amount_to_stake, env.denoms["deposit"].to_string())],
-        &env.traders[0],
+        &[Coin {
+            amount: amount_to_stake.to_string(),
+            denom: NATIVE_DENOM.to_string(),
+        }],
+        &accounts[0],
     )
     .unwrap();
 
-    env.app.increase_time(5u64);
+    router.increase_time(5u64);
 
     let res: TotalStakedResponse = wasm
         .query(&staking_address, &QueryMsg::GetTotalStakedAmount {})
@@ -506,7 +559,7 @@ fn test_query_get_total_staked_amount() {
             amount: amount_to_unstake.into(),
         },
         &[],
-        &env.traders[0],
+        &accounts[0],
     )
     .unwrap();
 
