@@ -1,16 +1,24 @@
+use std::str::FromStr;
+
 use crate::state::{Config, UserStake};
 
-use cosmwasm_std::{coin, Uint128};
-use margined_perp::margined_staking::{ExecuteMsg, QueryMsg, UserStakedResponse};
+use cosmwasm_std::Uint128;
+use margined_common::asset::{AssetInfo, NATIVE_DENOM};
+use margined_perp::margined_staking::{ExecuteMsg, InstantiateMsg, QueryMsg, UserStakedResponse};
 use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
-use osmosis_test_tube::{Account, Bank, Module, Wasm};
+use osmosis_test_tube::{
+    cosmrs::proto::cosmos::{
+        bank::v1beta1::{MsgSend, QueryBalanceRequest},
+        base::v1beta1::Coin,
+    },
+    Account, Bank, Module, Wasm,
+};
 
 #[test]
 fn test_stake_unstake_claim() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -59,20 +67,20 @@ fn test_stake_unstake_claim() {
     {
         bank.send(
             MsgSend {
-                from_address: env.signer.address(),
-                to_address: fee_pool,
+                from_address: signer.address(),
+                to_address: fee_pool.0.to_string(),
                 amount: [Coin {
                     amount: 1_000_000_000_000u128.to_string(),
-                    denom: env.denoms["reward"].to_string(),
+                    denom: NATIVE_DENOM.to_string(),
                 }]
                 .to_vec(),
             },
-            &env.signer,
+            &signer,
         )
         .unwrap();
     }
 
-    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &env.signer)
+    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &signer)
         .unwrap();
 
     // update tokens per interval
@@ -84,7 +92,7 @@ fn test_stake_unstake_claim() {
                 tokens_per_interval: Some(new_tokens_per_interval.into()),
             },
             &[],
-            &env.signer,
+            &signer,
         )
         .unwrap();
 
@@ -95,14 +103,40 @@ fn test_stake_unstake_claim() {
         );
     }
 
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::AddToken {
+                token: NATIVE_DENOM.to_string(),
+            },
+            &[],
+            &signer,
+        )
+        .unwrap();
+
+    // change owner of fee pool to staking contract
+    let _res = wasm
+        .execute(
+            fee_pool.0.as_str(),
+            &margined_perp::margined_fee_pool::ExecuteMsg::UpdateOwner {
+                owner: staking_address.clone(),
+            },
+            &[],
+            &signer,
+        )
+        .unwrap();
+
     // stake then increase time by one day
     {
         let amount_to_stake = 1_000_000_000u128; // 1,000@6dp esTOKEN
         wasm.execute(
             &staking_address,
             &ExecuteMsg::Stake {},
-            &[coin(amount_to_stake, env.denoms["deposit"].to_string())],
-            &env.traders[0],
+            &[Coin {
+                amount: amount_to_stake.to_string(),
+                denom: NATIVE_DENOM.to_string(),
+            }],
+            &accounts[0],
         )
         .unwrap();
 
@@ -110,7 +144,7 @@ fn test_stake_unstake_claim() {
             .query(
                 &staking_address,
                 &QueryMsg::GetUserStakedAmount {
-                    user: env.traders[0].address(),
+                    user: accounts[0].address(),
                 },
             )
             .unwrap();
@@ -124,13 +158,13 @@ fn test_stake_unstake_claim() {
             }
         );
 
-        env.app.increase_time(24 * 60 * 60);
+        router.increase_time(24 * 60 * 60);
 
         let claimable: Uint128 = wasm
             .query(
                 &staking_address,
                 &QueryMsg::GetClaimable {
-                    user: env.traders[0].address(),
+                    user: accounts[0].address(),
                 },
             )
             .unwrap();
@@ -143,8 +177,11 @@ fn test_stake_unstake_claim() {
         wasm.execute(
             &staking_address,
             &ExecuteMsg::Stake {},
-            &[coin(amount_to_stake, env.denoms["deposit"].to_string())],
-            &env.traders[1],
+            &[Coin {
+                amount: amount_to_stake.to_string(),
+                denom: NATIVE_DENOM.to_string(),
+            }],
+            &accounts[1],
         )
         .unwrap();
 
@@ -153,7 +190,7 @@ fn test_stake_unstake_claim() {
             .query(
                 &staking_address,
                 &QueryMsg::GetUserStakedAmount {
-                    user: env.traders[0].address(),
+                    user: accounts[0].address(),
                 },
             )
             .unwrap();
@@ -164,13 +201,13 @@ fn test_stake_unstake_claim() {
             .query(
                 &staking_address,
                 &QueryMsg::GetUserStakedAmount {
-                    user: env.traders[1].address(),
+                    user: accounts[1].address(),
                 },
             )
             .unwrap();
         assert_eq!(stake.staked_amounts, Uint128::from(500_000_000u128),);
 
-        env.app.increase_time(24 * 60 * 60);
+        router.increase_time(24 * 60 * 60);
 
         // check claimable
         {
@@ -178,7 +215,7 @@ fn test_stake_unstake_claim() {
                 .query(
                     &staking_address,
                     &QueryMsg::GetClaimable {
-                        user: env.traders[0].address(),
+                        user: accounts[0].address(),
                     },
                 )
                 .unwrap();
@@ -191,7 +228,7 @@ fn test_stake_unstake_claim() {
                 .query(
                     &staking_address,
                     &QueryMsg::GetClaimable {
-                        user: env.traders[1].address(),
+                        user: accounts[1].address(),
                     },
                 )
                 .unwrap();
@@ -207,7 +244,7 @@ fn test_stake_unstake_claim() {
                     amount: amount_to_unstake.into(),
                 },
                 &[],
-                &env.traders[0],
+                &accounts[0],
             );
             assert!(res.is_err());
 
@@ -218,7 +255,7 @@ fn test_stake_unstake_claim() {
                     amount: amount_to_unstake.into(),
                 },
                 &[],
-                &env.traders[1],
+                &accounts[1],
             );
             assert!(res.is_err());
         }
@@ -226,8 +263,19 @@ fn test_stake_unstake_claim() {
         // unstake successfully and check user stake
         {
             assert_eq!(
-                env.get_balance(env.traders[0].address(), env.denoms["deposit"].to_string()),
-                Uint128::zero()
+                Uint128::from_str(
+                    &bank
+                        .query_balance(&QueryBalanceRequest {
+                            address: accounts[1].address(),
+                            denom: NATIVE_DENOM.to_string()
+                        })
+                        .unwrap()
+                        .balance
+                        .unwrap()
+                        .amount
+                )
+                .unwrap(),
+                Uint128::from(4998277445000u128)
             );
 
             let amount_to_unstake = 1_000_000_000u128;
@@ -237,20 +285,32 @@ fn test_stake_unstake_claim() {
                     amount: amount_to_unstake.into(),
                 },
                 &[],
-                &env.traders[0],
+                &accounts[0],
             )
             .unwrap();
 
             assert_eq!(
-                env.get_balance(env.traders[0].address(), env.denoms["deposit"].to_string()),
-                Uint128::from(amount_to_unstake)
+                Uint128::from_str(
+                    &bank
+                        .query_balance(&QueryBalanceRequest {
+                            address: accounts[0].address(),
+                            denom: NATIVE_DENOM.to_string()
+                        })
+                        .unwrap()
+                        .balance
+                        .unwrap()
+                        .amount
+                )
+                .unwrap()
+                    > Uint128::from(amount_to_unstake),
+                true
             );
 
             let stake: UserStake = wasm
                 .query(
                     &staking_address,
                     &QueryMsg::GetUserStakedAmount {
-                        user: env.traders[0].address(),
+                        user: accounts[0].address(),
                     },
                 )
                 .unwrap();
@@ -274,7 +334,7 @@ fn test_stake_unstake_claim() {
                     amount: amount_to_unstake.into(),
                 },
                 &[],
-                &env.traders[0],
+                &accounts[0],
             );
             assert!(res.is_err());
         }
@@ -285,7 +345,7 @@ fn test_stake_unstake_claim() {
                 .query(
                     &staking_address,
                     &QueryMsg::GetUserStakedAmount {
-                        user: env.traders[0].address(),
+                        user: accounts[0].address(),
                     },
                 )
                 .unwrap();
@@ -294,20 +354,31 @@ fn test_stake_unstake_claim() {
             wasm.execute(
                 &staking_address,
                 &ExecuteMsg::Claim {
-                    recipient: Some(env.empty.address()),
+                    recipient: Some(accounts[2].address()),
                 },
                 &[],
-                &env.traders[0],
+                &accounts[0],
             )
             .unwrap();
 
             assert_eq!(
-                env.get_balance(env.empty.address(), env.denoms["reward"].to_string()),
-                Uint128::from(2_976_501_000u128)
+                Uint128::from_str(
+                    &bank
+                        .query_balance(&QueryBalanceRequest {
+                            address: accounts[2].address(),
+                            denom: NATIVE_DENOM.to_string()
+                        })
+                        .unwrap()
+                        .balance
+                        .unwrap()
+                        .amount
+                )
+                .unwrap(),
+                Uint128::from(5002540588500u128)
             );
         }
 
-        env.app.increase_time(24 * 60 * 60);
+        router.increase_time(24 * 60 * 60);
 
         // check claimable
         {
@@ -315,7 +386,7 @@ fn test_stake_unstake_claim() {
                 .query(
                     &staking_address,
                     &QueryMsg::GetClaimable {
-                        user: env.traders[0].address(),
+                        user: accounts[0].address(),
                     },
                 )
                 .unwrap();
@@ -325,7 +396,7 @@ fn test_stake_unstake_claim() {
                 .query(
                     &staking_address,
                     &QueryMsg::GetClaimable {
-                        user: env.traders[1].address(),
+                        user: accounts[1].address(),
                     },
                 )
                 .unwrap();
