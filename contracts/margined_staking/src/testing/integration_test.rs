@@ -1,7 +1,7 @@
 use crate::state::{Config, UserStake};
 
 use cosmwasm_std::{coin, Uint128};
-use margined_protocol::staking::{ExecuteMsg, QueryMsg, UserStakedResponse};
+use margined_perp::margined_staking::{ExecuteMsg, QueryMsg, UserStakedResponse};
 use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
 use osmosis_test_tube::{Account, Bank, Module, Wasm};
 

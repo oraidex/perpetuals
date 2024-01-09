@@ -1,5 +1,8 @@
 use cosmwasm_std::Addr;
-use margined_protocol::staking::{ExecuteMsg, OwnerProposalResponse, QueryMsg};
+use margined_common::asset::{AssetInfo, NATIVE_DENOM};
+use margined_perp::margined_staking::{
+    ExecuteMsg, InstantiateMsg, OwnerProposalResponse, QueryMsg,
+};
 use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
 use osmosis_test_tube::{Account, Module, RunnerError, Wasm};
 
@@ -10,7 +13,6 @@ fn test_update_owner_staking() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -56,7 +58,12 @@ fn test_update_owner_staking() {
     // claim before a proposal is made
     {
         let err = wasm
-            .execute(&staking, &ExecuteMsg::ClaimOwnership {}, &[], &env.signer)
+            .execute(
+                &staking_address,
+                &ExecuteMsg::ClaimOwnership {},
+                &[],
+                &signer,
+            )
             .unwrap_err();
         assert_eq!(
             err,
@@ -68,23 +75,28 @@ fn test_update_owner_staking() {
 
     // propose new owner
     wasm.execute(
-        &staking,
+        &staking_address,
         &ExecuteMsg::ProposeNewOwner {
-            new_owner: env.traders[0].address(),
+            new_owner: accounts[1].address(),
             duration: PROPOSAL_DURATION,
         },
         &[],
-        &env.signer,
+        &signer,
     )
     .unwrap();
 
-    let owner: Addr = wasm.query(&staking, &QueryMsg::Owner {}).unwrap();
-    assert_eq!(owner, env.signer.address());
+    let owner: Addr = wasm.query(&staking_address, &QueryMsg::Owner {}).unwrap();
+    assert_eq!(owner, signer.address());
 
     // reject claim by incorrect new owner
     {
         let err = wasm
-            .execute(&staking, &ExecuteMsg::ClaimOwnership {}, &[], &env.signer)
+            .execute(
+                &staking_address,
+                &ExecuteMsg::ClaimOwnership {},
+                &[],
+                &signer,
+            )
             .unwrap_err();
         assert_eq!(
             err,
@@ -95,16 +107,16 @@ fn test_update_owner_staking() {
     }
 
     // let proposal expire
-    env.app.increase_time(PROPOSAL_DURATION + 1);
+    router.increase_time(PROPOSAL_DURATION + 1);
 
     // proposal fails due to expiry
     {
         let err = wasm
             .execute(
-                &staking,
+                &staking_address,
                 &ExecuteMsg::ClaimOwnership {},
                 &[],
-                &env.traders[0],
+                &accounts[1],
             )
             .unwrap_err();
         assert_eq!(
@@ -115,28 +127,33 @@ fn test_update_owner_staking() {
         );
     }
 
-    let owner: Addr = wasm.query(&staking, &QueryMsg::Owner {}).unwrap();
-    assert_eq!(owner, env.signer.address());
+    let owner: Addr = wasm.query(&staking_address, &QueryMsg::Owner {}).unwrap();
+    assert_eq!(owner, signer.address());
 
     // propose new owner
     wasm.execute(
-        &staking,
+        &staking_address,
         &ExecuteMsg::ProposeNewOwner {
-            new_owner: env.traders[0].address(),
+            new_owner: accounts[1].address(),
             duration: PROPOSAL_DURATION,
         },
         &[],
-        &env.signer,
+        &signer,
     )
     .unwrap();
 
-    let owner: Addr = wasm.query(&staking, &QueryMsg::Owner {}).unwrap();
-    assert_eq!(owner, env.signer.address());
+    let owner: Addr = wasm.query(&staking_address, &QueryMsg::Owner {}).unwrap();
+    assert_eq!(owner, signer.address());
 
     // proposal fails due to expiry
     {
         let err = wasm
-            .execute(&staking, &ExecuteMsg::RejectOwner {}, &[], &env.traders[0])
+            .execute(
+                &staking_address,
+                &ExecuteMsg::RejectOwner {},
+                &[],
+                &accounts[1],
+            )
             .unwrap_err();
         assert_eq!(
             err,
@@ -148,48 +165,48 @@ fn test_update_owner_staking() {
 
     // proposal fails due to expiry
     {
-        wasm.execute(&staking, &ExecuteMsg::RejectOwner {}, &[], &env.signer)
+        wasm.execute(&staking_address, &ExecuteMsg::RejectOwner {}, &[], &signer)
             .unwrap();
     }
 
     // propose new owner
     wasm.execute(
-        &staking,
+        &staking_address,
         &ExecuteMsg::ProposeNewOwner {
-            new_owner: env.traders[0].address(),
+            new_owner: accounts[1].address(),
             duration: PROPOSAL_DURATION,
         },
         &[],
-        &env.signer,
+        &signer,
     )
     .unwrap();
 
-    let block_time = env.app.get_block_time_seconds();
+    let block_time = router.get_block_time_seconds();
 
-    let owner: Addr = wasm.query(&staking, &QueryMsg::Owner {}).unwrap();
-    assert_eq!(owner, env.signer.address());
+    let owner: Addr = wasm.query(&staking_address, &QueryMsg::Owner {}).unwrap();
+    assert_eq!(owner, signer.address());
 
     // query ownership proposal
     {
         let proposal: OwnerProposalResponse = wasm
-            .query(&staking, &QueryMsg::GetOwnershipProposal {})
+            .query(&staking_address, &QueryMsg::GetOwnershipProposal {})
             .unwrap();
 
-        assert_eq!(proposal.owner, env.traders[0].address());
+        assert_eq!(proposal.owner, accounts[1].address());
         assert_eq!(proposal.expiry, block_time as u64 + PROPOSAL_DURATION);
     }
 
     // claim ownership
     {
         wasm.execute(
-            &staking,
+            &staking_address,
             &ExecuteMsg::ClaimOwnership {},
             &[],
-            &env.traders[0],
+            &accounts[1],
         )
         .unwrap();
     }
 
-    let owner: Addr = wasm.query(&staking, &QueryMsg::Owner {}).unwrap();
-    assert_eq!(owner, env.traders[0].address());
+    let owner: Addr = wasm.query(&staking_address, &QueryMsg::Owner {}).unwrap();
+    assert_eq!(owner, accounts[1].address());
 }
