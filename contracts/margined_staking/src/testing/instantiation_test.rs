@@ -1,7 +1,8 @@
 use crate::state::{Config, State};
 
 use cosmwasm_std::{Addr, Timestamp};
-use margined_protocol::staking::QueryMsg;
+use margined_common::asset::{AssetInfo, NATIVE_DENOM};
+use margined_perp::margined_staking::{InstantiateMsg, QueryMsg};
 use margined_utils::testing::test_tube::{TestTubeScenario, STAKING_CONTRACT_BYTES};
 use osmosis_test_tube::{Account, Module, Wasm};
 
@@ -10,7 +11,6 @@ fn test_instantiation() {
     let TestTubeScenario {
         router,
         accounts,
-        usdc,
         fee_pool,
         ..
     } = TestTubeScenario::default();
@@ -57,7 +57,7 @@ fn test_instantiation() {
     assert_eq!(
         config,
         Config {
-            fee_pool: Addr::unchecked(env.signer.address()),
+            fee_pool: fee_pool.addr(),
             deposit_token: AssetInfo::NativeToken {
                 denom: NATIVE_DENOM.to_string(),
             },
@@ -73,10 +73,10 @@ fn test_instantiation() {
         state,
         State {
             is_open: false,
-            last_distribution: Timestamp::from_nanos(env.app.get_block_time_nanos() as u64),
+            last_distribution: Timestamp::from_nanos(router.get_block_time_nanos() as u64),
         }
     );
 
     let owner: Addr = wasm.query(&staking_address, &QueryMsg::Owner {}).unwrap();
-    assert_eq!(owner, Addr::unchecked(env.signer.address()));
+    assert_eq!(owner, Addr::unchecked(signer.address()));
 }
