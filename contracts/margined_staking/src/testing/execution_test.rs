@@ -481,127 +481,148 @@ fn test_staking() {
     }
 }
 
-// #[test]
-// fn test_unstaking() {
-// let TestTubeScenario {
-//     router,
-//     accounts,
-//     usdc,
-//     fee_pool,
-//     ..
-// } = TestTubeScenario::default();
+#[test]
+fn test_unstaking() {
+    let TestTubeScenario {
+        router,
+        accounts,
+        fee_pool,
+        ..
+    } = TestTubeScenario::default();
 
-// let signer = &accounts[0];
+    let signer = &accounts[0];
 
-// let wasm = Wasm::new(&router);
+    let wasm = Wasm::new(&router);
 
-// let staking_code_id = wasm
-//     .store_code(STAKING_CONTRACT_BYTES, None, signer)
-//     .unwrap()
-//     .data
-//     .code_id;
+    let staking_code_id = wasm
+        .store_code(STAKING_CONTRACT_BYTES, None, signer)
+        .unwrap()
+        .data
+        .code_id;
 
-// let staking_address = wasm
-//     .instantiate(
-//         staking_code_id,
-//         &InstantiateMsg {
-//             fee_pool: fee_pool.addr().to_string(),
-//             deposit_token: AssetInfo::NativeToken {
-//                 denom: NATIVE_DENOM.to_string(),
-//             },
-//             reward_token: AssetInfo::NativeToken {
-//                 denom: NATIVE_DENOM.to_string(),
-//             },
-//             // deposit_token: AssetInfo::Token {
-//             //     contract_addr: usdc.addr(),
-//             // },
-//             // reward_token: AssetInfo::Token {
-//             //     contract_addr: usdc.addr(),
-//             // }, // should be ORAIX
-//             tokens_per_interval: 1_000_000u128.into(),
-//         },
-//         None,
-//         Some("margined-staking"),
-//         &[],
-//         signer,
-//     )
-//     .unwrap()
-//     .data
-//     .address;
+    let staking_address = wasm
+        .instantiate(
+            staking_code_id,
+            &InstantiateMsg {
+                fee_pool: fee_pool.addr().to_string(),
+                deposit_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                reward_token: AssetInfo::NativeToken {
+                    denom: NATIVE_DENOM.to_string(),
+                },
+                // deposit_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // },
+                // reward_token: AssetInfo::Token {
+                //     contract_addr: usdc.addr(),
+                // }, // should be ORAIX
+                tokens_per_interval: 1_000_000u128.into(),
+            },
+            None,
+            Some("margined-staking"),
+            &[],
+            signer,
+        )
+        .unwrap()
+        .data
+        .address;
 
-//     wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &env.signer)
-//         .unwrap();
+    wasm.execute(&staking_address, &ExecuteMsg::Unpause {}, &[], &signer)
+        .unwrap();
 
-//     let amount_to_stake = 1_000_000u128;
-//     wasm.execute(
-//         &staking_address,
-//         &ExecuteMsg::Stake {},
-//         &[coin(amount_to_stake, DEPOSIT_DENOM)],
-//         &env.traders[0],
-//     )
-//     .unwrap();
+    let amount_to_stake = 1_000_000u128;
+    wasm.execute(
+        &staking_address,
+        &ExecuteMsg::Stake {},
+        &[Coin {
+            amount: amount_to_stake.to_string(),
+            denom: NATIVE_DENOM.to_string(),
+        }],
+        &accounts[0],
+    )
+    .unwrap();
 
-//     // returns error if tokens are sent
-//     {
-//         let amount_to_stake = 1_000u128;
-//         let err = wasm
-//             .execute(
-//                 &staking_address,
-//                 &ExecuteMsg::Unstake {
-//                     amount: amount_to_stake.into(),
-//                 },
-//                 &[coin(amount_to_stake, DEPOSIT_DENOM)],
-//                 &env.traders[0],
-//             )
-//             .unwrap_err();
-//         assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Invalid funds: execute wasm contract failed");
-//     }
+    // returns error if tokens are sent
+    {
+        let amount_to_stake = 1_000u128;
+        let err = wasm
+            .execute(
+                &staking_address,
+                &ExecuteMsg::Unstake {
+                    amount: amount_to_stake.into(),
+                },
+                &[Coin {
+                    amount: amount_to_stake.to_string(),
+                    denom: NATIVE_DENOM.to_string(),
+                }],
+                &accounts[0],
+            )
+            .unwrap_err();
+        assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Invalid funds: execute wasm contract failed");
+    }
 
-//     // should unstake half
-//     {
-//         let balance_before =
-//             env.get_balance(env.traders[0].address(), env.denoms["deposit"].to_string());
-//         let balance_before_staked: UserStakedResponse = wasm
-//             .query(
-//                 &staking_address,
-//                 &QueryMsg::GetUserStakedAmount {
-//                     user: env.traders[0].address(),
-//                 },
-//             )
-//             .unwrap();
+    let bank = Bank::new(&router);
+    // should unstake half
+    {
+        let balance_before = bank
+            .query_balance(&QueryBalanceRequest {
+                address: accounts[0].address(),
+                denom: NATIVE_DENOM.to_string(),
+            })
+            .unwrap()
+            .balance
+            .unwrap();
 
-//         let amount_to_unstake = 500_000u128;
-//         wasm.execute(
-//             &staking_address,
-//             &ExecuteMsg::Unstake {
-//                 amount: amount_to_unstake.into(),
-//             },
-//             &[],
-//             &env.traders[0],
-//         )
-//         .unwrap();
+        let balance_before_staked: UserStakedResponse = wasm
+            .query(
+                &staking_address,
+                &QueryMsg::GetUserStakedAmount {
+                    user: accounts[0].address(),
+                },
+            )
+            .unwrap();
 
-//         let balance_after =
-//             env.get_balance(env.traders[0].address(), env.denoms["deposit"].to_string());
-//         let balance_after_staked: UserStakedResponse = wasm
-//             .query(
-//                 &staking_address,
-//                 &QueryMsg::GetUserStakedAmount {
-//                     user: env.traders[0].address(),
-//                 },
-//             )
-//             .unwrap();
+        let amount_to_unstake = 500_000u128;
+        wasm.execute(
+            &staking_address,
+            &ExecuteMsg::Unstake {
+                amount: amount_to_unstake.into(),
+            },
+            &[],
+            &accounts[0],
+        )
+        .unwrap();
 
-//         assert_eq!(
-//             balance_before + Uint128::from(amount_to_unstake),
-//             balance_after
-//         );
-//         assert_eq!(
-//             balance_before_staked.staked_amounts - Uint128::from(amount_to_unstake),
-//             balance_after_staked.staked_amounts
-//         );
-//     }
-// }
+        let balance_after = bank
+            .query_balance(&QueryBalanceRequest {
+                address: accounts[0].address(),
+                denom: NATIVE_DENOM.to_string(),
+            })
+            .unwrap()
+            .balance
+            .unwrap();
+
+        let balance_after_staked: UserStakedResponse = wasm
+            .query(
+                &staking_address,
+                &QueryMsg::GetUserStakedAmount {
+                    user: accounts[0].address(),
+                },
+            )
+            .unwrap();
+
+        assert_eq!(
+            Uint128::from_str(&balance_before.amount).unwrap() + Uint128::from(amount_to_unstake)
+                > Uint128::from_str(&balance_after.amount).unwrap(),
+            true
+        );
+        assert_eq!(
+            balance_before_staked.staked_amounts - Uint128::from(amount_to_unstake),
+            balance_after_staked.staked_amounts
+        );
+    }
+}
 
 // #[test]
 // fn test_claim() {
@@ -674,7 +695,7 @@ fn test_staking() {
 //         &staking_address,
 //         &ExecuteMsg::Stake {},
 //         &[coin(amount_to_stake, DEPOSIT_DENOM)],
-//         &env.traders[0],
+//         &accounts[0],
 //     )
 //     .unwrap();
 
@@ -684,7 +705,7 @@ fn test_staking() {
 //             .query(
 //                 &staking_address,
 //                 &QueryMsg::GetUserStakedAmount {
-//                     user: env.traders[0].address(),
+//                     user: accounts[0].address(),
 //                 },
 //             )
 //             .unwrap();
@@ -707,7 +728,7 @@ fn test_staking() {
 //                 &staking_address,
 //                 &ExecuteMsg::Claim { recipient: None },
 //                 &[coin(amount, DEPOSIT_DENOM)],
-//                 &env.traders[0],
+//                 &accounts[0],
 //             )
 //             .unwrap_err();
 //         assert_eq!(err.to_string(), "execute error: failed to execute message; message index: 0: Invalid funds: execute wasm contract failed");
@@ -724,7 +745,7 @@ fn test_staking() {
 //             &staking_address,
 //             &ExecuteMsg::UpdateRewards {},
 //             &[],
-//             &env.traders[1],
+//             &accounts[1],
 //         )
 //         .unwrap();
 
@@ -743,7 +764,7 @@ fn test_staking() {
 //             .query(
 //                 &staking_address,
 //                 &QueryMsg::GetClaimable {
-//                     user: env.traders[0].address(),
+//                     user: accounts[0].address(),
 //                 },
 //             )
 //             .unwrap();
@@ -753,7 +774,7 @@ fn test_staking() {
 //             .query(
 //                 &staking_address,
 //                 &QueryMsg::GetUserStakedAmount {
-//                     user: env.traders[0].address(),
+//                     user: accounts[0].address(),
 //                 },
 //             )
 //             .unwrap();
@@ -772,17 +793,17 @@ fn test_staking() {
 //     {
 //         env.app.increase_time(1u64);
 //         let balance_before =
-//             env.get_balance(env.traders[1].address(), env.denoms["reward"].to_string());
+//             env.get_balance(accounts[1].address(), env.denoms["reward"].to_string());
 //         wasm.execute(
 //             &staking_address,
 //             &ExecuteMsg::Claim { recipient: None },
 //             &[],
-//             &env.traders[1],
+//             &accounts[1],
 //         )
 //         .unwrap();
 
 //         let balance_after =
-//             env.get_balance(env.traders[1].address(), env.denoms["reward"].to_string());
+//             env.get_balance(accounts[1].address(), env.denoms["reward"].to_string());
 //         assert_eq!(balance_before, balance_after);
 //     }
 
@@ -790,19 +811,19 @@ fn test_staking() {
 //     {
 //         env.app.increase_time(1u64);
 //         let balance_before =
-//             env.get_balance(env.traders[0].address(), env.denoms["reward"].to_string());
+//             env.get_balance(accounts[0].address(), env.denoms["reward"].to_string());
 //         let expected_claimable = Uint128::from(112_000_000u128);
 
 //         wasm.execute(
 //             &staking_address,
 //             &ExecuteMsg::Claim { recipient: None },
 //             &[],
-//             &env.traders[0],
+//             &accounts[0],
 //         )
 //         .unwrap();
 
 //         let balance_after =
-//             env.get_balance(env.traders[0].address(), env.denoms["reward"].to_string());
+//             env.get_balance(accounts[0].address(), env.denoms["reward"].to_string());
 
 //         assert_eq!(balance_before + expected_claimable, balance_after);
 //     }
