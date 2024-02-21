@@ -786,13 +786,13 @@ pub fn pay_funding(
     vamm: String,
 ) -> StdResult<Response> {
     // validate address inputs
-    let vamm = deps.api.addr_validate(&vamm)?;
+    let vamm_addr = deps.api.addr_validate(&vamm)?;
     let config = read_config(deps.storage)?;
     // check its a valid vamm
-    require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
+    require_vamm(deps.as_ref(), &config.insurance_fund, &vamm_addr)?;
 
     let funding_msg = SubMsg::reply_always(
-        wasm_execute(vamm, &ExecuteMsg::SettleFunding {}, vec![])?,
+        wasm_execute(vamm_addr, &ExecuteMsg::SettleFunding {}, vec![])?,
         PAY_FUNDING_REPLY_ID,
     );
 
@@ -855,7 +855,7 @@ pub fn deposit_margin(
         ("position_id", &position_id.to_string()),
         ("trader", trader.as_ref()),
         ("deposit_amount", &amount.to_string()),
-        ("vamm", &vamm),
+        ("vamm", vamm.as_str()),
     ]))
 }
 
@@ -935,7 +935,7 @@ pub fn withdraw_margin(
             &remain_margin.latest_premium_fraction.to_string(),
         ),
         ("bad_debt", &remain_margin.bad_debt.to_string()),
-        ("vamm", &vamm),
+        ("vamm", vamm.as_str()),
     ]))
 }
 
