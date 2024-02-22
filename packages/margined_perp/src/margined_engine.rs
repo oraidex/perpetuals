@@ -58,6 +58,9 @@ pub enum ExecuteMsg {
         tp_sl_spread: Option<Uint128>,
         liquidation_fee: Option<Uint128>,
     },
+    UpdateOperator {
+        operator: Option<String>,
+    },
     UpdatePauser {
         pauser: String,
     },

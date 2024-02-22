@@ -38,6 +38,29 @@ use margined_perp::margined_engine::{
 };
 use margined_perp::margined_vamm::{CalcFeeResponse, Direction, ExecuteMsg};
 
+pub fn update_operator(
+    deps: DepsMut,
+    info: MessageInfo,
+    operator: Option<String>,
+) -> StdResult<Response> {
+    let mut config = read_config(deps.storage)?;
+
+    // check permission
+    if info.sender != config.owner {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    // if None then no operator to recieve reward
+    config.operator = match operator {
+        Some(addr) => Some(deps.api.addr_validate(addr.as_str())?),
+        None => None,
+    };
+
+    store_config(deps.storage, &config)?;
+
+    Ok(Response::default().add_attribute("action", "update_operator"))
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn update_config(
     deps: DepsMut,

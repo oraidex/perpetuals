@@ -10,7 +10,7 @@ use margined_common::validate::{
 use margined_perp::margined_engine::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 use crate::error::ContractError;
-use crate::handle::{trigger_mutiple_tp_sl, trigger_tp_sl, update_tp_sl};
+use crate::handle::{trigger_mutiple_tp_sl, trigger_tp_sl, update_operator, update_tp_sl};
 use crate::query::{
     query_last_position_id, query_position_is_bad_debt, query_position_is_liquidated,
     query_position_is_tpsl, query_positions,
@@ -154,6 +154,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             tp_sl_spread,
             liquidation_fee,
         ),
+        ExecuteMsg::UpdateOperator { operator } => update_operator(deps, info, operator),
         ExecuteMsg::UpdatePauser { pauser } => update_pauser(deps, info, pauser),
         ExecuteMsg::AddWhitelist { address } => add_whitelist(deps, info, address),
         ExecuteMsg::RemoveWhitelist { address } => remove_whitelist(deps, info, address),

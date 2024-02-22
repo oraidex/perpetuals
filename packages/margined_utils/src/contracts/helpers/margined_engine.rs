@@ -1,8 +1,8 @@
 use cosmwasm_schema::cw_serde;
 use cw_controllers::HooksResponse;
 use margined_perp::margined_engine::{
-    ConfigResponse, ExecuteMsg, PnlCalcOption, Position, PositionFilter,
-    PositionUnrealizedPnlResponse, QueryMsg, Side, StateResponse, TickResponse, TicksResponse, PositionTpSlResponse,
+    ConfigResponse, ExecuteMsg, PnlCalcOption, Position, PositionFilter, PositionTpSlResponse,
+    PositionUnrealizedPnlResponse, QueryMsg, Side, StateResponse, TickResponse, TicksResponse,
 };
 
 use cosmwasm_std::{Addr, Coin, CosmosMsg, QuerierWrapper, StdResult, Uint128};
@@ -249,8 +249,8 @@ impl EngineController {
         let msg = ExecuteMsg::TriggerTpSl {
             vamm,
             position_id,
-            take_profit
-        } ;
+            take_profit,
+        };
         wasm_execute(&self.0, &msg, vec![])
     }
 
@@ -265,8 +265,8 @@ impl EngineController {
             vamm,
             side,
             take_profit,
-            limit
-        } ;
+            limit,
+        };
         wasm_execute(&self.0, &msg, vec![])
     }
 
@@ -471,7 +471,7 @@ impl EngineController {
             vamm,
             side,
             take_profit,
-            limit
+            limit,
         };
 
         querier.query_wasm_smart(&self.0, &msg)
