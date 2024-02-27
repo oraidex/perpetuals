@@ -63,6 +63,13 @@ fn test_set_and_get_price() {
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, _msg).unwrap();
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let res = query(deps.as_ref(), mock_env(), QueryMsg::GetOwner {}).unwrap();
     let config: OwnerResponse = from_binary(&res).unwrap();
     let info = mock_info("addr0000", &[]);
@@ -75,7 +82,7 @@ fn test_set_and_get_price() {
         timestamp: 1_000_000,                  // 0.5 I think
     };
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), mock_env(), info, msg).unwrap();
 
     let res = query(
@@ -96,7 +103,7 @@ fn test_set_and_get_price() {
         timestamp: 1_000_001,                  // 0.5 I think
     };
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), mock_env(), info, msg).unwrap();
 
     let res = query(
@@ -125,6 +132,13 @@ fn test_set_multiple_price() {
     let info = mock_info("addr0000", &[]);
     assert_eq!(config, OwnerResponse { owner: info.sender });
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let prices = vec![
         Uint128::from(500_000_000u128),
         Uint128::from(600_000_000u128),
@@ -140,7 +154,7 @@ fn test_set_multiple_price() {
         timestamps,
     };
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), mock_env(), info, msg).unwrap();
 
     let res = query(
@@ -180,6 +194,13 @@ fn test_get_previous_price() {
     let info = mock_info("addr0000", &[]);
     assert_eq!(config, OwnerResponse { owner: info.sender });
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let prices = vec![
         Uint128::from(500_000_000u128),
         Uint128::from(600_000_000u128),
@@ -200,7 +221,7 @@ fn test_get_previous_price() {
         timestamps,
     };
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), mock_env(), info, msg).unwrap();
 
     let res = query(
@@ -253,6 +274,13 @@ fn test_get_twap_price() {
     let info = mock_info("addr0000", &[]);
     assert_eq!(config, OwnerResponse { owner: info.sender });
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let prices = vec![
         Uint128::from(400_000_000u128),
         Uint128::from(405_000_000u128),
@@ -274,7 +302,7 @@ fn test_get_twap_price() {
 
     env.block.time = env.block.time.plus_seconds(45);
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), env.clone(), info, msg).unwrap();
 
     // twap Price
@@ -346,6 +374,13 @@ fn test_get_twap_variant_price_period() {
     let info = mock_info("addr0000", &[]);
     assert_eq!(config, OwnerResponse { owner: info.sender });
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let prices = vec![
         Uint128::from(400_000_000u128),
         Uint128::from(405_000_000u128),
@@ -369,7 +404,7 @@ fn test_get_twap_variant_price_period() {
 
     env.block.time = env.block.time.plus_seconds(95);
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), env.clone(), info, msg).unwrap();
 
     let res = query(
@@ -412,6 +447,13 @@ fn test_get_twap_latest_price_update_is_earlier_than_request() {
     let info = mock_info("addr0000", &[]);
     assert_eq!(config, OwnerResponse { owner: info.sender });
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let prices = vec![
         Uint128::from(400_000_000u128),
         Uint128::from(405_000_000u128),
@@ -433,7 +475,7 @@ fn test_get_twap_latest_price_update_is_earlier_than_request() {
 
     env.block.time = env.block.time.plus_seconds(100);
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), env.clone(), info, msg).unwrap();
 
     let res = query(
@@ -476,6 +518,13 @@ fn test_get_twap_no_rounds() {
     let info = mock_info("addr0000", &[]);
     assert_eq!(config, OwnerResponse { owner: info.sender });
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let res = query(
         deps.as_ref(),
         env,
@@ -514,6 +563,13 @@ fn test_get_twap_error_zero_interval() {
     let info = mock_info("addr0000", &[]);
     assert_eq!(config, OwnerResponse { owner: info.sender });
 
+    // Update executor
+    let msg = ExecuteMsg::UpdateExecutor {
+        executor: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     let prices = vec![
         Uint128::from(400_000_000u128),
         Uint128::from(405_000_000u128),
@@ -535,7 +591,7 @@ fn test_get_twap_error_zero_interval() {
 
     env.block.time = env.block.time.plus_seconds(30);
 
-    let info = mock_info("addr0000", &[]);
+    let info = mock_info("addr0001", &[]);
     execute(deps.as_mut(), env.clone(), info, msg).unwrap();
 
     let res = query(
