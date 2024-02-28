@@ -38,6 +38,9 @@ pub enum ExecuteMsg {
     UpdateOwner {
         owner: String,
     },
+    UpdateExecutor {
+        executor: String,
+    },
 }
 
 #[cw_serde]
@@ -55,6 +58,8 @@ pub enum QueryMsg {
     GetTwapPrice { key: String, interval: u64 },
     #[returns(u64)]
     GetLastRoundId { key: String },
+    #[returns(ExecutorResponse)]
+    GetExecutor {},
 }
 
 #[cw_serde]
@@ -63,4 +68,9 @@ pub struct ConfigResponse {}
 #[cw_serde]
 pub struct OwnerResponse {
     pub owner: Addr,
+}
+
+#[cw_serde]
+pub struct ExecutorResponse {
+    pub executor: Addr,
 }

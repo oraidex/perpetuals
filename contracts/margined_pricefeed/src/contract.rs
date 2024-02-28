@@ -1,5 +1,6 @@
 use crate::error::ContractError;
-use crate::query::query_last_round_id;
+use crate::handle::update_executor;
+use crate::query::{query_executor, query_last_round_id};
 use crate::{
     handle::{append_multiple_price, append_price, update_owner},
     query::{
@@ -21,6 +22,8 @@ const CONTRACT_NAME: &str = "crates.io:margined-pricefeed";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 /// Owner admin
 pub const OWNER: Admin = Admin::new("owner");
+
+pub const EXECUTOR: Admin = Admin::new("executor");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -59,6 +62,7 @@ pub fn execute(
             timestamps,
         } => append_multiple_price(deps, env, info, key, prices, timestamps),
         ExecuteMsg::UpdateOwner { owner } => update_owner(deps, info, owner),
+        ExecuteMsg::UpdateExecutor { executor } => update_executor(deps, info, executor),
     }
 }
 
@@ -76,6 +80,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             to_binary(&query_get_twap_price(deps, env, key, interval)?)
         }
         QueryMsg::GetLastRoundId { key } => to_binary(&query_last_round_id(deps, key)?),
+        QueryMsg::GetExecutor {} => to_binary(&query_executor(deps)?),
     }
 }
 

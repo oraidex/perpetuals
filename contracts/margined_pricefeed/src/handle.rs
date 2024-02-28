@@ -1,6 +1,10 @@
-use cosmwasm_std::{DepsMut, MessageInfo, Response, StdError, Uint128, Env};
+use cosmwasm_std::{DepsMut, Env, MessageInfo, Response, StdError, Uint128};
 
-use crate::{contract::OWNER, error::ContractError, state::store_price_data};
+use crate::{
+    contract::{EXECUTOR, OWNER},
+    error::ContractError,
+    state::store_price_data,
+};
 
 pub fn update_owner(
     deps: DepsMut,
@@ -25,7 +29,7 @@ pub fn append_price(
     timestamp: u64,
 ) -> Result<Response, ContractError> {
     // check permission
-    OWNER.assert_admin(deps.as_ref(), &info.sender)?;
+    EXECUTOR.assert_admin(deps.as_ref(), &info.sender)?;
 
     if price.is_zero() {
         return Err(ContractError::Std(StdError::generic_err(
@@ -55,7 +59,7 @@ pub fn append_multiple_price(
     timestamps: Vec<u64>,
 ) -> Result<Response, ContractError> {
     // check permission
-    OWNER.assert_admin(deps.as_ref(), &info.sender)?;
+    EXECUTOR.assert_admin(deps.as_ref(), &info.sender)?;
 
     // This throws if the prices and timestamps are not the same length
     if prices.len() != timestamps.len() {
@@ -80,4 +84,22 @@ pub fn append_multiple_price(
     }
 
     Ok(Response::default().add_attribute("action", "append_multiple_price"))
+}
+
+pub fn update_executor(
+    deps: DepsMut,
+    info: MessageInfo,
+    executor: String,
+) -> Result<Response, ContractError> {
+    OWNER.assert_admin(deps.as_ref(), &info.sender)?;
+
+    // validate the address
+    let valid_executor = deps.api.addr_validate(&executor)?;
+
+    EXECUTOR.set(deps, Some(valid_executor))?;
+
+    Ok(Response::new().add_attributes(vec![
+        ("action", "update_executor"),
+        ("new_executor", &executor),
+    ]))
 }
