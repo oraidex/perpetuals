@@ -50,7 +50,7 @@ fn test_force_error_open_position_zero() {
             Side::Buy,
             Uint128::zero(),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -79,7 +79,7 @@ fn test_force_error_open_position_zero_leverage_or_fractional_leverage() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(0u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -97,7 +97,7 @@ fn test_force_error_open_position_zero_leverage_or_fractional_leverage() {
             Side::Buy,
             to_decimals(60u64),
             Uint128::from(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -127,7 +127,7 @@ fn test_open_position_long() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -171,7 +171,7 @@ fn test_open_position_two_longs() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -185,7 +185,7 @@ fn test_open_position_two_longs() {
             Side::Buy,
             to_decimals(33u64),
             to_decimals(5u64),
-            to_decimals(31),
+            Some(to_decimals(31)),
             Some(to_decimals(17)),
             to_decimals(0u64),
             vec![],
@@ -199,7 +199,7 @@ fn test_open_position_two_longs() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(45),
+            Some(to_decimals(45)),
             Some(to_decimals(25)),
             to_decimals(0u64),
             vec![],
@@ -213,7 +213,7 @@ fn test_open_position_two_longs() {
             Side::Sell,
             to_decimals(55u64),
             to_decimals(5u64),
-            to_decimals(26),
+            Some(to_decimals(26)),
             Some(to_decimals(58)),
             to_decimals(0u64),
             vec![],
@@ -227,7 +227,7 @@ fn test_open_position_two_longs() {
             Side::Sell,
             to_decimals(42u64),
             to_decimals(7u64),
-            to_decimals(22),
+            Some(to_decimals(22)),
             Some(to_decimals(45)),
             to_decimals(0u64),
             vec![],
@@ -241,7 +241,7 @@ fn test_open_position_two_longs() {
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(16),
+            Some(to_decimals(16)),
             Some(to_decimals(38)),
             to_decimals(0u64),
             vec![],
@@ -463,7 +463,7 @@ fn test_open_position_two_shorts() {
             Side::Sell,
             to_decimals(40u64),
             to_decimals(5u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(13)),
             to_decimals(0u64),
             vec![],
@@ -477,7 +477,7 @@ fn test_open_position_two_shorts() {
             Side::Sell,
             to_decimals(40u64),
             to_decimals(5u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(8)),
             to_decimals(0u64),
             vec![],
@@ -524,7 +524,7 @@ fn test_open_position_equal_size_opposite_side() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -538,7 +538,7 @@ fn test_open_position_equal_size_opposite_side() {
             Side::Sell,
             to_decimals(300u64),
             to_decimals(2u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(to_decimals(17)),
             to_decimals(0u64),
             vec![],
@@ -582,7 +582,7 @@ fn test_open_position_short_and_two_longs() {
             Side::Sell,
             to_decimals(40u64),
             to_decimals(5u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(10)),
             to_decimals(25u64),
             vec![],
@@ -603,7 +603,7 @@ fn test_open_position_short_and_two_longs() {
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(11),
+            Some(to_decimals(11)),
             Some(to_decimals(6)),
             Uint128::from(13_800_000_000u128),
             vec![],
@@ -635,7 +635,7 @@ fn test_open_position_short_and_two_longs() {
             Side::Buy,
             to_decimals(10u64),
             to_decimals(10u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(to_decimals(7)),
             to_decimals(0u64),
             vec![],
@@ -667,7 +667,7 @@ fn test_open_position_short_long_short() {
             Side::Sell,
             to_decimals(20u64),
             to_decimals(10u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -681,7 +681,7 @@ fn test_open_position_short_long_short() {
             Side::Buy,
             to_decimals(150u64),
             to_decimals(3u64),
-            to_decimals(11),
+            Some(to_decimals(11)),
             Some(to_decimals(6)),
             to_decimals(0u64),
             vec![],
@@ -707,7 +707,7 @@ fn test_open_position_short_long_short() {
             Side::Sell,
             to_decimals(25u64),
             to_decimals(10u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(14)),
             to_decimals(0u64),
             vec![],
@@ -738,7 +738,7 @@ fn test_open_position_long_short_long() {
             Side::Buy,
             to_decimals(25u64),
             to_decimals(10u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(to_decimals(8)),
             to_decimals(0u64),
             vec![],
@@ -752,7 +752,7 @@ fn test_open_position_long_short_long() {
             Side::Sell,
             to_decimals(150u64),
             to_decimals(3u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(16)),
             to_decimals(0u64),
             vec![],
@@ -780,7 +780,7 @@ fn test_open_position_long_short_long() {
             Side::Buy,
             to_decimals(20u64),
             to_decimals(10u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(Uint128::zero()),
             to_decimals(0u64),
             vec![],
@@ -812,7 +812,7 @@ fn test_pnl_zero_no_others_trading() {
             Side::Buy,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(14),
+            Some(to_decimals(14)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -826,7 +826,7 @@ fn test_pnl_zero_no_others_trading() {
             Side::Buy,
             to_decimals(750u64),
             to_decimals(1u64),
-            to_decimals(30),
+            Some(to_decimals(30)),
             Some(to_decimals(20)),
             to_decimals(0u64),
             vec![],
@@ -876,7 +876,7 @@ fn test_close_safe_position() {
             Side::Sell,
             to_decimals(50u64),
             to_decimals(2u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(13)),
             to_decimals(0u64),
             vec![],
@@ -896,7 +896,7 @@ fn test_close_safe_position() {
             Side::Buy,
             to_decimals(10u64),
             to_decimals(6u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(Uint128::zero()),
             to_decimals(0u64),
             vec![],
@@ -953,7 +953,7 @@ fn test_close_position_over_maintenance_margin_ratio() {
             Side::Buy,
             to_decimals(25u64),
             to_decimals(10u64),
-            to_decimals(14),
+            Some(to_decimals(14)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -972,7 +972,7 @@ fn test_close_position_over_maintenance_margin_ratio() {
             Side::Sell,
             Uint128::from(35_080_000_000u128),
             to_decimals(1u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(17)),
             to_decimals(0u64),
             vec![],
@@ -1021,7 +1021,7 @@ fn test_cannot_close_position_with_bad_debt() {
             Side::Buy,
             to_decimals(25u64),
             to_decimals(10u64),
-            to_decimals(14),
+            Some(to_decimals(14)),
             Some(Uint128::zero()),
             to_decimals(0u64),
             vec![],
@@ -1040,7 +1040,7 @@ fn test_cannot_close_position_with_bad_debt() {
             Side::Sell,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(17)),
             to_decimals(0u64),
             vec![],
@@ -1110,7 +1110,7 @@ fn test_openclose_position_to_check_fee_is_charged() {
             None,
             None,
             None,
-            None
+            None,
         )
         .unwrap();
     router.execute(owner.clone(), msg).unwrap();
@@ -1121,14 +1121,17 @@ fn test_openclose_position_to_check_fee_is_charged() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
         )
         .unwrap();
     let mut tx = router.execute(alice.clone(), msg).unwrap();
-    println!("test_openclose_position_to_check_fee_is_charged - open tx: {:?}", tx);
+    println!(
+        "test_openclose_position_to_check_fee_is_charged - open tx: {:?}",
+        tx
+    );
 
     let engine_balance = usdc.balance(&router.wrap(), engine.addr().clone()).unwrap();
     assert_eq!(engine_balance, to_decimals(42u64));
@@ -1137,7 +1140,10 @@ fn test_openclose_position_to_check_fee_is_charged() {
         .close_position(vamm.addr().to_string(), 1, to_decimals(0u64))
         .unwrap();
     tx = router.execute(alice.clone(), msg).unwrap();
-    println!("test_openclose_position_to_check_fee_is_charged - close tx: {:?}", tx);
+    println!(
+        "test_openclose_position_to_check_fee_is_charged - close tx: {:?}",
+        tx
+    );
 
     let engine_balance = usdc.balance(&router.wrap(), engine.addr().clone()).unwrap();
     assert_eq!(engine_balance, Uint128::from(11u128));
@@ -1177,7 +1183,7 @@ fn test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent() {
             None,
             None,
             None,
-            None
+            None,
         )
         .unwrap();
     router.execute(owner.clone(), msg).unwrap();
@@ -1188,14 +1194,17 @@ fn test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
         )
         .unwrap();
     let mut tx = router.execute(alice.clone(), msg).unwrap();
-    println!("test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent - open tx: {:?}", tx);
+    println!(
+        "test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent - open tx: {:?}",
+        tx
+    );
 
     let engine_balance = usdc.balance(&router.wrap(), engine.addr().clone()).unwrap();
     println!("test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent - engine_balance: {:?}", engine_balance);
@@ -1215,7 +1224,7 @@ fn test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent() {
             Side::Buy,
             to_decimals(58u64),
             to_decimals(10u64),
-            to_decimals(40),
+            Some(to_decimals(40)),
             Some(to_decimals(20)),
             to_decimals(0u64),
             vec![],
@@ -1239,7 +1248,10 @@ fn test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent() {
     let engine_balance = usdc.balance(&router.wrap(), engine.addr().clone()).unwrap();
     println!("test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent - engine_balance: {:?}", engine_balance);
     assert_eq!(engine_balance, Uint128::from(0u128));
-    println!("test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent - close tx: {:?}", tx);
+    println!(
+        "test_openclose_position_to_check_fee_is_charged_toll_ratio_5_percent - close tx: {:?}",
+        tx
+    );
     let fee_pool_balance = usdc
         .balance(&router.wrap(), fee_pool.addr().clone())
         .unwrap();
@@ -1267,7 +1279,7 @@ fn test_pnl_unrealized() {
             Side::Buy,
             to_decimals(25u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -1291,7 +1303,7 @@ fn test_pnl_unrealized() {
             Side::Sell,
             to_decimals(100u64),
             to_decimals(10u64),
-            to_decimals(2),
+            Some(to_decimals(2)),
             Some(to_decimals(8)),
             to_decimals(0u64),
             vec![],
@@ -1356,7 +1368,7 @@ fn test_error_open_position_insufficient_balance() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -1370,7 +1382,7 @@ fn test_error_open_position_insufficient_balance() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(40),
+            Some(to_decimals(40)),
             Some(to_decimals(20)),
             to_decimals(0u64),
             vec![],
@@ -1404,7 +1416,7 @@ fn test_error_open_position_exceed_margin_ratio() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(21u64),
-            to_decimals(25),
+            Some(to_decimals(25)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -1473,7 +1485,7 @@ fn test_alice_take_profit_from_bob_unrealized_undercollateralized_position_bob_c
             Side::Sell,
             to_decimals(20u64),
             to_decimals(10u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -1487,7 +1499,7 @@ fn test_alice_take_profit_from_bob_unrealized_undercollateralized_position_bob_c
             Side::Sell,
             to_decimals(20u64),
             to_decimals(10u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(8)),
             to_decimals(0u64),
             vec![],
@@ -1563,7 +1575,7 @@ fn test_query_no_user_positions() {
             Side::Sell,
             to_decimals(2u64),
             to_decimals(10u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],
@@ -1591,7 +1603,15 @@ fn test_query_no_user_positions() {
 
     // we query all of bob's positions (should return an empty array)
     let positions = engine
-        .get_positions(&router.wrap(), bob.to_string(), PositionFilter::None, None, None, None, None)
+        .get_positions(
+            &router.wrap(),
+            bob.to_string(),
+            PositionFilter::None,
+            None,
+            None,
+            None,
+            None,
+        )
         .unwrap();
     assert_eq!(positions, vec![]);
 }
@@ -1621,7 +1641,7 @@ fn test_bad_debt_recorded() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(10)),
             to_decimals(0u64),
             vec![],

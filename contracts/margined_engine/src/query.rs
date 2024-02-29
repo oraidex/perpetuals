@@ -322,7 +322,7 @@ pub fn query_position_is_tpsl(
     deps: Deps,
     vamm: String,
     side: Side,
-    take_profit: bool,
+    do_tp: bool,
     limit: u32,
 ) -> StdResult<PositionTpSlResponse> {
     let config = read_config(deps.storage)?;
@@ -334,7 +334,7 @@ pub fn query_position_is_tpsl(
         base_asset_reserve: vamm_state.base_asset_reserve,
     };
 
-    let order_by = if take_profit == (side == Side::Buy) {
+    let order_by = if do_tp == (side == Side::Buy) {
         Order::Descending
     } else {
         Order::Ascending
@@ -374,21 +374,22 @@ pub fn query_position_is_tpsl(
                 .checked_div(base_asset_amount)?;
 
             let stop_loss = position.stop_loss.unwrap_or_default();
+            let take_profit = position.take_profit.unwrap_or(Uint128::MAX);
             let (tp_spread, sl_spread) = calculate_tp_sl_spread(
                 config.tp_sl_spread,
-                position.take_profit,
+                take_profit,
                 stop_loss,
                 config.decimals,
             )?;
             let tp_sl_action = check_tp_sl_price(
                 close_price,
-                position.take_profit,
+                take_profit,
                 stop_loss,
                 tp_spread,
                 sl_spread,
                 &position.side,
             )?;
-            if take_profit {
+            if do_tp {
                 if tp_sl_action == "trigger_take_profit" {
                     is_tpsl = true;
                 }
