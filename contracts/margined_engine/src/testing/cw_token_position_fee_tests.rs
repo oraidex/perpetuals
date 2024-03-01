@@ -2,7 +2,10 @@ use cosmwasm_std::Uint128;
 use cw20::Cw20ExecuteMsg;
 use margined_common::integer::Integer;
 use margined_perp::margined_engine::{PnlCalcOption, Side};
-use margined_utils::{cw_multi_test::Executor, testing::{SimpleScenario, to_decimals}};
+use margined_utils::{
+    cw_multi_test::Executor,
+    testing::{to_decimals, SimpleScenario},
+};
 
 use crate::testing::new_simple_scenario;
 
@@ -35,7 +38,7 @@ fn test_ten_percent_fee_open_long_position() {
             Side::Buy,
             Uint128::from(60_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(Uint128::zero()),
             Uint128::from(10_500_000_000u64),
             vec![],
@@ -91,7 +94,7 @@ fn test_ten_percent_fee_open_short_position() {
             Side::Sell,
             Uint128::from(60_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(3),
+            Some(to_decimals(3)),
             Some(to_decimals(12)),
             Uint128::from(150_000_000_000u64),
             vec![],
@@ -147,7 +150,7 @@ fn test_ten_percent_fee_long_position_price_remains_long_again() {
             Side::Buy,
             Uint128::from(25_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(5_000_000_000u64),
             vec![],
@@ -166,7 +169,7 @@ fn test_ten_percent_fee_long_position_price_remains_long_again() {
             Side::Buy,
             Uint128::from(175_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(22),
+            Some(to_decimals(22)),
             Some(Uint128::zero()),
             Uint128::from(17_500_000_000u64),
             vec![],
@@ -226,7 +229,7 @@ fn test_ten_percent_fee_long_position_price_up_long_again() {
             Side::Buy,
             Uint128::from(25_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(1_000_000_000u64),
             vec![],
@@ -245,7 +248,7 @@ fn test_ten_percent_fee_long_position_price_up_long_again() {
             Side::Buy,
             Uint128::from(35_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(23),
+            Some(to_decimals(23)),
             Some(Uint128::zero()),
             Uint128::from(5_000_000_000u64),
             vec![],
@@ -261,10 +264,7 @@ fn test_ten_percent_fee_long_position_price_up_long_again() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_positive(10_365_013_771u64)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_positive(10_365_013_771u64));
 
     // alice opens long position with 175 margin, 2x leverage
     // (1250 + 350) * (80 + baseAssetDelta) = 100k, baseAssetDelta = -17.5
@@ -274,7 +274,7 @@ fn test_ten_percent_fee_long_position_price_up_long_again() {
             Side::Buy,
             Uint128::from(200_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(35),
+            Some(to_decimals(35)),
             Some(Uint128::zero()),
             Uint128::from(12_500_000_000u64),
             vec![],
@@ -333,7 +333,7 @@ fn test_ten_percent_fee_long_position_price_down_long_again() {
             Side::Buy,
             Uint128::from(125_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(15_000_000_000u64),
             vec![],
@@ -351,7 +351,7 @@ fn test_ten_percent_fee_long_position_price_down_long_again() {
             Side::Sell,
             Uint128::from(125_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(9),
+            Some(to_decimals(9)),
             Some(to_decimals(20)),
             Uint128::from(20_000_000_000u64),
             vec![],
@@ -380,7 +380,7 @@ fn test_ten_percent_fee_long_position_price_down_long_again() {
             Side::Buy,
             Uint128::from(50_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(28),
+            Some(to_decimals(28)),
             Some(Uint128::zero()),
             Uint128::from(10_000_000_000u64),
             vec![],
@@ -431,7 +431,7 @@ fn test_ten_percent_fee_short_position_price_remains_short_again() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(16)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -449,7 +449,7 @@ fn test_ten_percent_fee_short_position_price_remains_short_again() {
             Side::Sell,
             Uint128::from(50_000_000_000u64),
             Uint128::from(8_000_000_000u64),
-            to_decimals(3),
+            Some(to_decimals(3)),
             Some(to_decimals(10)),
             Uint128::from(125_000_000_000u64),
             vec![],
@@ -480,7 +480,10 @@ fn test_ten_percent_fee_short_position_price_remains_short_again() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(pnl.unrealized_pnl, Integer::new_positive(31_358_574_607u128));
+    assert_eq!(
+        pnl.unrealized_pnl,
+        Integer::new_positive(31_358_574_607u128)
+    );
 }
 
 #[test]
@@ -511,7 +514,7 @@ fn test_ten_percent_fee_short_position_price_down_short_again() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(10)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -529,7 +532,7 @@ fn test_ten_percent_fee_short_position_price_down_short_again() {
             Side::Sell,
             Uint128::from(150_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(3),
+            Some(to_decimals(3)),
             Some(to_decimals(8)),
             Uint128::from(75_000_000_000u64),
             vec![],
@@ -548,10 +551,7 @@ fn test_ten_percent_fee_short_position_price_down_short_again() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_positive(82_580_645_160u64)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_positive(82_580_645_160u64));
 
     // alice opens short position with 100 margin, 3x leverage
     // (500 - 300) * (200 + baseAssetDelta) = 100k, baseAssetDelta = 300
@@ -561,7 +561,7 @@ fn test_ten_percent_fee_short_position_price_down_short_again() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(3_000_000_000u64),
-            Uint128::from(900_000_000u64),
+            Some(Uint128::from(900_000_000u64)),
             Some(to_decimals(7)),
             Uint128::from(300_000_000_000u64),
             vec![],
@@ -613,7 +613,7 @@ fn test_ten_percent_fee_short_position_price_up_short_again() {
             Side::Sell,
             Uint128::from(200_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(16)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -631,7 +631,7 @@ fn test_ten_percent_fee_short_position_price_up_short_again() {
             Side::Buy,
             Uint128::from(200_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(to_decimals(3)),
             Uint128::from(15_000_000_000u64),
             vec![],
@@ -663,7 +663,7 @@ fn test_ten_percent_fee_short_position_price_up_short_again() {
             Side::Sell,
             Uint128::from(50_000_000_000u64),
             Uint128::from(4_000_000_000u64),
-            to_decimals(2),
+            Some(to_decimals(2)),
             Some(to_decimals(16)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -711,7 +711,7 @@ fn test_ten_percent_fee_long_position_price_remains_reduce_position() {
             Side::Buy,
             Uint128::from(60_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(Uint128::zero()),
             Uint128::from(10_000_000_000u64),
             vec![],
@@ -725,7 +725,7 @@ fn test_ten_percent_fee_long_position_price_remains_reduce_position() {
             Side::Sell,
             Uint128::from(350_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(26)),
             Uint128::from(33_000_000_000u64),
             vec![],
@@ -755,8 +755,10 @@ fn test_ten_percent_fee_long_position_price_remains_reduce_position() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(pnl_1.unrealized_pnl, Integer::new_negative(67_989_609_887u128));
-
+    assert_eq!(
+        pnl_1.unrealized_pnl,
+        Integer::new_negative(67_989_609_887u128)
+    );
 
     let pnl_2 = engine
         .get_unrealized_pnl(
@@ -792,7 +794,7 @@ fn test_ten_percent_fee_reduce_long_position_zero_fee() {
             Side::Buy,
             Uint128::from(60_000_000_000u64),
             Uint128::from(10_000_000_000u64),
-            to_decimals(17),
+            Some(to_decimals(17)),
             Some(Uint128::zero()),
             Uint128::from(37_500_000_000u64),
             vec![],
@@ -806,7 +808,7 @@ fn test_ten_percent_fee_reduce_long_position_zero_fee() {
             Side::Sell,
             Uint128::from(350_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(26)),
             Uint128::from(17_500_000_000u64),
             vec![],
@@ -836,7 +838,10 @@ fn test_ten_percent_fee_reduce_long_position_zero_fee() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(pnl_1.unrealized_pnl, Integer::new_negative(201_063_829_788u128));
+    assert_eq!(
+        pnl_1.unrealized_pnl,
+        Integer::new_negative(201_063_829_788u128)
+    );
 
     let pnl_2 = engine
         .get_unrealized_pnl(
@@ -874,7 +879,7 @@ fn test_ten_percent_fee_short_position_price_remains_reduce_position() {
             Side::Sell,
             Uint128::from(6_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(26)),
             Uint128::from(15_000_000_000u64),
             vec![],
@@ -888,7 +893,7 @@ fn test_ten_percent_fee_short_position_price_remains_reduce_position() {
             Side::Buy,
             Uint128::from(40_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(9_000_000_000u64),
             vec![],
@@ -903,7 +908,10 @@ fn test_ten_percent_fee_short_position_price_remains_reduce_position() {
     let position_2 = engine
         .position(&router.wrap(), vamm.addr().to_string(), 2)
         .unwrap();
-    assert_eq!(position_1.size + position_2.size, Integer::new_positive(7_834_101_382u128));
+    assert_eq!(
+        position_1.size + position_2.size,
+        Integer::new_positive(7_834_101_382u128)
+    );
     assert_eq!(position_1.notional, Uint128::from(15_000_000_000u64));
     assert_eq!(position_1.margin, Uint128::from(3_000_000_000u64));
 
@@ -943,7 +951,7 @@ fn test_ten_percent_fee_reduce_long_position_price_up_long_again() {
             Side::Buy,
             Uint128::from(60_000_000_000u64),
             Uint128::from(7_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(Uint128::zero()),
             Uint128::from(10_000_000_000u64),
             vec![],
@@ -960,7 +968,7 @@ fn test_ten_percent_fee_reduce_long_position_price_up_long_again() {
             Side::Buy,
             Uint128::from(400_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(35),
+            Some(to_decimals(35)),
             Some(Uint128::zero()),
             Uint128::from(12_500_000_000u64),
             vec![],
@@ -979,10 +987,7 @@ fn test_ten_percent_fee_reduce_long_position_price_up_long_again() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_positive(85_868_008_472u64)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_positive(85_868_008_472u64));
 
     let msg = engine
         .open_position(
@@ -990,7 +995,7 @@ fn test_ten_percent_fee_reduce_long_position_price_up_long_again() {
             Side::Sell,
             Uint128::from(400_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(to_decimals(50)),
             Uint128::from(22_000_000_000u64),
             vec![],
@@ -1008,7 +1013,10 @@ fn test_ten_percent_fee_reduce_long_position_price_up_long_again() {
         .position(&router.wrap(), vamm.addr().to_string(), 3)
         .unwrap();
 
-    assert_eq!(position_1.size + position_3.size, Integer::new_negative(10_325_142_421u128));
+    assert_eq!(
+        position_1.size + position_3.size,
+        Integer::new_negative(10_325_142_421u128)
+    );
     assert_eq!(position_1.margin, Uint128::from(18_000_000_000u64));
     assert_eq!(position_1.notional, Uint128::from(126_000_000_000u64));
 
@@ -1020,10 +1028,7 @@ fn test_ten_percent_fee_reduce_long_position_price_up_long_again() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_negative(14u128)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_negative(14u128));
 }
 
 #[test]
@@ -1051,7 +1056,7 @@ fn test_ten_percent_fee_reduce_long_position_price_down_long_again() {
             Side::Buy,
             Uint128::from(500_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(24),
+            Some(to_decimals(24)),
             Some(Uint128::zero()),
             Uint128::from(40_000_000_000u64),
             vec![],
@@ -1065,7 +1070,7 @@ fn test_ten_percent_fee_reduce_long_position_price_down_long_again() {
             Side::Sell,
             Uint128::from(400_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(41)),
             Uint128::from(14_500_000_000u64),
             vec![],
@@ -1092,7 +1097,7 @@ fn test_ten_percent_fee_reduce_long_position_price_down_long_again() {
             Side::Sell,
             Uint128::from(350_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(50)),
             Uint128::from(19_500_000_000u64),
             vec![],
@@ -1107,7 +1112,10 @@ fn test_ten_percent_fee_reduce_long_position_price_down_long_again() {
         .position(&router.wrap(), vamm.addr().to_string(), 3)
         .unwrap();
 
-    assert_eq!(position_1.size + position_3.size, Integer::new_positive(24_999_999_999u128));
+    assert_eq!(
+        position_1.size + position_3.size,
+        Integer::new_positive(24_999_999_999u128)
+    );
     assert_eq!(position_1.notional, Uint128::from(800_000_000_000u64));
     assert_eq!(position_1.margin, Uint128::from(400_000_000_000u64));
 
@@ -1150,7 +1158,7 @@ fn test_ten_percent_fee_reduce_short_position_price_up_short_again() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(26)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -1164,7 +1172,7 @@ fn test_ten_percent_fee_reduce_short_position_price_up_short_again() {
             Side::Buy,
             Uint128::from(50_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(16),
+            Some(to_decimals(16)),
             Some(Uint128::zero()),
             Uint128::from(5_350_000_000u64),
             vec![],
@@ -1188,7 +1196,7 @@ fn test_ten_percent_fee_reduce_short_position_price_up_short_again() {
             Side::Buy,
             Uint128::from(150_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(30),
+            Some(to_decimals(30)),
             Some(Uint128::zero()),
             Uint128::from(14_640_000_000u64),
             vec![],
@@ -1203,9 +1211,18 @@ fn test_ten_percent_fee_reduce_short_position_price_up_short_again() {
         .position(&router.wrap(), vamm.addr().to_string(), 3)
         .unwrap();
 
-    assert_eq!(position_1.size + position_3.size, Integer::new_negative(4_092_484_452u128));
-    assert_eq!(position_1.notional - position_3.notional, Uint128::from(25_000_000_000u64));
-    assert_eq!(position_3.margin - position_1.margin, Uint128::from(55_000_000_000u64));
+    assert_eq!(
+        position_1.size + position_3.size,
+        Integer::new_negative(4_092_484_452u128)
+    );
+    assert_eq!(
+        position_1.notional - position_3.notional,
+        Uint128::from(25_000_000_000u64)
+    );
+    assert_eq!(
+        position_3.margin - position_1.margin,
+        Uint128::from(55_000_000_000u64)
+    );
     let pnl = engine
         .get_unrealized_pnl(
             &router.wrap(),
@@ -1242,7 +1259,7 @@ fn test_ten_percent_fee_reduce_short_position_price_down_short_again() {
             Side::Sell,
             Uint128::from(250_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(10)),
             Uint128::from(100_000_000_000u64),
             vec![],
@@ -1259,7 +1276,7 @@ fn test_ten_percent_fee_reduce_short_position_price_down_short_again() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(1),
+            Some(to_decimals(1)),
             Some(to_decimals(7)),
             Uint128::from(50_000_000_000u64),
             vec![],
@@ -1289,7 +1306,7 @@ fn test_ten_percent_fee_reduce_short_position_price_down_short_again() {
             Side::Buy,
             Uint128::from(100_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -1306,9 +1323,18 @@ fn test_ten_percent_fee_reduce_short_position_price_down_short_again() {
     let position_3 = engine
         .position(&router.wrap(), vamm.addr().to_string(), 3)
         .unwrap();
-    assert_eq!(position_1.size + position_3.size, Integer::new_negative(37_254_901_962u128));
-    assert_eq!(position_1.notional - position_3.notional, Uint128::from(310_000_000_000u64));
-    assert_eq!(position_1.margin - position_3.margin, Uint128::from(110_000_000_000u64));
+    assert_eq!(
+        position_1.size + position_3.size,
+        Integer::new_negative(37_254_901_962u128)
+    );
+    assert_eq!(
+        position_1.notional - position_3.notional,
+        Uint128::from(310_000_000_000u64)
+    );
+    assert_eq!(
+        position_1.margin - position_3.margin,
+        Uint128::from(110_000_000_000u64)
+    );
 
     let pnl = engine
         .get_unrealized_pnl(
@@ -1318,10 +1344,7 @@ fn test_ten_percent_fee_reduce_short_position_price_down_short_again() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_positive(1u128)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_positive(1u128));
 }
 
 #[test]
@@ -1349,7 +1372,7 @@ fn test_ten_percent_fee_open_long_price_remains_close_manually() {
             Side::Buy,
             Uint128::from(50_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(10_000_000_000u64),
             vec![],
@@ -1365,7 +1388,7 @@ fn test_ten_percent_fee_open_long_price_remains_close_manually() {
             Side::Sell,
             Uint128::from(250_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(7),
+            Some(to_decimals(7)),
             Some(to_decimals(26)),
             Uint128::from(30_000_000_000u64),
             vec![],
@@ -1385,7 +1408,10 @@ fn test_ten_percent_fee_open_long_price_remains_close_manually() {
     let position_2 = engine
         .position(&router.wrap(), vamm.addr().to_string(), 2)
         .unwrap();
-    assert_eq!(position_1.size + position_2.size, Integer::new_negative(11_111_111_112u128));
+    assert_eq!(
+        position_1.size + position_2.size,
+        Integer::new_negative(11_111_111_112u128)
+    );
 }
 
 #[test]
@@ -1413,7 +1439,7 @@ fn test_ten_percent_fee_open_short_price_remains_close_manually() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(9)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -1429,7 +1455,7 @@ fn test_ten_percent_fee_open_short_price_remains_close_manually() {
             Side::Buy,
             Uint128::from(200_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(16),
+            Some(to_decimals(16)),
             Some(to_decimals(0)),
             Uint128::from(15_000_000_000u64),
             vec![],
@@ -1442,7 +1468,6 @@ fn test_ten_percent_fee_open_short_price_remains_close_manually() {
         alice_balance_1 - alice_balance_2,
         Uint128::from(200_000_000_000u64)
     );
-
 }
 
 #[test]
@@ -1484,7 +1509,7 @@ fn test_ten_percent_fee_open_long_price_up_close_manually() {
             Side::Buy,
             Uint128::from(25_000_000_000u64),
             Uint128::from(8_000_000_000u64),
-            to_decimals(16),
+            Some(to_decimals(16)),
             Some(to_decimals(0)),
             Uint128::from(2_000_000_000u64),
             vec![],
@@ -1500,7 +1525,7 @@ fn test_ten_percent_fee_open_long_price_up_close_manually() {
             Side::Buy,
             Uint128::from(35_000_000_000u64),
             Uint128::from(7_000_000_000u64),
-            to_decimals(27),
+            Some(to_decimals(27)),
             Some(to_decimals(0)),
             Uint128::from(3_500_000_000u64),
             vec![],
@@ -1516,10 +1541,7 @@ fn test_ten_percent_fee_open_long_price_up_close_manually() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_positive(5_729_332_249u64)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_positive(5_729_332_249u64));
 
     let msg = engine
         .open_position(
@@ -1527,7 +1549,7 @@ fn test_ten_percent_fee_open_long_price_up_close_manually() {
             Side::Sell,
             pnl.position_notional,
             Uint128::from(1_000_000_000u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(26)),
             Uint128::from(20_000_000_000u64),
             vec![],
@@ -1568,7 +1590,7 @@ fn test_ten_percent_fee_open_long_price_down_close_manually() {
             Side::Buy,
             Uint128::from(500_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(23),
+            Some(to_decimals(23)),
             Some(to_decimals(0)),
             Uint128::from(20_000_000_000u64),
             vec![],
@@ -1584,7 +1606,7 @@ fn test_ten_percent_fee_open_long_price_down_close_manually() {
             Side::Sell,
             Uint128::from(400_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(41)),
             Uint128::from(25_500_000_000u64),
             vec![],
@@ -1611,7 +1633,7 @@ fn test_ten_percent_fee_open_long_price_down_close_manually() {
             Side::Sell,
             pnl.position_notional,
             Uint128::from(1_000_000_000u64),
-            to_decimals(1),
+            Some(to_decimals(1)),
             Some(to_decimals(26)),
             Uint128::from(50_000_000_000u64),
             vec![],
@@ -1631,9 +1653,18 @@ fn test_ten_percent_fee_open_long_price_down_close_manually() {
     let position_3 = engine
         .position(&router.wrap(), vamm.addr().to_string(), 3)
         .unwrap();
-    assert_eq!(position_1.size + position_3.size, Integer::new_positive(6850459481u128));
-    assert_eq!(position_1.notional - position_3.notional, Uint128::from(294_243_902_444u128));
-    assert_eq!(position_3.margin - position_1.margin, Uint128::from(105_756_097_556u128));
+    assert_eq!(
+        position_1.size + position_3.size,
+        Integer::new_positive(6850459481u128)
+    );
+    assert_eq!(
+        position_1.notional - position_3.notional,
+        Uint128::from(294_243_902_444u128)
+    );
+    assert_eq!(
+        position_3.margin - position_1.margin,
+        Uint128::from(105_756_097_556u128)
+    );
 }
 
 #[test]
@@ -1662,7 +1693,7 @@ fn test_ten_percent_fee_open_short_price_up_close_manually() {
             Side::Sell,
             Uint128::from(200_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(10)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -1678,7 +1709,7 @@ fn test_ten_percent_fee_open_short_price_up_close_manually() {
             Side::Buy,
             Uint128::from(50_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(11),
+            Some(to_decimals(11)),
             Some(to_decimals(0)),
             Uint128::from(4_350_000_000u64),
             vec![],
@@ -1702,7 +1733,7 @@ fn test_ten_percent_fee_open_short_price_up_close_manually() {
             Side::Buy,
             pnl.position_notional,
             Uint128::from(1_000_000_000u64),
-            to_decimals(30),
+            Some(to_decimals(30)),
             Some(to_decimals(0)),
             Uint128::from(15_000_000_000u64),
             vec![],
@@ -1757,7 +1788,7 @@ fn test_ten_percent_fee_open_short_price_down_close_manually() {
             Side::Sell,
             Uint128::from(250_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(8)),
             Uint128::from(100_000_000_000u64),
             vec![],
@@ -1773,7 +1804,7 @@ fn test_ten_percent_fee_open_short_price_down_close_manually() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(1),
+            Some(to_decimals(1)),
             Some(to_decimals(10)),
             Uint128::from(50_000_000_000u64),
             vec![],
@@ -1800,7 +1831,7 @@ fn test_ten_percent_fee_open_short_price_down_close_manually() {
             Side::Buy,
             pnl.position_notional,
             Uint128::from(1_000_000_000u64),
-            to_decimals(9),
+            Some(to_decimals(9)),
             Some(to_decimals(0)),
             Uint128::from(30_000_000_000u64),
             vec![],
@@ -1840,7 +1871,7 @@ fn test_ten_percent_fee_open_long_price_remains_close_opening_larger_short() {
             Side::Buy,
             Uint128::from(125_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(0)),
             Uint128::from(10_000_000_000u64),
             vec![],
@@ -1856,7 +1887,7 @@ fn test_ten_percent_fee_open_long_price_remains_close_opening_larger_short() {
             Side::Sell,
             Uint128::from(45_000_000_000u64),
             Uint128::from(6_000_000_000u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(26)),
             Uint128::from(45_000_000_000u64),
             vec![],
@@ -1896,7 +1927,7 @@ fn test_ten_percent_fee_open_short_price_remains_close_opening_larger_long() {
             Side::Sell,
             Uint128::from(20_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(10)),
             Uint128::from(30_000_000_000u64),
             vec![],
@@ -1912,7 +1943,7 @@ fn test_ten_percent_fee_open_short_price_remains_close_opening_larger_long() {
             Side::Buy,
             Uint128::from(90_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(14),
+            Some(to_decimals(14)),
             Some(to_decimals(0)),
             Uint128::from(15_000_000_000u64),
             vec![],
@@ -1932,9 +1963,18 @@ fn test_ten_percent_fee_open_short_price_remains_close_opening_larger_long() {
     let position_2 = engine
         .position(&router.wrap(), vamm.addr().to_string(), 2)
         .unwrap();
-    assert_eq!(position_1.size + position_2.size, Integer::new_positive(14_893_617_021u64));
-    assert_eq!(position_2.notional - position_1.notional, Uint128::from(175_000_000_000u64));
-    assert_eq!(position_2.margin - position_1.margin, Uint128::from(35_000_000_000u64));
+    assert_eq!(
+        position_1.size + position_2.size,
+        Integer::new_positive(14_893_617_021u64)
+    );
+    assert_eq!(
+        position_2.notional - position_1.notional,
+        Uint128::from(175_000_000_000u64)
+    );
+    assert_eq!(
+        position_2.margin - position_1.margin,
+        Uint128::from(35_000_000_000u64)
+    );
 
     let pnl = engine
         .get_unrealized_pnl(
@@ -1944,7 +1984,10 @@ fn test_ten_percent_fee_open_short_price_remains_close_opening_larger_long() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(pnl.unrealized_pnl, Integer::new_negative(27_454_417_957u128));
+    assert_eq!(
+        pnl.unrealized_pnl,
+        Integer::new_negative(27_454_417_957u128)
+    );
 }
 
 #[test]
@@ -1974,7 +2017,7 @@ fn test_ten_percent_fee_open_long_price_up_close_opening_larger_short() {
             Side::Buy,
             Uint128::from(25_000_000_000u64),
             Uint128::from(6_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(0)),
             Uint128::from(5_000_000_000u64),
             vec![],
@@ -1990,7 +2033,7 @@ fn test_ten_percent_fee_open_long_price_up_close_opening_larger_short() {
             Side::Buy,
             Uint128::from(35_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(30),
+            Some(to_decimals(30)),
             Some(to_decimals(0)),
             Uint128::from(5_500_000_000u64),
             vec![],
@@ -2006,10 +2049,7 @@ fn test_ten_percent_fee_open_long_price_up_close_opening_larger_short() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_positive(9_987_487_259u64)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_positive(9_987_487_259u64));
 
     let msg = engine
         .open_position(
@@ -2017,7 +2057,7 @@ fn test_ten_percent_fee_open_long_price_up_close_opening_larger_short() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(8_000_000_000u64),
-            to_decimals(2),
+            Some(to_decimals(2)),
             Some(to_decimals(26)),
             Uint128::from(62_510_000_000u64),
             vec![],
@@ -2038,9 +2078,18 @@ fn test_ten_percent_fee_open_long_price_up_close_opening_larger_short() {
         .position(&router.wrap(), vamm.addr().to_string(), 3)
         .unwrap();
 
-    assert_eq!(position_1.size + position_3.size, Integer::new_negative(8_459_475_929u64));
-    assert_eq!(position_3.notional - position_1.notional, Uint128::from(100_000_000_000u64));
-    assert_eq!(position_3.margin - position_1.margin, Uint128::from(10_000_000_000u128));
+    assert_eq!(
+        position_1.size + position_3.size,
+        Integer::new_negative(8_459_475_929u64)
+    );
+    assert_eq!(
+        position_3.notional - position_1.notional,
+        Uint128::from(100_000_000_000u64)
+    );
+    assert_eq!(
+        position_3.margin - position_1.margin,
+        Uint128::from(10_000_000_000u128)
+    );
 
     let pnl = engine
         .get_unrealized_pnl(
@@ -2084,7 +2133,7 @@ fn test_ten_percent_fee_open_long_price_down_close_opening_larger_short() {
             Side::Buy,
             Uint128::from(125_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(0)),
             Uint128::from(10_000_000_000u64),
             vec![],
@@ -2101,7 +2150,7 @@ fn test_ten_percent_fee_open_long_price_down_close_opening_larger_short() {
             Side::Sell,
             Uint128::from(125_000_000_000u64),
             Uint128::from(2_000_000_000u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(26)),
             Uint128::from(20_000_000_000u64),
             vec![],
@@ -2125,7 +2174,7 @@ fn test_ten_percent_fee_open_long_price_down_close_opening_larger_short() {
             Side::Sell,
             Uint128::from(60_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(3),
+            Some(to_decimals(3)),
             Some(to_decimals(9)),
             Uint128::from(1_450_000_000_000u64),
             vec![],
@@ -2147,9 +2196,18 @@ fn test_ten_percent_fee_open_long_price_down_close_opening_larger_short() {
         .position(&router.wrap(), vamm.addr().to_string(), 3)
         .unwrap();
 
-    assert_eq!(position_1.size + position_3.size, Integer::new_negative(980_392_158u64));
-    assert_eq!(position_1.notional - position_3.notional, Uint128::from(50_000_000_000u64));
-    assert_eq!(position_1.margin - position_3.margin, Uint128::from(70_000_000_000u64));
+    assert_eq!(
+        position_1.size + position_3.size,
+        Integer::new_negative(980_392_158u64)
+    );
+    assert_eq!(
+        position_1.notional - position_3.notional,
+        Uint128::from(50_000_000_000u64)
+    );
+    assert_eq!(
+        position_1.margin - position_3.margin,
+        Uint128::from(70_000_000_000u64)
+    );
 
     let pnl = engine
         .get_unrealized_pnl(
@@ -2187,7 +2245,7 @@ fn test_ten_percent_fee_open_short_price_up_close_opening_larger_long() {
             Side::Sell,
             Uint128::from(200_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(10)),
             Uint128::from(25_000_000_000u64),
             vec![],
@@ -2201,7 +2259,7 @@ fn test_ten_percent_fee_open_short_price_up_close_opening_larger_long() {
             Side::Buy,
             Uint128::from(50_000_000_000u64),
             Uint128::from(4_000_000_000u64),
-            to_decimals(14),
+            Some(to_decimals(14)),
             Some(to_decimals(0)),
             Uint128::from(7_349_000_000u64),
             vec![],
@@ -2217,10 +2275,7 @@ fn test_ten_percent_fee_open_short_price_up_close_opening_larger_long() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(
-        pnl.unrealized_pnl,
-        Integer::new_negative(64_388_444_998u64)
-    );
+    assert_eq!(pnl.unrealized_pnl, Integer::new_negative(64_388_444_998u64));
 
     let msg = engine
         .open_position(
@@ -2228,7 +2283,7 @@ fn test_ten_percent_fee_open_short_price_up_close_opening_larger_long() {
             Side::Buy,
             Uint128::from(60_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(30),
+            Some(to_decimals(30)),
             Some(to_decimals(0)),
             Uint128::from(14_490_000_000u64),
             vec![],
@@ -2251,7 +2306,10 @@ fn test_ten_percent_fee_open_short_price_up_close_opening_larger_long() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(pnl_1.unrealized_pnl, Integer::new_negative(162_831_035_596u64));
+    assert_eq!(
+        pnl_1.unrealized_pnl,
+        Integer::new_negative(162_831_035_596u64)
+    );
 
     let pnl_1 = engine
         .get_unrealized_pnl(
@@ -2261,7 +2319,10 @@ fn test_ten_percent_fee_open_short_price_up_close_opening_larger_long() {
             PnlCalcOption::SpotPrice,
         )
         .unwrap();
-    assert_eq!(pnl_1.unrealized_pnl, Integer::new_negative(162_831_035_596u64));
+    assert_eq!(
+        pnl_1.unrealized_pnl,
+        Integer::new_negative(162_831_035_596u64)
+    );
 
     let pnl_2 = engine
         .get_unrealized_pnl(
@@ -2300,7 +2361,7 @@ fn test_ten_percent_fee_open_short_price_down_close_opening_larger_long() {
             Side::Sell,
             Uint128::from(500_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(10)),
             Uint128::from(100_000_000_000u64),
             vec![],
@@ -2316,7 +2377,7 @@ fn test_ten_percent_fee_open_short_price_down_close_opening_larger_long() {
             Side::Sell,
             Uint128::from(100_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(1),
+            Some(to_decimals(1)),
             Some(to_decimals(6)),
             Uint128::from(50_000_000_000u64),
             vec![],
@@ -2343,7 +2404,7 @@ fn test_ten_percent_fee_open_short_price_down_close_opening_larger_long() {
             Side::Buy,
             Uint128::from(60_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(1)),
             Uint128::from(50_990_000_000u64),
             vec![],
@@ -2384,7 +2445,7 @@ fn test_ten_percent_fee_open_long_price_down_liquidation() {
             Side::Buy,
             Uint128::from(5_000_000_000u64),
             Uint128::from(10_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             Uint128::zero(),
             vec![],
@@ -2398,7 +2459,7 @@ fn test_ten_percent_fee_open_long_price_down_liquidation() {
             Side::Sell,
             Uint128::from(50_000_000_000u64),
             Uint128::from(10_000_000_000u64),
-            to_decimals(4),
+            Some(to_decimals(4)),
             Some(to_decimals(10)),
             Uint128::zero(),
             vec![],
@@ -2429,7 +2490,7 @@ fn test_ten_percent_fee_open_long_price_down_liquidation() {
             Side::Sell,
             Uint128::from(60_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(1),
+            Some(to_decimals(1)),
             Some(to_decimals(6)),
             Uint128::zero(),
             vec![],
@@ -2470,7 +2531,7 @@ fn test_ten_percent_fee_open_long_price_down_liquidation_with_positive_margin() 
             Side::Buy,
             Uint128::from(10_000_000_000u64),
             Uint128::from(10_000_000_000u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(8)),
             Uint128::zero(),
             vec![],
@@ -2484,7 +2545,7 @@ fn test_ten_percent_fee_open_long_price_down_liquidation_with_positive_margin() 
             Side::Sell,
             Uint128::from(10_000_000_000u64),
             Uint128::from(5_000_000_000u64),
-            to_decimals(8),
+            Some(to_decimals(8)),
             Some(to_decimals(26)),
             Uint128::zero(),
             vec![],
@@ -2515,7 +2576,7 @@ fn test_ten_percent_fee_open_long_price_down_liquidation_with_positive_margin() 
             Side::Buy,
             Uint128::from(60_000_000_000u64),
             Uint128::from(1_000_000_000u64),
-            to_decimals(20),
+            Some(to_decimals(20)),
             Some(to_decimals(4)),
             Uint128::zero(),
             vec![],

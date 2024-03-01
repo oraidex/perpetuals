@@ -288,7 +288,7 @@ impl NativeTokenScenario {
         side: Side,
         quote_asset_amount: Uint128,
         leverage: Uint128,
-        take_profit: Uint128,
+        take_profit: Option<Uint128>,
         stop_loss: Option<Uint128>,
         count: u64,
     ) {
@@ -624,7 +624,7 @@ impl SimpleScenario {
         side: Side,
         quote_asset_amount: Uint128,
         leverage: Uint128,
-        take_profit: Uint128,
+        take_profit: Option<Uint128>,
         stop_loss: Option<Uint128>,
         count: u64,
     ) {

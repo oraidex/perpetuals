@@ -143,7 +143,7 @@ pub fn open_position(
     side: Side,
     margin_amount: Uint128,
     leverage: Uint128,
-    take_profit: Uint128,
+    take_profit: Option<Uint128>,
     stop_loss: Option<Uint128>,
     base_asset_limit: Uint128,
 ) -> StdResult<Response> {
@@ -160,7 +160,6 @@ pub fn open_position(
     require_not_restriction_mode(deps.storage, &vamm, env.block.height)?;
     require_non_zero_input(margin_amount)?;
     require_non_zero_input(leverage)?;
-    require_non_zero_input(take_profit)?;
 
     let position_id = increase_last_position_id(deps.storage)?;
 
@@ -210,8 +209,10 @@ pub fn open_position(
 
     match side {
         Side::Buy => {
-            if take_profit <= entry_price {
-                return Err(StdError::generic_err("TP price is too low"));
+            if let Some(take_profit) = take_profit {
+                if take_profit <= entry_price {
+                    return Err(StdError::generic_err("TP price is too low"));
+                }
             }
             if let Some(stop_loss) = stop_loss {
                 if stop_loss > entry_price {
@@ -220,8 +221,10 @@ pub fn open_position(
             }
         }
         Side::Sell => {
-            if take_profit >= entry_price {
-                return Err(StdError::generic_err("TP price is too high"));
+            if let Some(take_profit) = take_profit {
+                if take_profit >= entry_price {
+                    return Err(StdError::generic_err("TP price is too high"));
+                }
             }
             if let Some(stop_loss) = stop_loss {
                 if stop_loss < entry_price {
@@ -280,7 +283,10 @@ pub fn open_position(
         ("trader", trader.as_ref()),
         ("margin_amount", &margin_amount.to_string()),
         ("leverage", &leverage.to_string()),
-        ("take_profit", &take_profit.to_string()),
+        (
+            "take_profit",
+            &take_profit.map(|tp| tp.to_string()).unwrap_or_default(),
+        ),
         ("stop_loss", &stop_loss.unwrap_or_default().to_string()),
     ]))
 }
@@ -317,8 +323,8 @@ pub fn update_tp_sl(
 
     match position.side {
         Side::Buy => {
-            if let Some(take_profit) = take_profit {
-                if take_profit <= position.entry_price {
+            if let Some(tp) = take_profit {
+                if tp <= position.entry_price {
                     return Err(StdError::generic_err("TP price is too low"));
                 }
                 position.take_profit = take_profit;
@@ -332,8 +338,8 @@ pub fn update_tp_sl(
             }
         }
         Side::Sell => {
-            if let Some(take_profit) = take_profit {
-                if take_profit >= position.entry_price {
+            if let Some(tp) = take_profit {
+                if tp >= position.entry_price {
                     return Err(StdError::generic_err("TP price is too high"));
                 }
                 position.take_profit = take_profit;
@@ -355,7 +361,10 @@ pub fn update_tp_sl(
         ("pair", &position.pair),
         ("trader", trader.as_ref()),
         ("position_id", &position_id.to_string()),
-        ("take_profit", &position.take_profit.to_string()),
+        (
+            "take_profit",
+            &take_profit.map(|tp| tp.to_string()).unwrap_or_default(),
+        ),
         (
             "stop_loss",
             &position.stop_loss.unwrap_or_default().to_string(),
@@ -493,7 +502,7 @@ pub fn trigger_tp_sl(
     deps: DepsMut,
     vamm: String,
     position_id: u64,
-    take_profit: bool,
+    do_tp: bool,
 ) -> StdResult<Response> {
     let config = read_config(deps.storage)?;
     let vamm_addr = deps.api.addr_validate(&vamm)?;
@@ -529,21 +538,18 @@ pub fn trigger_tp_sl(
         .checked_div(base_asset_amount)?;
 
     let stop_loss = position.stop_loss.unwrap_or_default();
-    let (tp_spread, sl_spread) = calculate_tp_sl_spread(
-        config.tp_sl_spread,
-        position.take_profit,
-        stop_loss,
-        config.decimals,
-    )?;
+    let take_profit = position.take_profit.unwrap_or(Uint128::MAX);
+    let (tp_spread, sl_spread) =
+        calculate_tp_sl_spread(config.tp_sl_spread, take_profit, stop_loss, config.decimals)?;
     let tp_sl_action = check_tp_sl_price(
         close_price,
-        position.take_profit,
+        take_profit,
         stop_loss,
         tp_spread,
         sl_spread,
         &position.side,
     )?;
-    if take_profit {
+    if do_tp {
         if tp_sl_action == "trigger_take_profit" {
             tp_sl_flag = true;
         }
@@ -561,7 +567,7 @@ pub fn trigger_tp_sl(
         )?);
     }
 
-    let action = if take_profit {
+    let action = if do_tp {
         "trigger_take_profit"
     } else {
         "trigger_stop_loss"
@@ -577,7 +583,7 @@ pub fn trigger_mutiple_tp_sl(
     deps: DepsMut,
     vamm: String,
     side: Side,
-    take_profit: bool,
+    do_tp: bool,
     limit: u32,
 ) -> StdResult<Response> {
     let config = read_config(deps.storage)?;
@@ -603,7 +609,7 @@ pub fn trigger_mutiple_tp_sl(
         base_asset_reserve: vamm_state.base_asset_reserve,
     };
 
-    let order_by = if take_profit == (side == Side::Buy) {
+    let order_by = if do_tp == (side == Side::Buy) {
         Order::Descending
     } else {
         Order::Ascending
@@ -669,21 +675,22 @@ pub fn trigger_mutiple_tp_sl(
                 .checked_div(base_asset_amount)?;
 
             let stop_loss = position.stop_loss.unwrap_or_default();
+            let take_profit = position.take_profit.unwrap_or(Uint128::MAX);
             let (tp_spread, sl_spread) = calculate_tp_sl_spread(
                 config.tp_sl_spread,
-                position.take_profit,
+                take_profit,
                 stop_loss,
                 config.decimals,
             )?;
             let tp_sl_action = check_tp_sl_price(
                 close_price,
-                position.take_profit,
+                take_profit,
                 stop_loss,
                 tp_spread,
                 sl_spread,
                 &position.side,
             )?;
-            if take_profit {
+            if do_tp {
                 if tp_sl_action == "trigger_take_profit" {
                     tp_sl_flag = true;
                 }
@@ -710,7 +717,7 @@ pub fn trigger_mutiple_tp_sl(
         }
     }
 
-    let action = if take_profit {
+    let action = if do_tp {
         "trigger_take_profit"
     } else {
         "trigger_stop_loss"

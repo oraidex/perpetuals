@@ -45,7 +45,7 @@ fn test_increase_with_increase_position() {
             Side::Buy,
             to_decimals(600u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -94,7 +94,7 @@ fn test_reduce_when_position_is_reduced() {
             Side::Buy,
             to_decimals(600u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -108,7 +108,7 @@ fn test_reduce_when_position_is_reduced() {
             Side::Sell,
             to_decimals(300u64),
             to_decimals(1u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(to_decimals(26)),
             to_decimals(0u64),
             vec![],
@@ -157,7 +157,7 @@ fn test_reduce_when_close_position() {
             Side::Buy,
             to_decimals(400u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -226,7 +226,7 @@ fn test_increase_when_traders_open_positions_in_diff_directions() {
             Side::Buy,
             to_decimals(300u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -240,7 +240,7 @@ fn test_increase_when_traders_open_positions_in_diff_directions() {
             Side::Sell,
             to_decimals(300u64),
             to_decimals(1u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(to_decimals(26)),
             to_decimals(0u64),
             vec![],
@@ -289,7 +289,7 @@ fn test_increase_when_traders_open_larger_positions_in_reverse_directions() {
             Side::Buy,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -303,7 +303,7 @@ fn test_increase_when_traders_open_larger_positions_in_reverse_directions() {
             Side::Sell,
             to_decimals(350u64),
             to_decimals(1u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(to_decimals(17)),
             to_decimals(0u64),
             vec![],
@@ -367,7 +367,7 @@ fn test_zero_when_everyone_closes_positions() {
             Side::Buy,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -381,7 +381,7 @@ fn test_zero_when_everyone_closes_positions() {
             Side::Sell,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(12),
+            Some(to_decimals(12)),
             Some(to_decimals(17)),
             to_decimals(0u64),
             vec![],
@@ -455,7 +455,7 @@ fn test_zero_when_everyone_closes_positions_one_position_is_bankrupt() {
             Side::Sell,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(13)),
             to_decimals(0u64),
             vec![],
@@ -469,7 +469,7 @@ fn test_zero_when_everyone_closes_positions_one_position_is_bankrupt() {
             Side::Buy,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(to_decimals(4)),
             to_decimals(0u64),
             vec![],
@@ -478,11 +478,7 @@ fn test_zero_when_everyone_closes_positions_one_position_is_bankrupt() {
     router.execute(bob.clone(), msg).unwrap();
 
     let msg = engine
-        .liquidate(
-            vamm.addr().to_string(),
-            1,
-            to_decimals(0u64),
-        )
+        .liquidate(vamm.addr().to_string(), 1, to_decimals(0u64))
         .unwrap();
     router.execute(bob.clone(), msg).unwrap();
 
@@ -518,7 +514,7 @@ fn test_open_interest_logged_without_cap() {
             Side::Sell,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(6),
+            Some(to_decimals(6)),
             Some(to_decimals(13)),
             to_decimals(0u64),
             vec![],
@@ -535,7 +531,7 @@ fn test_open_interest_logged_without_cap() {
             Side::Buy,
             to_decimals(250u64),
             to_decimals(1u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(to_decimals(4)),
             to_decimals(0u64),
             vec![],
@@ -547,11 +543,7 @@ fn test_open_interest_logged_without_cap() {
     assert_eq!(open_interest_notional, Uint128::from(500_000_000_000u64));
 
     let msg = engine
-        .liquidate(
-            vamm.addr().to_string(),
-            1,
-            to_decimals(0u64),
-        )
+        .liquidate(vamm.addr().to_string(), 1, to_decimals(0u64))
         .unwrap();
     router.execute(bob.clone(), msg).unwrap();
 
@@ -621,7 +613,7 @@ fn test_stop_trading_if_over_open_interest_notional_cap() {
             Side::Buy,
             to_decimals(600u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(8)),
             to_decimals(0u64),
             vec![],
@@ -635,7 +627,7 @@ fn test_stop_trading_if_over_open_interest_notional_cap() {
             Side::Buy,
             to_decimals(1u64),
             to_decimals(1u64),
-            to_decimals(27),
+            Some(to_decimals(27)),
             Some(to_decimals(25)),
             to_decimals(0u64),
             vec![],
@@ -701,7 +693,7 @@ fn test_wont_stop_trading_if_reducing_position_even_if_over_open_interest_notion
             Side::Buy,
             to_decimals(600u64),
             to_decimals(1u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(8)),
             to_decimals(0u64),
             vec![],
@@ -720,7 +712,7 @@ fn test_wont_stop_trading_if_reducing_position_even_if_over_open_interest_notion
             Side::Sell,
             to_decimals(300u64),
             to_decimals(1u64),
-            to_decimals(13),
+            Some(to_decimals(13)),
             Some(to_decimals(26)),
             to_decimals(0u64),
             vec![],
