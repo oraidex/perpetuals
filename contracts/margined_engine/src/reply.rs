@@ -278,7 +278,7 @@ pub fn close_position_reply(
         ("action", "close_position_reply"),
         (
             "take_profit",
-            &position.take_profit.unwrap_or_default().to_string(),
+            &position.take_profit.unwrap_or(Uint128::MAX).to_string(),
         ),
         (
             "stop_loss",
@@ -379,7 +379,7 @@ pub fn partial_close_position_reply(
             ("action", "partial_close_position_reply"),
             (
                 "take_profit",
-                &position.take_profit.unwrap_or_default().to_string(),
+                &position.take_profit.unwrap_or(Uint128::MAX).to_string(),
             ),
             (
                 "stop_loss",
@@ -488,7 +488,7 @@ pub fn liquidate_reply(
         ("action", "liquidation_reply"),
         (
             "take_profit",
-            &position.take_profit.unwrap_or_default().to_string(),
+            &position.take_profit.unwrap_or(Uint128::MAX).to_string(),
         ),
         (
             "stop_loss",

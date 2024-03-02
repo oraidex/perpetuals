@@ -283,7 +283,10 @@ pub fn open_position(
         ("trader", trader.as_ref()),
         ("margin_amount", &margin_amount.to_string()),
         ("leverage", &leverage.to_string()),
-        ("take_profit", &take_profit.unwrap_or_default().to_string()),
+        (
+            "take_profit",
+            &take_profit.unwrap_or(Uint128::MAX).to_string(),
+        ),
         ("stop_loss", &stop_loss.unwrap_or_default().to_string()),
     ]))
 }
@@ -358,7 +361,10 @@ pub fn update_tp_sl(
         ("pair", &position.pair),
         ("trader", trader.as_ref()),
         ("position_id", &position_id.to_string()),
-        ("take_profit", &take_profit.unwrap_or_default().to_string()),
+        (
+            "take_profit",
+            &take_profit.unwrap_or(Uint128::MAX).to_string(),
+        ),
         (
             "stop_loss",
             &position.stop_loss.unwrap_or_default().to_string(),
