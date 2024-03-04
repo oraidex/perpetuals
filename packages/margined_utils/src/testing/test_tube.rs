@@ -340,6 +340,17 @@ impl TestTubeScenario {
         )
         .unwrap();
 
+        //register executor
+        wasm.execute(
+            &pricefeed_addr,
+            &PricefeedExecuteMsg::UpdateExecutor {
+                executor: owner.address(),
+            },
+            &[],
+            owner,
+        )
+        .unwrap();
+
         // append a price to the mock pricefeed
         wasm.execute(
             &pricefeed_addr,

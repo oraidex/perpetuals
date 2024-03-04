@@ -510,7 +510,9 @@ pub fn check_tp_sl_price(
 
     // if spot_price is ~ take_profit or stop_loss, close position
     if side == &Side::Buy {
-        if close_price > take_profit || take_profit.abs_diff(close_price) <= tp_spread {
+        if take_profit > Uint128::zero() && close_price > take_profit
+            || take_profit.abs_diff(close_price) <= tp_spread
+        {
             msg = String::from("trigger_take_profit");
         } else if stop_loss > close_price
             || stop_loss > Uint128::zero() && close_price.abs_diff(stop_loss) <= sl_spread
@@ -518,7 +520,9 @@ pub fn check_tp_sl_price(
             msg = String::from("trigger_stop_loss");
         }
     } else if side == &Side::Sell {
-        if take_profit > close_price || close_price.abs_diff(take_profit) <= tp_spread {
+        if take_profit > close_price
+            || take_profit > Uint128::zero() && close_price.abs_diff(take_profit) <= tp_spread
+        {
             msg = String::from("trigger_take_profit");
         } else if stop_loss > Uint128::zero() && close_price > stop_loss
             || stop_loss.abs_diff(close_price) <= sl_spread
