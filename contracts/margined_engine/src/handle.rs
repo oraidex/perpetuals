@@ -283,10 +283,7 @@ pub fn open_position(
         ("trader", trader.as_ref()),
         ("margin_amount", &margin_amount.to_string()),
         ("leverage", &leverage.to_string()),
-        (
-            "take_profit",
-            &take_profit.unwrap_or(Uint128::MAX).to_string(),
-        ),
+        ("take_profit", &take_profit.unwrap_or_default().to_string()),
         ("stop_loss", &stop_loss.unwrap_or_default().to_string()),
     ]))
 }
@@ -361,10 +358,7 @@ pub fn update_tp_sl(
         ("pair", &position.pair),
         ("trader", trader.as_ref()),
         ("position_id", &position_id.to_string()),
-        (
-            "take_profit",
-            &take_profit.unwrap_or(Uint128::MAX).to_string(),
-        ),
+        ("take_profit", &take_profit.unwrap_or_default().to_string()),
         (
             "stop_loss",
             &position.stop_loss.unwrap_or_default().to_string(),
@@ -538,7 +532,7 @@ pub fn trigger_tp_sl(
         .checked_div(base_asset_amount)?;
 
     let stop_loss = position.stop_loss.unwrap_or_default();
-    let take_profit = position.take_profit.unwrap_or(Uint128::MAX);
+    let take_profit = position.take_profit.unwrap_or_default();
     let (tp_spread, sl_spread) =
         calculate_tp_sl_spread(config.tp_sl_spread, take_profit, stop_loss, config.decimals)?;
     let tp_sl_action = check_tp_sl_price(
