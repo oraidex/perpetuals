@@ -669,7 +669,7 @@ pub fn trigger_mutiple_tp_sl(
                 .checked_div(base_asset_amount)?;
 
             let stop_loss = position.stop_loss.unwrap_or_default();
-            let take_profit = position.take_profit.unwrap_or(Uint128::MAX);
+            let take_profit = position.take_profit.unwrap_or_default();
             let (tp_spread, sl_spread) = calculate_tp_sl_spread(
                 config.tp_sl_spread,
                 take_profit,
