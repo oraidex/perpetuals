@@ -322,7 +322,7 @@ pub fn query_position_is_tpsl(
     deps: Deps,
     vamm: String,
     side: Side,
-    take_profit: bool,
+    do_tp: bool,
     limit: u32,
 ) -> StdResult<PositionTpSlResponse> {
     let config = read_config(deps.storage)?;
@@ -334,13 +334,13 @@ pub fn query_position_is_tpsl(
         base_asset_reserve: vamm_state.base_asset_reserve,
     };
 
-    let order_by = if take_profit == (side == Side::Buy) {
+    let order_by = if do_tp == (side == Side::Buy) {
         Order::Descending
     } else {
         Order::Ascending
     };
     let vamm_key = keccak_256(vamm.as_bytes());
-    let mut is_tpsl: bool = false;
+
     let ticks = query_ticks(
         deps.storage,
         &vamm_key,
@@ -374,33 +374,30 @@ pub fn query_position_is_tpsl(
                 .checked_div(base_asset_amount)?;
 
             let stop_loss = position.stop_loss.unwrap_or_default();
+            let take_profit = position.take_profit.unwrap_or_default();
             let (tp_spread, sl_spread) = calculate_tp_sl_spread(
                 config.tp_sl_spread,
-                position.take_profit,
+                take_profit,
                 stop_loss,
                 config.decimals,
             )?;
-            let tp_sl_action = check_tp_sl_price(
+
+            // if there is one can tp_sl then do it
+            if check_tp_sl_price(
                 close_price,
-                position.take_profit,
+                take_profit,
                 stop_loss,
                 tp_spread,
                 sl_spread,
                 &position.side,
-            )?;
-            if take_profit {
-                if tp_sl_action == "trigger_take_profit" {
-                    is_tpsl = true;
-                }
-            } else {
-                if tp_sl_action == "trigger_stop_loss" {
-                    is_tpsl = true;
-                }
+                do_tp,
+            ) {
+                return Ok(PositionTpSlResponse { is_tpsl: true });
             }
         }
     }
 
-    Ok(PositionTpSlResponse { is_tpsl })
+    Ok(PositionTpSlResponse { is_tpsl: false })
 }
 
 pub fn query_position_is_bad_debt(deps: Deps, position_id: u64, vamm: String) -> StdResult<bool> {

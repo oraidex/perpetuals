@@ -1,8 +1,8 @@
 use cosmwasm_std::{Deps, Env, StdError, StdResult, Uint128};
-use margined_perp::margined_pricefeed::{ConfigResponse, OwnerResponse};
+use margined_perp::margined_pricefeed::{ConfigResponse, ExecutorResponse, OwnerResponse};
 
 use crate::{
-    contract::OWNER,
+    contract::{EXECUTOR, OWNER},
     state::{read_last_round_id, read_price_data},
 };
 
@@ -15,6 +15,15 @@ pub fn query_config(_deps: Deps) -> StdResult<ConfigResponse> {
 pub fn query_owner(deps: Deps) -> StdResult<OwnerResponse> {
     if let Some(owner) = OWNER.get(deps)? {
         Ok(OwnerResponse { owner })
+    } else {
+        Err(StdError::generic_err("No owner set"))
+    }
+}
+
+/// Queries contract exceutor from the admin
+pub fn query_executor(deps: Deps) -> StdResult<ExecutorResponse> {
+    if let Some(executor) = EXECUTOR.get(deps)? {
+        Ok(ExecutorResponse { executor })
     } else {
         Err(StdError::generic_err("No owner set"))
     }

@@ -105,7 +105,7 @@ fn test_liquidator_can_open_position_and_liquidate_in_next_block() {
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(Uint128::zero()),
             Uint128::from(9_090_000_000u128),
             vec![],
@@ -125,7 +125,7 @@ fn test_liquidator_can_open_position_and_liquidate_in_next_block() {
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::zero(),
             vec![],
@@ -146,7 +146,7 @@ fn test_liquidator_can_open_position_and_liquidate_in_next_block() {
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             Uint128::zero(),
             vec![],
@@ -167,7 +167,7 @@ fn test_liquidator_can_open_position_and_liquidate_in_next_block() {
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             to_decimals(0u64),
             vec![],
@@ -184,11 +184,7 @@ fn test_liquidator_can_open_position_and_liquidate_in_next_block() {
 
     let msg = env
         .engine
-        .liquidate(
-            env.vamm.addr().to_string(),
-            2,
-            to_decimals(0u64),
-        )
+        .liquidate(env.vamm.addr().to_string(), 2, to_decimals(0u64))
         .unwrap();
     let response = env.router.execute(env.carol.clone(), msg).unwrap();
     assert_eq!(
@@ -297,7 +293,7 @@ fn test_can_open_position_short_and_liquidate_but_cannot_do_anything_more_in_sam
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(9_090_000_000u128),
             vec![],
@@ -317,7 +313,7 @@ fn test_can_open_position_short_and_liquidate_but_cannot_do_anything_more_in_sam
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(7_570_000_000u128),
             vec![],
@@ -337,7 +333,7 @@ fn test_can_open_position_short_and_liquidate_but_cannot_do_anything_more_in_sam
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             Uint128::from(7_580_000_000u128),
             vec![],
@@ -357,7 +353,7 @@ fn test_can_open_position_short_and_liquidate_but_cannot_do_anything_more_in_sam
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             to_decimals(0u64),
             vec![],
@@ -374,11 +370,7 @@ fn test_can_open_position_short_and_liquidate_but_cannot_do_anything_more_in_sam
 
     let msg = env
         .engine
-        .liquidate(
-            env.vamm.addr().to_string(),
-            2,
-            to_decimals(0u64),
-        )
+        .liquidate(env.vamm.addr().to_string(), 2, to_decimals(0u64))
         .unwrap();
     env.router.execute(env.carol.clone(), msg).unwrap();
 
@@ -492,7 +484,7 @@ fn test_can_open_position_long_and_liquidate_but_cannot_do_anything_more_in_same
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             Uint128::zero(),
             vec![],
@@ -512,7 +504,7 @@ fn test_can_open_position_long_and_liquidate_but_cannot_do_anything_more_in_same
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             Uint128::zero(),
             vec![],
@@ -543,7 +535,7 @@ fn test_can_open_position_long_and_liquidate_but_cannot_do_anything_more_in_same
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             to_decimals(0u64),
             vec![],
@@ -560,11 +552,7 @@ fn test_can_open_position_long_and_liquidate_but_cannot_do_anything_more_in_same
 
     let msg = env
         .engine
-        .liquidate(
-            env.vamm.addr().to_string(),
-            2,
-            to_decimals(0u64),
-        )
+        .liquidate(env.vamm.addr().to_string(), 2, to_decimals(0u64))
         .unwrap();
     env.router.execute(env.carol.clone(), msg).unwrap();
 
@@ -678,7 +666,7 @@ fn test_can_open_position_and_liquidate_but_cannot_do_anything_more_in_same_bloc
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(9_090_000_000u128),
             vec![],
@@ -698,7 +686,7 @@ fn test_can_open_position_and_liquidate_but_cannot_do_anything_more_in_same_bloc
             Side::Buy,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             Uint128::from(7_570_000_000u128),
             vec![],
@@ -718,7 +706,7 @@ fn test_can_open_position_and_liquidate_but_cannot_do_anything_more_in_same_bloc
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             Uint128::from(7_580_000_000u128),
             vec![],
@@ -738,7 +726,7 @@ fn test_can_open_position_and_liquidate_but_cannot_do_anything_more_in_same_bloc
             Side::Buy,
             to_decimals(10u64),
             to_decimals(1u64),
-            to_decimals(15),
+            Some(to_decimals(15)),
             Some(Uint128::zero()),
             to_decimals(0u64),
             vec![],
@@ -755,11 +743,7 @@ fn test_can_open_position_and_liquidate_but_cannot_do_anything_more_in_same_bloc
 
     let msg = env
         .engine
-        .liquidate(
-            env.vamm.addr().to_string(),
-            2,
-            to_decimals(0u64),
-        )
+        .liquidate(env.vamm.addr().to_string(), 2, to_decimals(0u64))
         .unwrap();
     env.router.execute(env.carol.clone(), msg).unwrap();
 
@@ -873,7 +857,7 @@ fn test_can_open_position_same_side_and_liquidate_but_cannot_do_anything_more_in
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             Uint128::zero(),
             vec![],
@@ -893,7 +877,7 @@ fn test_can_open_position_same_side_and_liquidate_but_cannot_do_anything_more_in
             Side::Sell,
             to_decimals(20u64),
             to_decimals(5u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             Uint128::zero(),
             vec![],
@@ -924,7 +908,7 @@ fn test_can_open_position_same_side_and_liquidate_but_cannot_do_anything_more_in
             Side::Sell,
             to_decimals(10u64),
             to_decimals(1u64),
-            to_decimals(5),
+            Some(to_decimals(5)),
             Some(to_decimals(16)),
             to_decimals(0u64),
             vec![],
@@ -941,11 +925,7 @@ fn test_can_open_position_same_side_and_liquidate_but_cannot_do_anything_more_in
 
     let msg = env
         .engine
-        .liquidate(
-            env.vamm.addr().to_string(),
-            2,
-            to_decimals(0u64),
-        )
+        .liquidate(env.vamm.addr().to_string(), 2, to_decimals(0u64))
         .unwrap();
     env.router.execute(env.carol.clone(), msg).unwrap();
 

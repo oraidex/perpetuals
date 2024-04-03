@@ -152,10 +152,8 @@ pub fn remove_position(
     )
     .remove(position_id_key);
 
-    Bucket::<Side>::multilevel(
-        storage,
-        &[PREFIX_POSITION_BY_PRICE, key, &price_key]
-    ).remove(position_id_key);
+    Bucket::<Side>::multilevel(storage, &[PREFIX_POSITION_BY_PRICE, key, &price_key])
+        .remove(position_id_key);
 
     // return total orders belong to the tick
     Ok(total_tick_orders)
@@ -258,17 +256,17 @@ pub struct TmpSwapInfo {
     pub vamm: Addr,
     pub pair: String,
     pub trader: Addr,
-    pub side: Side,                 // buy or sell
-    pub margin_amount: Uint128,     // amount of quote asset being supplied
-    pub leverage: Uint128,          // leverage of new position
-    pub open_notional: Uint128,     // notional of position being opened
-    pub position_notional: Uint128, // notional of existing position, inclusing funding
-    pub unrealized_pnl: Integer,    // any pnl due
-    pub margin_to_vault: Integer,   // margin to be sent to vault
-    pub take_profit: Uint128, // take profit price of position
-    pub stop_loss: Option<Uint128>, // stop loss price of position
-    pub spread_fee: Uint128, // spread fee
-    pub toll_fee: Uint128, // toll fee
+    pub side: Side,                   // buy or sell
+    pub margin_amount: Uint128,       // amount of quote asset being supplied
+    pub leverage: Uint128,            // leverage of new position
+    pub open_notional: Uint128,       // notional of position being opened
+    pub position_notional: Uint128,   // notional of existing position, inclusing funding
+    pub unrealized_pnl: Integer,      // any pnl due
+    pub margin_to_vault: Integer,     // margin to be sent to vault
+    pub take_profit: Option<Uint128>, // take profit price of position
+    pub stop_loss: Option<Uint128>,   // stop loss price of position
+    pub spread_fee: Uint128,          // spread fee
+    pub toll_fee: Uint128,            // toll fee
 }
 
 pub fn store_tmp_swap(storage: &mut dyn Storage, swap: &TmpSwapInfo) -> StdResult<()> {

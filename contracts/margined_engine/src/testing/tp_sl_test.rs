@@ -8,7 +8,8 @@ use cosmwasm_std::{StdError, Uint128};
 use margined_perp::{margined_engine::Side, margined_vamm::Direction};
 use margined_utils::{
     cw_multi_test::Executor,
-    testing::{to_decimals, SimpleScenario}, tools::price_swap::get_output_price_with_reserves,
+    testing::{to_decimals, SimpleScenario},
+    tools::price_swap::get_output_price_with_reserves,
 };
 
 use crate::{
@@ -53,151 +54,151 @@ fn test_calculate_tp_spread_sl_spread() {
 fn test_check_tp_sl_price() {
     // LONG SIDE - TAKE PROFIT
     // spot_price > take_profit
-    let mut action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(2_000_000u64),
         Uint128::from(1_000_000u64),
         Uint128::zero(),
         Uint128::zero(),
         Uint128::zero(),
         &Side::Buy,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_take_profit");
+        true,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // take_profit - spot_price <= tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(2_000_000u64),
         Uint128::from(2_010_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         Uint128::zero(),
         &Side::Buy,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_take_profit");
+        true,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // take_profit - spot_price > tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(2_000_000u64),
         Uint128::from(2_020_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         Uint128::zero(),
         &Side::Buy,
-    )
-    .unwrap();
-    assert_eq!(action, "");
+        true,
+    );
+    assert_eq!(is_tp_sl, false);
 
     // LONG SIDE - STOP LOSS
     // stop_loss > spot_price
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(1_000_000u64),
         Uint128::from(3_000_000u64),
         Uint128::from(2_500_000u64),
         Uint128::zero(),
         Uint128::zero(),
         &Side::Buy,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_stop_loss");
+        false,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // spot_price - stop_loss <= tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(1_000_000u64),
         Uint128::from(3_000_000u64),
         Uint128::from(990_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         &Side::Buy,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_stop_loss");
+        false,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // spot_price - stop_loss > tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(2_000_000u64),
         Uint128::from(3_000_000u64),
         Uint128::from(1_980_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         &Side::Buy,
-    )
-    .unwrap();
-    assert_eq!(action, "");
+        true,
+    );
+    assert_eq!(is_tp_sl, false);
 
     // SHORT SIDE - TAKE PROFIT
     // take_profit > spot_price
-    let mut action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(2_000_000u64),
         Uint128::from(3_000_000u64),
         Uint128::zero(),
         Uint128::zero(),
         Uint128::zero(),
         &Side::Sell,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_take_profit");
+        true,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // spot_price - take_profit <= tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(2_000_000u64),
         Uint128::from(1_990_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         Uint128::zero(),
         &Side::Sell,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_take_profit");
+        true,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // spot_price - take_profit > tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(2_000_000u64),
         Uint128::from(1_980_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         Uint128::zero(),
         &Side::Sell,
-    )
-    .unwrap();
-    assert_eq!(action, "");
+        true,
+    );
+    assert_eq!(is_tp_sl, false);
 
     // SHORT SIDE - STOP LOSS
     // stop_loss > spot_price
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(3_000_000u64),
         Uint128::from(1_000_000u64),
         Uint128::from(2_500_000u64),
         Uint128::zero(),
         Uint128::zero(),
         &Side::Sell,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_stop_loss");
+        false,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // stop_loss - spot_price <= tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(3_000_000u64),
         Uint128::from(1_000_000u64),
         Uint128::from(3_010_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         &Side::Sell,
-    )
-    .unwrap();
-    assert_eq!(action, "trigger_stop_loss");
+        false,
+    );
+    assert_eq!(is_tp_sl, true);
 
     // stop_loss - spot_price > tp_spread
-    action = check_tp_sl_price(
+    let is_tp_sl = check_tp_sl_price(
         Uint128::from(3_000_000u64),
         Uint128::from(1_000_000u64),
         Uint128::from(3_020_000u64),
         Uint128::zero(),
         Uint128::from(10_000u64),
         &Side::Sell,
-    )
-    .unwrap();
-    assert_eq!(action, "");
+        true,
+    );
+    assert_eq!(is_tp_sl, false);
 }
 
 #[test]
@@ -217,11 +218,14 @@ fn test_simulate_close_price() {
         base_asset_amount,
         tmp_reserve_info.quote_asset_reserve,
         tmp_reserve_info.base_asset_reserve,
-    ).unwrap();
+    )
+    .unwrap();
 
     let close_price = quote_asset_amount
-        .checked_mul(decimals).unwrap()
-        .checked_div(base_asset_amount).unwrap();
+        .checked_mul(decimals)
+        .unwrap()
+        .checked_div(base_asset_amount)
+        .unwrap();
     assert_eq!(close_price, Uint128::from(999_900u64));
 
     let _ = update_reserve(
@@ -230,7 +234,7 @@ fn test_simulate_close_price() {
         base_asset_amount,
         &Direction::AddToAmm,
     );
-    
+
     // direction AddToVamm, since we are closing => reverse it to remove from vamm. base +=, quote -=
     assert_eq!(
         tmp_reserve_info.base_asset_reserve,
@@ -253,11 +257,14 @@ fn test_simulate_close_price() {
         base_asset_amount,
         tmp_reserve_info.quote_asset_reserve,
         tmp_reserve_info.base_asset_reserve,
-    ).unwrap();
+    )
+    .unwrap();
 
     let close_price = quote_asset_amount
-        .checked_mul(decimals).unwrap()
-        .checked_div(base_asset_amount).unwrap();
+        .checked_mul(decimals)
+        .unwrap()
+        .checked_div(base_asset_amount)
+        .unwrap();
     assert_eq!(close_price, Uint128::from(1_000_110u64));
 
     let _ = update_reserve(
@@ -294,7 +301,7 @@ fn test_change_tp_sl() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(18),
+            Some(to_decimals(18)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -306,7 +313,7 @@ fn test_change_tp_sl() {
     let position = engine
         .position(&router.wrap(), vamm.addr().to_string(), 1)
         .unwrap();
-    assert_eq!(position.take_profit, to_decimals(18));
+    assert_eq!(position.take_profit, Some(to_decimals(18)));
     assert_eq!(position.stop_loss, Some(to_decimals(9)));
 
     let msg = engine
@@ -333,7 +340,7 @@ fn test_change_tp_sl() {
     let position = engine
         .position(&router.wrap(), vamm.addr().to_string(), 1)
         .unwrap();
-    assert_eq!(position.take_profit, to_decimals(26));
+    assert_eq!(position.take_profit, Some(to_decimals(26)));
     assert_eq!(position.stop_loss, Some(to_decimals(14)));
 
     let msg = engine
@@ -362,7 +369,7 @@ fn test_takeprofit() {
             Side::Buy,
             to_decimals(6u64),
             to_decimals(10u64),
-            to_decimals(11u64),
+            Some(to_decimals(11u64)),
             Some(to_decimals(5u64)),
             to_decimals(0u64),
             vec![],
@@ -391,7 +398,7 @@ fn test_takeprofit() {
             Side::Buy,
             to_decimals(22u64),
             to_decimals(10u64),
-            to_decimals(20u64),
+            Some(to_decimals(20u64)),
             Some(to_decimals(10u64)),
             to_decimals(0u64),
             vec![],
@@ -457,7 +464,7 @@ fn test_stoploss() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(3u64),
-            to_decimals(20u64),
+            Some(to_decimals(20u64)),
             Some(to_decimals(11u64)),
             to_decimals(0u64),
             vec![],
@@ -492,7 +499,7 @@ fn test_stoploss() {
             Side::Sell,
             to_decimals(14u64),
             to_decimals(10u64),
-            to_decimals(5u64),
+            Some(to_decimals(5u64)),
             Some(to_decimals(40u64)),
             to_decimals(0u64),
             vec![],
@@ -570,7 +577,7 @@ fn test_multi_takeprofit_long() {
             Side::Buy,
             to_decimals(6u64),
             to_decimals(10u64),
-            to_decimals(11u64),
+            Some(to_decimals(11u64)),
             Some(to_decimals(5u64)),
             to_decimals(0u64),
             vec![],
@@ -599,7 +606,7 @@ fn test_multi_takeprofit_long() {
             Side::Buy,
             to_decimals(20u64),
             to_decimals(3u64),
-            to_decimals(20u64),
+            Some(to_decimals(20u64)),
             Some(to_decimals(10u64)),
             to_decimals(0u64),
             vec![],
@@ -616,7 +623,7 @@ fn test_multi_takeprofit_long() {
             Side::Buy,
             to_decimals(1u64),
             to_decimals(2u64),
-            Uint128::from(12_600_000_000u128),
+            Some(Uint128::from(12_600_000_000u128)),
             Some(Uint128::from(10_000_000_000u128)),
             to_decimals(0u64),
             vec![],
@@ -631,14 +638,13 @@ fn test_multi_takeprofit_long() {
             Side::Buy,
             to_decimals(40u64),
             to_decimals(5u64),
-            to_decimals(20u64),
+            Some(to_decimals(20u64)),
             Some(to_decimals(10u64)),
             to_decimals(0u64),
             vec![],
         )
         .unwrap();
     router.execute(bob.clone(), msg).unwrap();
-    
 
     price = vamm.spot_price(&router.wrap()).unwrap();
     assert_eq!(price, Uint128::from(17_476_839_999u128));
@@ -729,7 +735,7 @@ fn test_multi_stoploss_long() {
             Side::Buy,
             to_decimals(10u64),
             to_decimals(3u64),
-            to_decimals(20u64),
+            Some(to_decimals(20u64)),
             Some(to_decimals(9u64)),
             to_decimals(0u64),
             vec![],
@@ -743,7 +749,7 @@ fn test_multi_stoploss_long() {
             Side::Buy,
             to_decimals(10u64),
             to_decimals(3u64),
-            to_decimals(20u64),
+            Some(to_decimals(20u64)),
             Some(to_decimals(9u64)),
             to_decimals(0u64),
             vec![],
@@ -778,7 +784,7 @@ fn test_multi_stoploss_long() {
             Side::Sell,
             to_decimals(14u64),
             to_decimals(10u64),
-            to_decimals(5u64),
+            Some(to_decimals(5u64)),
             Some(to_decimals(40u64)),
             to_decimals(0u64),
             vec![],
@@ -880,7 +886,7 @@ fn test_multi_takeprofit_short() {
             Side::Sell,
             to_decimals(1u64),
             to_decimals(5u64),
-            to_decimals(5u64),
+            Some(to_decimals(5u64)),
             Some(to_decimals(14u64)),
             to_decimals(0u64),
             vec![],
@@ -914,14 +920,14 @@ fn test_multi_takeprofit_short() {
             Side::Sell,
             to_decimals(3u64),
             to_decimals(5u64),
-            Uint128::from(5_100_000_000u128),
+            Some(Uint128::from(5_100_000_000u128)),
             Some(to_decimals(14u64)),
             to_decimals(0u64),
             vec![],
         )
         .unwrap();
     router.execute(bob.clone(), msg).unwrap();
-    
+
     price = vamm.spot_price(&router.wrap()).unwrap();
     assert_eq!(price, Uint128::from(9_603_999_999u128));
 
@@ -932,7 +938,7 @@ fn test_multi_takeprofit_short() {
             Side::Sell,
             to_decimals(200u64),
             to_decimals(2u64),
-            to_decimals(1u64),
+            Some(to_decimals(1u64)),
             Some(to_decimals(14u64)),
             to_decimals(0u64),
             vec![],
@@ -1035,7 +1041,7 @@ fn test_multi_stoploss_short() {
             Side::Sell,
             to_decimals(4u64),
             to_decimals(3u64),
-            to_decimals(5u64),
+            Some(to_decimals(5u64)),
             Some(to_decimals(11u64)),
             to_decimals(0u64),
             vec![],
@@ -1049,7 +1055,7 @@ fn test_multi_stoploss_short() {
             Side::Sell,
             to_decimals(4u64),
             to_decimals(3u64),
-            to_decimals(5u64),
+            Some(to_decimals(5u64)),
             Some(to_decimals(11u64)),
             to_decimals(0u64),
             vec![],
@@ -1083,7 +1089,7 @@ fn test_multi_stoploss_short() {
             Side::Buy,
             to_decimals(13u64),
             to_decimals(6u64),
-            to_decimals(40u64),
+            Some(to_decimals(40u64)),
             Some(to_decimals(5u64)),
             to_decimals(0u64),
             vec![],

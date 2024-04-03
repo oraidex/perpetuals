@@ -165,6 +165,7 @@ impl TestTubeScenario {
                 engine_id,
                 &InstantiateMsg {
                     pauser: owner.address(),
+                    operator: None,
                     insurance_fund: None,
                     fee_pool: fee_pool.0.to_string(),
                     eligible_collateral: usdc.0.to_string(),
@@ -339,6 +340,17 @@ impl TestTubeScenario {
             },
             &[],
             david,
+        )
+        .unwrap();
+
+        //register executor
+        wasm.execute(
+            &pricefeed_addr,
+            &PricefeedExecuteMsg::UpdateExecutor {
+                executor: owner.address(),
+            },
+            &[],
+            owner,
         )
         .unwrap();
 

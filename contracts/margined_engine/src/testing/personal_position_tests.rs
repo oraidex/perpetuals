@@ -45,7 +45,7 @@ fn test_return_zero_margin_when_alices_position_is_underwater() {
             Side::Sell,
             to_decimals(60u64),
             to_decimals(10u64),
-            to_decimals(3),
+            Some(to_decimals(3)),
             Some(to_decimals(12)),
             to_decimals(0u64),
             vec![],
@@ -83,11 +83,7 @@ fn test_return_zero_margin_when_alices_position_is_underwater() {
     // then alice need to pay 150 * 50% = $75
     // {size: -150, margin: 300} => {size: -150, margin: 0}
     let alice_position = engine
-        .get_position_with_funding_payment(
-            &router.wrap(),
-            vamm.addr().to_string(),
-            1u64
-        )
+        .get_position_with_funding_payment(&router.wrap(), vamm.addr().to_string(), 1u64)
         .unwrap();
     assert_eq!(alice_position.margin, to_decimals(0u64),);
     assert_eq!(

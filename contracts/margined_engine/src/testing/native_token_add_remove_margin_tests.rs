@@ -4,7 +4,10 @@ use margined_common::{
     integer::Integer,
 };
 use margined_perp::margined_engine::Side;
-use margined_utils::{cw_multi_test::Executor, testing::{NativeTokenScenario, to_decimals}};
+use margined_utils::{
+    cw_multi_test::Executor,
+    testing::{to_decimals, NativeTokenScenario},
+};
 
 use crate::testing::new_native_token_scenario;
 
@@ -26,7 +29,7 @@ fn test_add_margin() {
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(10_000_000u64),
-            to_decimals(10),
+            Some(to_decimals(10)),
             Some(Uint128::zero()),
             Uint128::zero(),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -59,11 +62,7 @@ fn test_add_margin() {
     assert_eq!(engine_balance, Uint128::from(140_000_000u64));
 
     let alice_position = engine
-        .get_position_with_funding_payment(
-            &router.wrap(),
-            vamm.addr().to_string(),
-            1,
-        )
+        .get_position_with_funding_payment(&router.wrap(), vamm.addr().to_string(), 1)
         .unwrap();
     assert_eq!(alice_position.margin, Uint128::from(140_000_000u64));
     assert_eq!(
@@ -158,7 +157,7 @@ fn test_remove_margin() {
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(10_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::zero(),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -186,11 +185,7 @@ fn test_remove_margin() {
     assert_eq!(engine_balance, Uint128::from(40_000_000u64));
 
     let alice_position = engine
-        .get_position_with_funding_payment(
-            &router.wrap(),
-            vamm.addr().to_string(),
-            1
-        )
+        .get_position_with_funding_payment(&router.wrap(), vamm.addr().to_string(), 1)
         .unwrap();
     assert_eq!(alice_position.margin, Uint128::from(40_000_000u64));
     assert_eq!(
@@ -219,7 +214,7 @@ fn test_remove_margin_after_paying_funding() {
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(10_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0_000_000u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -265,11 +260,7 @@ fn test_remove_margin_after_paying_funding() {
     assert_eq!(engine_balance, Uint128::from(36_250_000u128));
 
     let alice_position = engine
-        .get_position_with_funding_payment(
-            &router.wrap(),
-            vamm.addr().to_string(),
-            1
-        )
+        .get_position_with_funding_payment(&router.wrap(), vamm.addr().to_string(), 1)
         .unwrap();
     assert_eq!(alice_position.margin, Uint128::from(36_250_000u128),);
     assert_eq!(
@@ -296,7 +287,7 @@ fn test_remove_margin_insufficient_margin() {
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(10_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0_000_000u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -337,7 +328,7 @@ fn test_remove_margin_incorrect_ratio_four_percent() {
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(10_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0_000_000u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -380,7 +371,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_profit_using_spot_price(
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0_000_000u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -395,7 +386,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_profit_using_spot_price(
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(27_000_000u64),
+            Some(Uint128::from(27_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0_000_000u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -442,7 +433,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_loss_using_spot_price() 
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -457,7 +448,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_loss_using_spot_price() 
             Side::Sell,
             Uint128::from(10_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(14_000_000u64),
+            Some(Uint128::from(14_000_000u64)),
             Some(Uint128::from(17_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(10_000_000u128, "orai")],
@@ -504,7 +495,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_profit_using_spot_price
             Side::Sell,
             Uint128::from(20_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(7_000_000u64),
+            Some(Uint128::from(7_000_000u64)),
             Some(Uint128::from(11_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(20_000_000u128, "orai")],
@@ -519,7 +510,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_profit_using_spot_price
             Side::Sell,
             Uint128::from(20_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(4_000_000u64),
+            Some(Uint128::from(4_000_000u64)),
             Some(Uint128::from(9_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(20_000_000u128, "orai")],
@@ -573,7 +564,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_loss_using_spot_price()
             Side::Sell,
             Uint128::from(20_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(7_000_000u64),
+            Some(Uint128::from(7_000_000u64)),
             Some(Uint128::from(12_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(20_000_000u128, "orai")],
@@ -587,7 +578,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_loss_using_spot_price()
             Side::Buy,
             Uint128::from(10_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(13_000_000u64),
+            Some(Uint128::from(13_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0u64),
             vec![Coin::new(10_000_000u128, "orai")],
@@ -634,7 +625,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_profit_using_twap_price(
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -654,7 +645,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_profit_using_twap_price(
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(27_000_000u64),
+            Some(Uint128::from(27_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -706,7 +697,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_loss_using_twap_price() 
             Side::Buy,
             Uint128::from(60_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(18_000_000u64),
+            Some(Uint128::from(18_000_000u64)),
             Some(Uint128::zero()),
             Uint128::from(0u64),
             vec![Coin::new(60_000_000u128, "orai")],
@@ -726,7 +717,7 @@ fn test_remove_margin_unrealized_pnl_long_position_with_loss_using_twap_price() 
             Side::Sell,
             Uint128::from(10_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(14_000_000u64),
+            Some(Uint128::from(14_000_000u64)),
             Some(Uint128::from(17_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(10_000_000u128, "orai")],
@@ -778,7 +769,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_profit_using_twap_price
             Side::Sell,
             Uint128::from(20_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(7_000_000u64),
+            Some(Uint128::from(7_000_000u64)),
             Some(Uint128::from(12_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(20_000_000u128, "orai")],
@@ -798,7 +789,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_profit_using_twap_price
             Side::Sell,
             Uint128::from(20_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(6_500_000u64),
+            Some(Uint128::from(6_500_000u64)),
             Some(Uint128::from(10_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(20_000_000u128, "orai")],
@@ -857,7 +848,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_loss_using_twap_price()
             Side::Sell,
             Uint128::from(20_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(7_000_000u64),
+            Some(Uint128::from(7_000_000u64)),
             Some(Uint128::from(12_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(20_000_000u128, "orai")],
@@ -876,7 +867,7 @@ fn test_remove_margin_unrealized_pnl_short_position_with_loss_using_twap_price()
             Side::Buy,
             Uint128::from(10_000_000u64),
             Uint128::from(5_000_000u64),
-            Uint128::from(10_000_000u64),
+            Some(Uint128::from(10_000_000u64)),
             Some(Uint128::from(7_000_000u64)),
             Uint128::from(0u64),
             vec![Coin::new(10_000_000u128, "orai")],

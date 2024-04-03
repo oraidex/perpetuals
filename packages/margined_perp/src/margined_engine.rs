@@ -36,6 +36,7 @@ pub enum PositionFilter {
 #[cw_serde]
 pub struct InstantiateMsg {
     pub pauser: String,
+    pub operator: Option<String>,       // address to receive reward
     pub insurance_fund: Option<String>, // insurance_fund need engine addr, so there is senario when we re-deploy engine
     pub fee_pool: String,
     pub eligible_collateral: String,
@@ -57,6 +58,9 @@ pub enum ExecuteMsg {
         tp_sl_spread: Option<Uint128>,
         liquidation_fee: Option<Uint128>,
     },
+    UpdateOperator {
+        operator: Option<String>,
+    },
     UpdatePauser {
         pauser: String,
     },
@@ -71,7 +75,7 @@ pub enum ExecuteMsg {
         side: Side,
         margin_amount: Uint128,
         leverage: Uint128,
-        take_profit: Uint128,
+        take_profit: Option<Uint128>,
         stop_loss: Option<Uint128>,
         base_asset_limit: Uint128,
     },
@@ -210,6 +214,7 @@ pub struct ConfigResponse {
     pub partial_liquidation_ratio: Uint128,
     pub tp_sl_spread: Uint128,
     pub liquidation_fee: Uint128,
+    pub operator: Option<Addr>,
 }
 
 #[cw_serde]
@@ -257,7 +262,7 @@ pub struct Position {
     pub margin: Uint128,
     pub notional: Uint128,
     pub entry_price: Uint128,
-    pub take_profit: Uint128,
+    pub take_profit: Option<Uint128>,
     pub stop_loss: Option<Uint128>,
     pub spread_fee: Uint128,
     pub toll_fee: Uint128,
@@ -278,7 +283,7 @@ impl Default for Position {
             margin: Uint128::zero(),
             notional: Uint128::zero(),
             entry_price: Uint128::zero(),
-            take_profit: Uint128::zero(),
+            take_profit: None,
             stop_loss: Some(Uint128::zero()),
             last_updated_premium_fraction: Integer::zero(),
             spread_fee: Uint128::zero(),

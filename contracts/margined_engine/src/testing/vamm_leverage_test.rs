@@ -50,7 +50,7 @@ fn test_vamm_leverage() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(21u64),
-            to_decimals(50),
+            Some(to_decimals(50)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -71,7 +71,7 @@ fn test_vamm_leverage() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(20u64),
-            to_decimals(50),
+            Some(to_decimals(50)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
@@ -84,9 +84,9 @@ fn test_vamm_leverage() {
         .position(&router.wrap(), vamm.addr().to_string(), 1)
         .unwrap();
     assert_eq!(position.margin, to_decimals(60));
-    assert_eq!(position.take_profit, to_decimals(50));
+    assert_eq!(position.take_profit, Some(to_decimals(50)));
     assert_eq!(position.stop_loss, Some(to_decimals(9)));
-    
+
     // Set new configuration
     // initial_margin_ratio = 100_000_000
     // decimal = 1_000_000_000
@@ -113,7 +113,7 @@ fn test_vamm_leverage() {
             Side::Buy,
             to_decimals(60u64),
             to_decimals(20u64),
-            to_decimals(70),
+            Some(to_decimals(70)),
             Some(to_decimals(9)),
             to_decimals(0u64),
             vec![],
