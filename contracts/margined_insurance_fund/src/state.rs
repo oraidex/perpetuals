@@ -3,7 +3,6 @@ use margined_perp::margined_insurance_fund::ConfigResponse;
 
 pub static KEY_CONFIG: &[u8] = b"config";
 pub const VAMM_LIST: &[u8] = b"vamm-list";
-pub const VAMM_LIMIT: usize = 3usize;
 
 pub type Config = ConfigResponse;
 
@@ -19,13 +18,6 @@ pub fn save_vamm(storage: &mut dyn Storage, input: Addr) -> StdResult<()> {
     // check if we already added the vamm
     if vamm_list.contains(&input) {
         return Err(StdError::generic_err("This vAMM is already added"));
-    };
-
-    // check if we have reached the capacity
-    if vamm_list.len() >= VAMM_LIMIT {
-        return Err(StdError::generic_err(
-            "The vAMM capacity is already reached",
-        ));
     };
 
     // add the vamm to the vector
