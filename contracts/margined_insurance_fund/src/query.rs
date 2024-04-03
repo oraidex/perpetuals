@@ -7,11 +7,11 @@ use margined_utils::contracts::helpers::VammController;
 
 use crate::{
     contract::OWNER,
-    state::{is_vamm, read_config, read_vammlist, VAMM_LIMIT},
+    state::{is_vamm, read_config, read_vammlist},
 };
 
 const DEFAULT_PAGINATION_LIMIT: u32 = 10u32;
-const MAX_PAGINATION_LIMIT: u32 = VAMM_LIMIT as u32;
+pub const MAX_PAGINATION_LIMIT: u32 = 30u32;
 
 /// Queries contract owner from the admin
 pub fn query_owner(deps: Deps) -> StdResult<OwnerResponse> {

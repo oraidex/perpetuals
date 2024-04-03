@@ -1,6 +1,7 @@
 use crate::{
     contract::OWNER,
-    state::{read_config, read_vammlist, remove_vamm as remove_amm, save_vamm, VAMM_LIMIT},
+    query::MAX_PAGINATION_LIMIT,
+    state::{read_config, read_vammlist, remove_vamm as remove_amm, save_vamm},
 };
 use cosmwasm_std::{DepsMut, Env, MessageInfo, Response, StdError, StdResult, Uint128};
 
@@ -69,7 +70,7 @@ pub fn shutdown_all_vamm(deps: DepsMut, _env: Env, info: MessageInfo) -> StdResu
     }
 
     // construct all the shutdown messages
-    let keys = read_vammlist(deps.storage, VAMM_LIMIT)?;
+    let keys = read_vammlist(deps.storage, MAX_PAGINATION_LIMIT as usize)?;
 
     // initialise the submsgs vec
     let mut msgs = vec![];
@@ -80,8 +81,7 @@ pub fn shutdown_all_vamm(deps: DepsMut, _env: Env, info: MessageInfo) -> StdResu
 
     Ok(Response::default()
         .add_messages(msgs)
-        .add_attribute("action", "shutdown_all_vamm")
-    )
+        .add_attribute("action", "shutdown_all_vamm"))
 }
 
 pub fn withdraw(
@@ -105,6 +105,5 @@ pub fn withdraw(
         .add_attributes(vec![
             ("action", "insurance_withdraw"),
             ("amount", &amount.to_string()),
-        ])
-    )
+        ]))
 }
