@@ -80,12 +80,12 @@ pub fn shutdown_all_vamm(deps: DepsMut, _env: Env, info: MessageInfo) -> StdResu
 
     Ok(Response::default()
         .add_messages(msgs)
-        .add_attribute("action", "shutdown_all_vamm")
-    )
+        .add_attribute("action", "shutdown_all_vamm"))
 }
 
 pub fn withdraw(
     deps: DepsMut,
+    env: Env,
     info: MessageInfo,
     token: AssetInfo,
     amount: Uint128,
@@ -97,6 +97,23 @@ pub fn withdraw(
         return Err(StdError::generic_err("unauthorized"));
     }
 
+    // if eligible_collateral token balance can't afford the debt amount, ask staking token to mint
+    let remain_amount = token.query_balance(&deps.querier, env.contract.address)?;
+    // TODO: swap staking token to amount token using amm rounter
+    if remain_amount < amount {
+        // deposit_token is perp token, reward token default is perp token, and receive fee token distribution as well
+        // insurance_fund contract is the minter of perp token
+        // let required_perp_amount = query(router_addr, &SimulateSwapOperations { offer_amount: amount - remain_amount, operations: Vec<SwapOperation>})?
+        // let required_perp_amount = swap_router_contract.simulate_swap(
+        //     &deps.querier,
+        //     amount - remain_amount,
+        //     vec![SwapOperation::OraiSwap {
+        //         offer_asset_info: staking_token,
+        //         ask_asset_info: token,
+        //     }])?;
+        // mint_for_loss(required_perp_amount)
+    }
+
     // send tokens if native or cw20
     let transfer_msg = token.into_msg(config.engine.to_string(), amount, None)?;
 
@@ -105,6 +122,5 @@ pub fn withdraw(
         .add_attributes(vec![
             ("action", "insurance_withdraw"),
             ("amount", &amount.to_string()),
-        ])
-    )
+        ]))
 }

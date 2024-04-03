@@ -48,7 +48,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
         ExecuteMsg::UpdateOwner { owner } => update_owner(deps, info, owner),
         ExecuteMsg::AddVamm { vamm } => add_vamm(deps, info, vamm),
         ExecuteMsg::RemoveVamm { vamm } => remove_vamm(deps, info, vamm),
-        ExecuteMsg::Withdraw { token, amount } => withdraw(deps, info, token, amount),
+        ExecuteMsg::Withdraw { token, amount } => withdraw(deps, env, info, token, amount),
         ExecuteMsg::ShutdownVamms {} => shutdown_all_vamm(deps, env, info),
     }
 }
