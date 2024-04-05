@@ -122,6 +122,10 @@ pub enum ExecuteMsg {
     SetPause {
         pause: bool,
     },
+    UpdateVammConfig {
+        vamm: String,
+        minimum_base_vol: Option<Uint128>,
+    },
 }
 
 #[cw_serde]

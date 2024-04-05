@@ -10,7 +10,9 @@ use margined_common::validate::{
 use margined_perp::margined_engine::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 use crate::error::ContractError;
-use crate::handle::{trigger_mutiple_tp_sl, trigger_tp_sl, update_operator, update_tp_sl};
+use crate::handle::{
+    execute_update_vamm_config, trigger_mutiple_tp_sl, trigger_tp_sl, update_operator, update_tp_sl,
+};
 use crate::query::{
     query_last_position_id, query_position_is_bad_debt, query_position_is_liquidated,
     query_position_is_tpsl, query_positions,
@@ -217,6 +219,10 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             amount,
         } => withdraw_margin(deps, env, info, vamm, position_id, amount),
         ExecuteMsg::SetPause { pause } => set_pause(deps, env, info, pause),
+        ExecuteMsg::UpdateVammConfig {
+            vamm,
+            minimum_base_vol,
+        } => execute_update_vamm_config(deps, info, vamm, minimum_base_vol),
     }
 }
 

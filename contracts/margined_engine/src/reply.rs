@@ -8,9 +8,9 @@ use crate::{
     },
     state::{
         append_cumulative_premium_fraction, enter_restriction_mode, read_config, read_position,
-        read_sent_funds, read_state, read_tmp_liquidator, read_tmp_swap, remove_position,
-        remove_sent_funds, remove_tmp_liquidator, remove_tmp_swap, store_position, store_state,
-        State,
+        read_sent_funds, read_state, read_tmp_liquidator, read_tmp_swap, read_vamm_map,
+        remove_position, remove_sent_funds, remove_tmp_liquidator, remove_tmp_swap, store_position,
+        store_state, State,
     },
     utils::{
         calc_remain_margin_with_funding_payment, check_base_asset_holding_cap, keccak_256,
@@ -33,6 +33,15 @@ pub fn open_position_reply(
     position_id: u64,
 ) -> StdResult<Response> {
     let mut swap = read_tmp_swap(deps.storage, &position_id.to_be_bytes())?;
+
+    // Check output must be greater than minimum vol
+    let vamm_map = read_vamm_map(deps.storage, &swap.vamm)?;
+    if vamm_map.minimum_base_vol > output {
+        return Err(StdError::generic_err(format!(
+            "Trading volume must be greater than {}, got {}",
+            vamm_map.minimum_base_vol, output
+        )));
+    }
 
     let mut position = Position {
         position_id: swap.position_id,

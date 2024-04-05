@@ -13,9 +13,9 @@ use crate::{
     messages::{execute_transfer_from, withdraw},
     query::{query_free_collateral, query_margin_ratio, query_positions},
     state::{
-        increase_last_position_id, read_config, read_position, read_state, store_config,
-        store_position, store_sent_funds, store_state, store_tmp_liquidator, store_tmp_swap,
-        SentFunds, TmpReserveInfo, TmpSwapInfo,
+        increase_last_position_id, read_config, read_position, read_state, read_vamm_map,
+        store_config, store_position, store_sent_funds, store_state, store_tmp_liquidator,
+        store_tmp_swap, store_vamm_map, SentFunds, TmpReserveInfo, TmpSwapInfo,
     },
     tick::query_ticks,
     utils::{
@@ -133,6 +133,31 @@ pub fn update_config(
     Ok(Response::default().add_attribute("action", "update_config"))
 }
 
+// update vamm_config
+pub fn execute_update_vamm_config(
+    deps: DepsMut,
+    info: MessageInfo,
+    vamm: String,
+    minimum_base_vol: Option<Uint128>,
+) -> StdResult<Response> {
+    let config = read_config(deps.storage)?;
+    let vamm_addr = deps.api.addr_validate(&vamm)?;
+
+    // check permission
+    if info.sender != config.owner {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    let mut vamm_map = read_vamm_map(deps.storage, &vamm_addr)?;
+
+    if let Some(minimum_base_vol) = minimum_base_vol {
+        vamm_map.minimum_base_vol = minimum_base_vol;
+    }
+
+    store_vamm_map(deps.storage, vamm_addr, &vamm_map)?;
+
+    Ok(Response::default().add_attributes(vec![("action", "update_vamm_config"), ("vamm", &vamm)]))
+}
 // Opens a position
 #[allow(clippy::too_many_arguments)]
 pub fn open_position(

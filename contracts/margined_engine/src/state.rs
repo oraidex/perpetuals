@@ -308,6 +308,8 @@ pub struct TmpReserveInfo {
 pub struct VammMap {
     pub last_restriction_block: u64,
     pub cumulative_premium_fractions: Vec<Integer>,
+    #[serde(default)]
+    pub minimum_base_vol: Uint128,
 }
 
 pub fn store_vamm_map(storage: &mut dyn Storage, vamm: Addr, vamm_map: &VammMap) -> StdResult<()> {
