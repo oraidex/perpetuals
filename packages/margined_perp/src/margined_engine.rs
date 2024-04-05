@@ -204,6 +204,8 @@ pub enum QueryMsg {
     IsLiquidated { vamm: String, position_id: u64 },
     #[returns(LastPositionIdResponse)]
     LastPositionId {},
+    #[returns(VammMapResponse)]
+    VammMap { vamm: String },
 }
 
 #[cw_serde]
@@ -328,4 +330,9 @@ pub struct TransferResponse {
     pub messages: Vec<SubMsg>,
     pub spread_fee: Uint128,
     pub toll_fee: Uint128,
+}
+
+#[cw_serde]
+pub struct VammMapResponse {
+    pub minimum_base_vol: Uint128,
 }

@@ -15,7 +15,7 @@ use crate::handle::{
 };
 use crate::query::{
     query_last_position_id, query_position_is_bad_debt, query_position_is_liquidated,
-    query_position_is_tpsl, query_positions,
+    query_position_is_tpsl, query_positions, query_vamm_map,
 };
 use crate::state::{init_last_position_id, read_position};
 use crate::tick::{query_tick, query_ticks};
@@ -332,6 +332,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             to_binary(&query_position_is_liquidated(deps, position_id, vamm)?)
         }
         QueryMsg::LastPositionId {} => to_binary(&query_last_position_id(deps)?),
+        QueryMsg::VammMap { vamm } => to_binary(&query_vamm_map(deps, vamm)?),
     }
 }
 

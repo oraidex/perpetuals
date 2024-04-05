@@ -3,6 +3,7 @@ use cw_controllers::HooksResponse;
 use margined_perp::margined_engine::{
     ConfigResponse, ExecuteMsg, PnlCalcOption, Position, PositionFilter, PositionTpSlResponse,
     PositionUnrealizedPnlResponse, QueryMsg, Side, StateResponse, TickResponse, TicksResponse,
+    VammMapResponse,
 };
 
 use cosmwasm_std::{Addr, Coin, CosmosMsg, QuerierWrapper, StdResult, Uint128};
@@ -44,6 +45,21 @@ impl EngineController {
                 partial_liquidation_ratio,
                 tp_sl_spread,
                 liquidation_fee,
+            },
+            vec![],
+        )
+    }
+
+    pub fn update_vamm_map(
+        &self,
+        vamm: String,
+        minimum_base_vol: Option<Uint128>,
+    ) -> StdResult<CosmosMsg> {
+        wasm_execute(
+            &self.0,
+            &ExecuteMsg::UpdateVammConfig {
+                vamm,
+                minimum_base_vol,
             },
             vec![],
         )
@@ -473,6 +489,13 @@ impl EngineController {
             take_profit,
             limit,
         };
+
+        querier.query_wasm_smart(&self.0, &msg)
+    }
+
+    /// get margin engine configuration
+    pub fn vamm_map(&self, querier: &QuerierWrapper, vamm: String) -> StdResult<VammMapResponse> {
+        let msg = QueryMsg::VammMap { vamm };
 
         querier.query_wasm_smart(&self.0, &msg)
     }

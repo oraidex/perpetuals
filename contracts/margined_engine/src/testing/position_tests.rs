@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use cosmwasm_std::{StdError, Uint128};
 use cw20::Cw20ExecuteMsg;
 use margined_common::integer::Integer;
@@ -1693,4 +1695,73 @@ fn test_bad_debt_recorded() {
     // engine contract's state should reflect bad debt as 20
     let bad_debt = engine.state(&router.wrap()).unwrap().bad_debt;
     assert_eq!(bad_debt, to_decimals(20u64));
+}
+
+#[test]
+fn test_open_position_require_minimum_vol() {
+    let SimpleScenario {
+        mut router,
+        owner,
+        alice,
+        usdc,
+        engine,
+        vamm,
+        ..
+    } = new_simple_scenario();
+
+    // update minimum_vol failed, unauthorized
+    let msg = engine
+        .update_vamm_map(vamm.addr().to_string(), Some(to_decimals(1)))
+        .unwrap();
+
+    let err = router.execute(alice.clone(), msg.clone()).unwrap_err();
+    assert_eq!(
+        err.source().unwrap().to_string(),
+        "Generic error: unauthorized".to_string()
+    );
+
+    // update successful
+    router.execute(owner.clone(), msg).unwrap();
+
+    // query vamm map
+    let vamm_map = engine
+        .vamm_map(&router.wrap(), vamm.addr().to_string())
+        .unwrap();
+    assert_eq!(vamm_map.minimum_base_vol, to_decimals(1));
+
+    // open a long position fail, because base_vol < minimum vol
+
+    let msg = engine
+        .open_position(
+            vamm.addr().to_string(),
+            Side::Buy,
+            to_decimals(1u64),
+            to_decimals(10u64),
+            Some(to_decimals(18)),
+            Some(to_decimals(9)),
+            to_decimals(0u64),
+            vec![],
+        )
+        .unwrap();
+    let err = router.execute(alice.clone(), msg).unwrap_err();
+    assert!(err
+        .source()
+        .unwrap()
+        .to_string()
+        .contains(format!("Trading volume must be greater than {}", to_decimals(1u64)).as_str()));
+
+    // open position success
+    let msg = engine
+        .open_position(
+            vamm.addr().to_string(),
+            Side::Buy,
+            to_decimals(2u64),
+            to_decimals(10u64),
+            Some(to_decimals(18)),
+            Some(to_decimals(9)),
+            to_decimals(0u64),
+            vec![],
+        )
+        .unwrap();
+    router.execute(alice.clone(), msg).unwrap();
 }

@@ -3,6 +3,7 @@ use margined_common::integer::Integer;
 use margined_perp::margined_engine::{
     ConfigResponse, LastPositionIdResponse, PauserResponse, PnlCalcOption, Position,
     PositionFilter, PositionTpSlResponse, PositionUnrealizedPnlResponse, Side, StateResponse,
+    VammMapResponse,
 };
 use margined_utils::{
     contracts::helpers::{InsuranceFundController, VammController},
@@ -432,4 +433,12 @@ pub fn query_position_is_liquidated(deps: Deps, position_id: u64, vamm: String) 
         &vamm_controller,
     )?;
     Ok(is_liquidated)
+}
+
+pub fn query_vamm_map(deps: Deps, vamm: String) -> StdResult<VammMapResponse> {
+    let vamm_map = read_vamm_map(deps.storage, &deps.api.addr_validate(&vamm)?)?;
+
+    Ok(VammMapResponse {
+        minimum_base_vol: vamm_map.minimum_base_vol,
+    })
 }
