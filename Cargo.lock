@@ -1709,6 +1709,7 @@ dependencies = [
  "cosmwasm-std",
  "cw-controllers",
  "cw2",
+ "cw20",
  "margined_common",
  "margined_engine",
  "margined_perp",

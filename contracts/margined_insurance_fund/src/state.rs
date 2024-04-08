@@ -1,11 +1,15 @@
 use cosmwasm_std::{from_slice, to_vec, Addr, StdError, StdResult, Storage};
 use margined_perp::margined_insurance_fund::ConfigResponse;
+use margined_utils::contracts::helpers::smart_router::SwapInfoResponse;
 
 pub static KEY_CONFIG: &[u8] = b"config";
 pub const VAMM_LIST: &[u8] = b"vamm-list";
 pub const VAMM_LIMIT: usize = 3usize;
+pub const KEY_SWAP_INFO: &[u8] = b"swap-info";
 
 pub type Config = ConfigResponse;
+
+pub type SwapInfo = SwapInfoResponse;
 
 // function checks if an addr is already added and adds it if not
 // We also check that we have not reached the limit of vAMMs here
@@ -85,5 +89,16 @@ pub fn read_config(storage: &dyn Storage) -> StdResult<Config> {
     match storage.get(KEY_CONFIG) {
         Some(data) => from_slice(&data),
         None => Err(StdError::generic_err("Config not found")),
+    }
+}
+
+pub fn store_swap_info(storage: &mut dyn Storage, swap_info: &SwapInfo) -> StdResult<()> {
+    Ok(storage.set(KEY_SWAP_INFO, &to_vec(swap_info)?))
+}
+
+pub fn read_swap_info(storage: &dyn Storage) -> StdResult<SwapInfo> {
+    match storage.get(KEY_SWAP_INFO) {
+        Some(data) => from_slice(&data),
+        None => Err(StdError::generic_err("Swap info not found")),
     }
 }

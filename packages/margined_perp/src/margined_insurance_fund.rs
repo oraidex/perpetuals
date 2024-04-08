@@ -1,10 +1,12 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use margined_common::asset::AssetInfo;
 
-use cosmwasm_std::{Addr, Uint128};
+use cosmwasm_std::{Addr, Decimal, Uint128};
 #[cw_serde]
 pub struct InstantiateMsg {
     pub engine: String,
+    pub perp_token: String,
+    pub additional_mint_rate: Decimal,
 }
 
 #[cw_serde]
@@ -39,6 +41,8 @@ pub struct MigrateMsg {}
 #[cw_serde]
 pub struct ConfigResponse {
     pub engine: Addr,
+    pub perp_token: Addr,
+    pub additional_mint_rate: Decimal,
 }
 
 #[cw_serde]

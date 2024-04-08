@@ -21,5 +21,3 @@ cosmwasm-std = { workspace = true }
 margined_common = { workspace = true }
 
 strum = { version = "0.24", features = ["derive"] }
-
-

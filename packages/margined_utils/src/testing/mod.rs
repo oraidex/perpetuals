@@ -150,6 +150,8 @@ impl NativeTokenScenario {
                 owner.clone(),
                 &InsuranceFundInstantiateMsg {
                     engine: engine_addr.to_string(),
+                    perp_token: "perp_token".to_string(),
+                    additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
                 },
                 &[],
                 "insurance_fund",
@@ -439,6 +441,8 @@ impl SimpleScenario {
                 owner.clone(),
                 &InsuranceFundInstantiateMsg {
                     engine: engine.0.to_string(),
+                    perp_token: "perp_token".to_string(),
+                    additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
                 },
                 &[],
                 "insurance_fund",
@@ -827,6 +831,8 @@ impl ShutdownScenario {
                 owner.clone(),
                 &InsuranceFundInstantiateMsg {
                     engine: engine.0.to_string(),
+                    perp_token: "perp_token".to_string(),
+                    additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
                 },
                 &[],
                 "insurance_fund",

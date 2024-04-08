@@ -5,7 +5,7 @@ use crate::{
     },
     testing::to_decimals,
 };
-use cosmwasm_std::{Addr, Coin, Uint128};
+use cosmwasm_std::{Addr, Coin, Decimal, Uint128};
 use cw20::{Cw20Coin, Cw20Contract, Cw20ExecuteMsg, MinterResponse};
 use margined_common::asset::NATIVE_DENOM;
 use margined_perp::margined_engine::{ExecuteMsg, InstantiateMsg};
@@ -189,6 +189,8 @@ impl TestTubeScenario {
                 insurance_fund_id,
                 &InsuranceFundInstantiateMsg {
                     engine: engine.0.to_string(),
+                    perp_token: "perp_token".to_string(),
+                    additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
                 },
                 Some(&owner.address()),
                 Some("insurance_fund"),

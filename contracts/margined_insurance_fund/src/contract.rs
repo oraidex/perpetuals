@@ -6,7 +6,7 @@ use crate::{
         query_all_vamm, query_config, query_is_vamm, query_owner, query_status_all_vamm,
         query_vamm_status,
     },
-    state::{store_config, Config},
+    state::{store_config, Config, SwapInfo},
 };
 use cosmwasm_std::{
     entry_point, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
@@ -33,6 +33,8 @@ pub fn instantiate(
 
     let config = Config {
         engine: deps.api.addr_validate(&msg.engine)?,
+        perp_token: deps.api.addr_validate(&msg.perp_token)?,
+        additional_mint_rate: msg.additional_mint_rate,
     };
 
     store_config(deps.storage, &config)?;
