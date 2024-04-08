@@ -1,7 +1,7 @@
 use crate::contract::{execute, instantiate, query};
 use crate::testing::new_shutdown_scenario;
 use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
-use cosmwasm_std::{from_binary, Addr, StdError};
+use cosmwasm_std::{from_binary, Addr, Decimal, StdError};
 use margined_perp::margined_insurance_fund::{
     ConfigResponse, ExecuteMsg, InstantiateMsg, OwnerResponse, QueryMsg,
 };
@@ -9,12 +9,18 @@ use margined_utils::cw_multi_test::Executor;
 use margined_utils::testing::ShutdownScenario;
 
 const ENGINE: &str = "engine";
+const PERP_TOKEN: &str = "perp_token";
 
 #[test]
 fn test_instantiation() {
     let mut deps = mock_dependencies();
     let msg = InstantiateMsg {
         engine: ENGINE.to_string(),
+        perp_token: PERP_TOKEN.to_string(),
+        additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
+        smart_router: "smart_router".to_string(),
+        swap_router: "swap_router".to_string(),
+        swap_fee: Decimal::from_ratio(3u128, 1000u128),
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -25,6 +31,8 @@ fn test_instantiation() {
         config,
         ConfigResponse {
             engine: Addr::unchecked(ENGINE.to_string()),
+            perp_token: Addr::unchecked("perp_token".to_string()),
+            additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
         }
     );
 }
@@ -34,6 +42,11 @@ fn test_update_owner() {
     let mut deps = mock_dependencies();
     let msg = InstantiateMsg {
         engine: ENGINE.to_string(),
+        perp_token: PERP_TOKEN.to_string(),
+        additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
+        smart_router: "smart_router".to_string(),
+        swap_router: "swap_router".to_string(),
+        swap_fee: Decimal::from_ratio(3u128, 1000u128),
     };
     let info = mock_info("addr0000", &[]);
 
@@ -701,6 +714,11 @@ fn test_not_owner() {
     let mut deps = mock_dependencies();
     let msg = InstantiateMsg {
         engine: "orai1xwx3xs6gx9gkgf4rj7wu2elqa92cjqhutlnqx68eppgs09qm8c2qs72jh5".to_string(),
+        perp_token: PERP_TOKEN.to_string(),
+        additional_mint_rate: Decimal::from_ratio(1u128, 100u128),
+        smart_router: "smart_router".to_string(),
+        swap_router: "swap_router".to_string(),
+        swap_fee: Decimal::from_ratio(3u128, 1000u128),
     };
     let info = mock_info("owner", &[]);
 

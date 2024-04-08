@@ -7,15 +7,32 @@ pub struct InstantiateMsg {
     pub engine: String,
     pub perp_token: String,
     pub additional_mint_rate: Decimal,
+    pub smart_router: String,
+    pub swap_router: String,
+    pub swap_fee: Decimal,
 }
 
 #[cw_serde]
 pub enum ExecuteMsg {
-    UpdateOwner { owner: String },
-    AddVamm { vamm: String },
-    RemoveVamm { vamm: String },
-    Withdraw { token: AssetInfo, amount: Uint128 },
+    UpdateOwner {
+        owner: String,
+    },
+    AddVamm {
+        vamm: String,
+    },
+    RemoveVamm {
+        vamm: String,
+    },
+    Withdraw {
+        token: AssetInfo,
+        amount: Uint128,
+    },
     ShutdownVamms {},
+    UpdateSwapInfo {
+        smart_router: Option<String>,
+        swap_router: Option<String>,
+        swap_fee: Option<Decimal>,
+    },
 }
 
 #[cw_serde]

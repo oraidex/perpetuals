@@ -19,10 +19,10 @@ cosmwasm-schema = { workspace = true }
 cosmwasm-std = { workspace = true }
 margined_common = { workspace = true }
 margined_perp = { workspace = true }
+cw20 = { workspace = true }
 
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-cw20 = { workspace = true }
 cw20-base = { workspace = true, features = ["library"] }
 cw-multi-test = { workspace = true }
 osmosis-test-tube = { workspace = true }

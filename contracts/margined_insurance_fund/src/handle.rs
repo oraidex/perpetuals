@@ -2,7 +2,7 @@ use crate::{
     contract::OWNER,
     state::{
         read_config, read_swap_info, read_vammlist, remove_vamm as remove_amm, save_vamm,
-        VAMM_LIMIT,
+        store_swap_info, VAMM_LIMIT,
     },
 };
 use cosmwasm_std::{
@@ -22,6 +22,35 @@ pub fn update_owner(deps: DepsMut, info: MessageInfo, owner: String) -> StdResul
     OWNER
         .execute_update_admin(deps, info, Some(valid_owner))
         .map_err(|error| StdError::generic_err(error.to_string()))
+}
+
+pub fn update_swap_info(
+    deps: DepsMut,
+    info: MessageInfo,
+    smart_router: Option<String>,
+    swap_router: Option<String>,
+    swap_fee: Option<Decimal>,
+) -> StdResult<Response> {
+    // check permission
+    if !OWNER.is_admin(deps.as_ref(), &info.sender)? {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    let mut swap_info = read_swap_info(deps.storage)?;
+
+    if let Some(smart_router) = smart_router {
+        swap_info.smart_router = deps.api.addr_validate(&smart_router)?;
+    }
+    if let Some(swap_router) = swap_router {
+        swap_info.swap_router = deps.api.addr_validate(&swap_router)?;
+    }
+    if let Some(swap_fee) = swap_fee {
+        swap_info.swap_fee = swap_fee;
+    }
+
+    store_swap_info(deps.storage, &swap_info)?;
+
+    Ok(Response::new().add_attribute("action", "update_swap_info"))
 }
 
 pub fn add_vamm(deps: DepsMut, info: MessageInfo, vamm: String) -> StdResult<Response> {

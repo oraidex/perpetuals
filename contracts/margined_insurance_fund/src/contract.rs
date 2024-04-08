@@ -1,12 +1,12 @@
 #[cfg(not(feature = "library"))]
 use crate::error::ContractError;
 use crate::{
-    handle::{add_vamm, remove_vamm, shutdown_all_vamm, update_owner, withdraw},
+    handle::{add_vamm, remove_vamm, shutdown_all_vamm, update_owner, update_swap_info, withdraw},
     query::{
         query_all_vamm, query_config, query_is_vamm, query_owner, query_status_all_vamm,
         query_vamm_status,
     },
-    state::{store_config, Config, SwapInfo},
+    state::{store_config, store_swap_info, Config, SwapInfo},
 };
 use cosmwasm_std::{
     entry_point, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
@@ -37,7 +37,14 @@ pub fn instantiate(
         additional_mint_rate: msg.additional_mint_rate,
     };
 
+    let swap_info = SwapInfo {
+        smart_router: deps.api.addr_validate(&msg.smart_router)?,
+        swap_router: deps.api.addr_validate(&msg.swap_router)?,
+        swap_fee: msg.swap_fee,
+    };
+
     store_config(deps.storage, &config)?;
+    store_swap_info(deps.storage, &swap_info)?;
 
     OWNER.set(deps, Some(info.sender))?;
 
@@ -52,6 +59,11 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
         ExecuteMsg::RemoveVamm { vamm } => remove_vamm(deps, info, vamm),
         ExecuteMsg::Withdraw { token, amount } => withdraw(deps, env, info, token, amount),
         ExecuteMsg::ShutdownVamms {} => shutdown_all_vamm(deps, env, info),
+        ExecuteMsg::UpdateSwapInfo {
+            smart_router,
+            swap_router,
+            swap_fee,
+        } => update_swap_info(deps, info, smart_router, swap_router, swap_fee),
     }
 }
 
