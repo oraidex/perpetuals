@@ -160,69 +160,6 @@ fn test_get_margin_ratio_short() {
 }
 
 #[test]
-fn test_get_margin_higher_twap() {
-    let SimpleScenario {
-        mut router,
-        alice,
-        bob,
-        engine,
-        vamm,
-        ..
-    } = new_simple_scenario();
-
-    // moves block forward 1 and 15 secs timestamp
-    router.update_block(|block| {
-        block.time = block.time.plus_seconds(15);
-        block.height += 1;
-    });
-
-    let msg = engine
-        .open_position(
-            vamm.addr().to_string(),
-            Side::Buy,
-            to_decimals(25u64),
-            to_decimals(10u64),
-            Some(to_decimals(15)),
-            Some(to_decimals(9)),
-            to_decimals(0u64),
-            vec![],
-        )
-        .unwrap();
-    router.execute(alice.clone(), msg).unwrap();
-
-    router.update_block(|block| {
-        block.time = block.time.plus_seconds(15 * 62);
-        block.height += 62;
-    });
-
-    let msg = engine
-        .open_position(
-            vamm.addr().to_string(),
-            Side::Sell,
-            to_decimals(15u64),
-            to_decimals(10u64),
-            Some(to_decimals(4)),
-            Some(to_decimals(16)),
-            to_decimals(0u64),
-            vec![],
-        )
-        .unwrap();
-    router.execute(bob.clone(), msg).unwrap();
-
-    // moves block forward 1 and 15 secs timestamp
-    router.update_block(|block| {
-        block.time = block.time.plus_seconds(15);
-        block.height += 1;
-    });
-
-    // expect to be 0.09689093601
-    let margin_ratio = engine
-        .get_margin_ratio(&router.wrap(), vamm.addr().to_string(), 1)
-        .unwrap();
-    assert_eq!(margin_ratio, Integer::new_positive(96_890_936u128));
-}
-
-#[test]
 fn test_verify_margin_ratio_funding_payment_positive() {
     let SimpleScenario {
         mut router,

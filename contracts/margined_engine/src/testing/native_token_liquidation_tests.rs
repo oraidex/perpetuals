@@ -741,159 +741,6 @@ fn test_short_position_complete_liquidation() {
 }
 
 #[test]
-fn test_force_error_position_not_liquidation_twap_over_maintenance_margin() {
-    let NativeTokenScenario {
-        mut router,
-        alice,
-        bob,
-        carol,
-        owner,
-        engine,
-        vamm,
-        pricefeed,
-        ..
-    } = new_native_token_scenario();
-
-    // set the latest price
-    let price = Uint128::from(10_000_000u128);
-    let timestamp = router.block_info().time.seconds();
-
-    let msg = pricefeed
-        .append_price("ETH".to_string(), price, timestamp)
-        .unwrap();
-    router.execute(owner.clone(), msg).unwrap();
-
-    router.update_block(|block| {
-        block.time = block.time.plus_seconds(900);
-        block.height += 1;
-    });
-
-    let msg = engine
-        .set_margin_ratios(Uint128::from(100_000u128))
-        .unwrap();
-    router.execute(owner.clone(), msg).unwrap();
-
-    let msg = engine
-        .set_partial_liquidation_ratio(Uint128::from(250_000u128))
-        .unwrap();
-    router.execute(owner.clone(), msg).unwrap();
-
-    let msg = engine
-        .set_liquidation_fee(Uint128::from(25_000u128))
-        .unwrap();
-    router.execute(owner.clone(), msg).unwrap();
-
-    // when bob create a 20 margin * 5x long position when 9.0909090909 quoteAsset = 100
-    // AMM after: 1100 : 90.9090909091
-    let msg = engine
-        .open_position(
-            vamm.addr().to_string(),
-            Side::Buy,
-            Uint128::from(20_000_000u64),
-            Uint128::from(5_000_000u64),
-            Some(Uint128::from(14_000_000u64)),
-            Some(Uint128::from(9_000_000u64)),
-            Uint128::zero(),
-            vec![Coin::new(20_000_000u128, "orai")],
-        )
-        .unwrap();
-    router.execute(bob.clone(), msg).unwrap();
-
-    router.update_block(|block| {
-        block.time = block.time.plus_seconds(15);
-        block.height += 1;
-    });
-
-    // when alice create a 20 margin * 5x long position when 7.5757575758 quoteAsset = 100
-    // AMM after: 1200 : 83.3333333333
-    let msg = engine
-        .open_position(
-            vamm.addr().to_string(),
-            Side::Buy,
-            Uint128::from(20_000_000u64),
-            Uint128::from(5_000_000u64),
-            Some(Uint128::from(16_000_000u64)),
-            Some(Uint128::from(10_000_000u64)),
-            Uint128::zero(),
-            vec![Coin::new(20_000_000u128, "orai")],
-        )
-        .unwrap();
-    router.execute(alice.clone(), msg).unwrap();
-
-    router.update_block(|block| {
-        block.time = block.time.plus_seconds(600);
-        block.height += 1;
-    });
-
-    // when bob sell his position when 7.5757575758 quoteAsset = 100
-    // AMM after: 1100 : 90.9090909091
-    let msg = engine
-        .open_position(
-            vamm.addr().to_string(),
-            Side::Sell,
-            Uint128::from(20_000_000u64),
-            Uint128::from(5_000_000u64),
-            Some(Uint128::from(6_000_000u64)),
-            Some(Uint128::from(18_000_000u64)),
-            Uint128::zero(),
-            vec![Coin::new(20_000_000u128, "orai")],
-        )
-        .unwrap();
-    router.execute(bob.clone(), msg).unwrap();
-
-    router.update_block(|block| {
-        block.time = block.time.plus_seconds(15);
-        block.height += 1;
-    });
-
-    // verify alice's openNotional = 100
-    // spot price PnL = positionValue - openNotional = 84.62 - 100 = -15.38
-    // TWAP PnL = (70.42 * 270 + 84.62 * 15 + 99.96 * 600 + 84.62 * 15) / 900 - 100 ~= -9.39
-    // Use TWAP price PnL since -9.39 > -15.38
-    let position = engine
-        .position(&router.wrap(), vamm.addr().to_string(), 2)
-        .unwrap();
-    assert_eq!(position.notional, Uint128::from(100_000_000u64));
-
-    let pnl = engine
-        .get_unrealized_pnl(
-            &router.wrap(),
-            vamm.addr().to_string(),
-            2,
-            PnlCalcOption::SpotPrice,
-        )
-        .unwrap();
-    assert_eq!(pnl.unrealized_pnl, Integer::new_negative(15_384_623u128));
-
-    let pnl = engine
-        .get_unrealized_pnl(
-            &router.wrap(),
-            vamm.addr().to_string(),
-            2,
-            PnlCalcOption::Twap,
-        )
-        .unwrap();
-    assert_eq!(pnl.unrealized_pnl, Integer::new_negative(9_386_068u128));
-
-    let price = vamm.spot_price(&router.wrap()).unwrap();
-    let msg = pricefeed
-        .append_price("ETH".to_string(), price, timestamp)
-        .unwrap();
-    router.execute(owner.clone(), msg).unwrap();
-
-    let msg = engine
-        .liquidate(vamm.addr().to_string(), 2, Uint128::zero())
-        .unwrap();
-    let err = router.execute(carol.clone(), msg).unwrap_err();
-    assert_eq!(
-        StdError::GenericErr {
-            msg: "Position is overcollateralized".to_string(),
-        },
-        err.downcast().unwrap()
-    );
-}
-
-#[test]
 fn test_force_error_position_not_liquidation_spot_over_maintenance_margin() {
     let NativeTokenScenario {
         mut router,
@@ -1983,4 +1830,157 @@ fn test_force_error_partially_liquidate_two_positions_exceeding_fluctuation_limi
         },
         err.downcast().unwrap()
     );
+}
+
+#[test]
+fn test_can_open_position_and_liquidate_and_whitelist_can_do_anything_more_in_same_block() {
+    let mut env = new_native_token_scenario();
+
+    // set the latest price
+    let price = Uint128::from(10_000_000u128);
+    let timestamp = env.router.block_info().time.seconds();
+
+    let msg = env
+        .pricefeed
+        .append_price("ETH".to_string(), price, timestamp)
+        .unwrap();
+    env.router.execute(env.owner.clone(), msg).unwrap();
+
+    env.router.update_block(|block| {
+        block.time = block.time.plus_seconds(900);
+        block.height += 1;
+    });
+
+    // set the margin ratios
+    let msg = env
+        .engine
+        .set_margin_ratios(Uint128::from(100_000u128))
+        .unwrap();
+    env.router.execute(env.owner.clone(), msg).unwrap();
+
+    let msg = env
+        .engine
+        .set_partial_liquidation_ratio(Uint128::from(250_000u128))
+        .unwrap();
+    env.router.execute(env.owner.clone(), msg).unwrap();
+
+    let msg = env
+        .engine
+        .set_liquidation_fee(Uint128::from(25_000u128))
+        .unwrap();
+    env.router.execute(env.owner.clone(), msg).unwrap();
+
+    // mint funds for carol
+    let msg = CosmosMsg::Bank(BankMsg::Send {
+        to_address: env.carol.to_string(),
+        amount: vec![Coin::new(1_000u128 * 10u128.pow(6), "orai")],
+    });
+    env.router.execute(env.bank.clone(), msg).unwrap();
+
+    let msg = env
+        .engine
+        .open_position(
+            env.vamm.addr().to_string(),
+            Side::Buy,
+            Uint128::from(20_000_000u64),
+            Uint128::from(5_000_000u64),
+            Some(Uint128::from(15_000_000u64)),
+            Some(Uint128::from(10_000_000u64)),
+            Uint128::from(9_090_000u128),
+            vec![Coin::new(20_000_000u128, "orai")],
+        )
+        .unwrap();
+    env.router.execute(env.bob.clone(), msg).unwrap();
+
+    env.router.update_block(|block| {
+        block.time = block.time.plus_seconds(15);
+        block.height += 1;
+    });
+
+    let msg = env
+        .engine
+        .open_position(
+            env.vamm.addr().to_string(),
+            Side::Buy,
+            Uint128::from(20_000_000u64),
+            Uint128::from(5_000_000u64),
+            Some(Uint128::from(20_000_000u64)),
+            Some(Uint128::from(10_000_000u64)),
+            Uint128::zero(),
+            vec![Coin::new(20_000_000u128, "orai")],
+        )
+        .unwrap();
+    env.router.execute(env.alice.clone(), msg).unwrap();
+
+    env.router.update_block(|block| {
+        block.time = block.time.plus_seconds(15);
+        block.height += 1;
+    });
+
+    let msg = env
+        .engine
+        .open_position(
+            env.vamm.addr().to_string(),
+            Side::Sell,
+            Uint128::from(20_000_000u64),
+            Uint128::from(5_000_000u64),
+            Some(Uint128::from(12_000_000u64)),
+            Some(Uint128::from(20_000_000u64)),
+            Uint128::zero(),
+            vec![Coin::new(20_000_000u128, "orai")],
+        )
+        .unwrap();
+    env.router.execute(env.bob.clone(), msg).unwrap();
+
+    env.router.update_block(|block| {
+        block.time = block.time.plus_seconds(15);
+        block.height += 1;
+    });
+
+    let msg = env
+        .engine
+        .open_position(
+            env.vamm.addr().to_string(),
+            Side::Sell,
+            Uint128::from(20_000_000u64),
+            Uint128::from(5_000_000u64),
+            Some(Uint128::from(9_000_000u64)),
+            Some(Uint128::from(15_000_000u64)),
+            Uint128::zero(),
+            vec![Coin::new(20_000_000u128, "orai")],
+        )
+        .unwrap();
+    env.router.execute(env.carol.clone(), msg).unwrap();
+
+    let price = env.vamm.spot_price(&env.router.wrap()).unwrap();
+    let msg = env
+        .pricefeed
+        .append_price("ETH".to_string(), price, timestamp)
+        .unwrap();
+    env.router.execute(env.owner.clone(), msg).unwrap();
+
+    let msg = env
+        .engine
+        .liquidate(env.vamm.addr().to_string(), 2, Uint128::zero())
+        .unwrap();
+    env.router.execute(env.carol.clone(), msg).unwrap();
+
+    let msg = env
+        .engine
+        .close_position(env.vamm.addr().to_string(), 4, Uint128::zero())
+        .unwrap();
+    let err = env.router.execute(env.carol.clone(), msg).unwrap_err();
+    assert_eq!(
+        err.source().unwrap().to_string(),
+        "Generic error: Only one action allowed".to_string()
+    );
+
+    // whitelist can do anything
+    let msg = env.engine.add_whitelist(env.carol.to_string()).unwrap();
+    env.router.execute(env.owner.clone(), msg).unwrap();
+    let msg = env
+        .engine
+        .close_position(env.vamm.addr().to_string(), 4, to_decimals(0u64))
+        .unwrap();
+    env.router.execute(env.carol.clone(), msg).unwrap();
 }

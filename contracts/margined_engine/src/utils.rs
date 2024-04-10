@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    Addr, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Storage, SubMsg,
-    SubMsgResponse, Uint128,
+    Addr, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult, SubMsg, SubMsgResponse,
+    Uint128,
 };
 use margined_utils::{
     contracts::helpers::{InsuranceFundController, VammController},
@@ -371,13 +371,16 @@ pub fn require_insufficient_margin(
 }
 
 pub fn require_not_restriction_mode(
-    storage: &dyn Storage,
+    deps: &Deps,
     vamm: &Addr,
     block_height: u64,
+    trader: &Addr,
 ) -> StdResult<Response> {
-    let vamm_map = read_vamm_map(storage, vamm)?;
+    let vamm_map = read_vamm_map(deps.storage, vamm)?;
 
-    if vamm_map.last_restriction_block == block_height {
+    if vamm_map.last_restriction_block == block_height
+        && !WHITELIST.query_hook(deps.to_owned(), trader.to_string())?
+    {
         return Err(StdError::generic_err("Only one action allowed"));
     }
 

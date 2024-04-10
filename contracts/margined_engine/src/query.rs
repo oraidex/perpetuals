@@ -215,29 +215,9 @@ pub fn query_margin_ratio(deps: Deps, position: &Position) -> StdResult<Integer>
     }
 
     let PositionUnrealizedPnlResponse {
-        position_notional: spot_notional,
-        unrealized_pnl: spot_pnl,
-    } = get_position_notional_unrealized_pnl(deps, &position, PnlCalcOption::SpotPrice)?;
-    let PositionUnrealizedPnlResponse {
-        position_notional: twap_notional,
-        unrealized_pnl: twap_pnl,
-    } = get_position_notional_unrealized_pnl(deps, &position, PnlCalcOption::Twap)?;
-
-    // calculate and return margin
-    let PositionUnrealizedPnlResponse {
         position_notional,
         unrealized_pnl,
-    } = if spot_pnl.abs() > twap_pnl.abs() {
-        PositionUnrealizedPnlResponse {
-            position_notional: twap_notional,
-            unrealized_pnl: twap_pnl,
-        }
-    } else {
-        PositionUnrealizedPnlResponse {
-            position_notional: spot_notional,
-            unrealized_pnl: spot_pnl,
-        }
-    };
+    } = get_position_notional_unrealized_pnl(deps, &position, PnlCalcOption::SpotPrice)?;
 
     let remain_margin = calc_remain_margin_with_funding_payment(deps, position, unrealized_pnl)?;
 
