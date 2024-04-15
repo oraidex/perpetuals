@@ -9,6 +9,7 @@ use crate::{
     contract::{
         CLOSE_POSITION_REPLY_ID, INCREASE_POSITION_REPLY_ID, LIQUIDATION_REPLY_ID,
         PARTIAL_CLOSE_POSITION_REPLY_ID, PARTIAL_LIQUIDATION_REPLY_ID, PAY_FUNDING_REPLY_ID,
+        WHITELIST,
     },
     messages::{execute_transfer_from, withdraw},
     query::{query_free_collateral, query_margin_ratio, query_positions},
@@ -743,6 +744,13 @@ pub fn liquidate(
     // read the position for the trader from vamm
     let vamm_key = keccak_256(vamm.as_bytes());
     let position = read_position(deps.storage, &vamm_key, position_id)?;
+
+    // check if the trader is on the whitelist
+    if WHITELIST.query_hook(deps.as_ref(), position.trader.to_string())?
+        && info.sender != position.trader
+    {
+        return Err(StdError::generic_err("trader is whitelisted"));
+    }
 
     // store the liquidator
     store_tmp_liquidator(deps.storage, &info.sender)?;
