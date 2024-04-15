@@ -756,18 +756,18 @@ pub fn liquidate(
     store_tmp_liquidator(deps.storage, &info.sender)?;
 
     // retrieve the existing margin ratio of the position
-    let mut margin_ratio = query_margin_ratio(deps.as_ref(), &position)?;
+    let margin_ratio = query_margin_ratio(deps.as_ref(), &position)?;
 
-    let vamm_controller = VammController(vamm.clone());
+    // let vamm_controller = VammController(vamm.clone());
 
-    if vamm_controller.is_over_spread_limit(&deps.querier)? {
-        let oracle_margin_ratio =
-            get_margin_ratio_calc_option(deps.as_ref(), &position, PnlCalcOption::Oracle)?;
+    // if vamm_controller.is_over_spread_limit(&deps.querier)? {
+    //     let oracle_margin_ratio =
+    //         get_margin_ratio_calc_option(deps.as_ref(), &position, PnlCalcOption::Oracle)?;
 
-        if oracle_margin_ratio.checked_sub(margin_ratio)? > Integer::zero() {
-            margin_ratio = oracle_margin_ratio
-        }
-    }
+    //     if oracle_margin_ratio.checked_sub(margin_ratio)? > Integer::zero() {
+    //         margin_ratio = oracle_margin_ratio
+    //     }
+    // }
 
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
     require_insufficient_margin(margin_ratio, config.maintenance_margin_ratio)?;
