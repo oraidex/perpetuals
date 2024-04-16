@@ -9,6 +9,7 @@ use crate::{
     contract::{
         CLOSE_POSITION_REPLY_ID, INCREASE_POSITION_REPLY_ID, LIQUIDATION_REPLY_ID,
         PARTIAL_CLOSE_POSITION_REPLY_ID, PARTIAL_LIQUIDATION_REPLY_ID, PAY_FUNDING_REPLY_ID,
+        WHITELIST,
     },
     messages::{execute_transfer_from, withdraw},
     query::{query_free_collateral, query_margin_ratio, query_positions},
@@ -20,9 +21,8 @@ use crate::{
     tick::query_ticks,
     utils::{
         calc_remain_margin_with_funding_payment, calculate_tp_sl_spread, check_tp_sl_price,
-        direction_to_side, get_asset, get_margin_ratio_calc_option,
-        get_position_notional_unrealized_pnl, keccak_256, position_to_side,
-        require_additional_margin, require_bad_debt, require_insufficient_margin,
+        direction_to_side, get_asset, get_position_notional_unrealized_pnl, keccak_256,
+        position_to_side, require_additional_margin, require_bad_debt, require_insufficient_margin,
         require_non_zero_input, require_not_paused, require_not_restriction_mode,
         require_position_not_zero, require_vamm, side_to_direction, update_reserve,
     },
@@ -744,22 +744,29 @@ pub fn liquidate(
     let vamm_key = keccak_256(vamm.as_bytes());
     let position = read_position(deps.storage, &vamm_key, position_id)?;
 
+    // check if the trader is on the whitelist
+    if WHITELIST.query_hook(deps.as_ref(), position.trader.to_string())?
+        && info.sender != position.trader
+    {
+        return Err(StdError::generic_err("trader is whitelisted"));
+    }
+
     // store the liquidator
     store_tmp_liquidator(deps.storage, &info.sender)?;
 
     // retrieve the existing margin ratio of the position
-    let mut margin_ratio = query_margin_ratio(deps.as_ref(), &position)?;
+    let margin_ratio = query_margin_ratio(deps.as_ref(), &position)?;
 
-    let vamm_controller = VammController(vamm.clone());
+    // let vamm_controller = VammController(vamm.clone());
 
-    if vamm_controller.is_over_spread_limit(&deps.querier)? {
-        let oracle_margin_ratio =
-            get_margin_ratio_calc_option(deps.as_ref(), &position, PnlCalcOption::Oracle)?;
+    // if vamm_controller.is_over_spread_limit(&deps.querier)? {
+    //     let oracle_margin_ratio =
+    //         get_margin_ratio_calc_option(deps.as_ref(), &position, PnlCalcOption::Oracle)?;
 
-        if oracle_margin_ratio.checked_sub(margin_ratio)? > Integer::zero() {
-            margin_ratio = oracle_margin_ratio
-        }
-    }
+    //     if oracle_margin_ratio.checked_sub(margin_ratio)? > Integer::zero() {
+    //         margin_ratio = oracle_margin_ratio
+    //     }
+    // }
 
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
     require_insufficient_margin(margin_ratio, config.maintenance_margin_ratio)?;
