@@ -16,7 +16,7 @@ pub fn query_ticks(
     limit: Option<u32>,
     order_by: Option<i32>,
 ) -> StdResult<TicksResponse> {
-    let order_by = order_by.map_or(None, |val| OrderBy::try_from(val).ok());
+    let order_by = order_by.and_then(|val| OrderBy::try_from(val).ok());
 
     let position_bucket =
         ReadonlyBucket::multilevel(storage, &[PREFIX_TICK, vamm_key, side.as_bytes()]);

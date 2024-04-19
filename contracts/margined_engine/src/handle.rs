@@ -249,7 +249,7 @@ pub fn open_position(
             vamm: vamm.clone(),
             pair: format!("{}/{}", vamm_config.base_asset, vamm_config.quote_asset),
             trader: trader.clone(),
-            side: side.clone(),
+            side,
             margin_amount: new_margin_amount,
             leverage,
             open_notional,
@@ -440,7 +440,7 @@ pub fn close_position(
                 vamm: position.vamm.clone(),
                 pair: position.pair.clone(),
                 trader: position.trader.clone(),
-                side: side.clone(),
+                side,
                 margin_amount: position.size.value,
                 leverage: config.decimals,
                 open_notional: partial_close_notional,
@@ -501,7 +501,6 @@ pub fn trigger_tp_sl(
     let config = read_config(deps.storage)?;
     let vamm_addr = deps.api.addr_validate(&vamm)?;
     let mut msgs: Vec<SubMsg> = vec![];
-    let mut tp_sl_flag: bool = false;
 
     let vamm_controller = VammController(vamm_addr.clone());
     let vamm_state = vamm_controller.state(&deps.querier)?;
@@ -543,15 +542,14 @@ pub fn trigger_tp_sl(
         sl_spread,
         &position.side,
     )?;
-    if do_tp {
-        if tp_sl_action == "trigger_take_profit" {
-            tp_sl_flag = true;
-        }
+
+    // tp_sl_flag = do_tp && tp_sl_action == "trigger_take_profit" || !do_tp && tp_sl_action == "trigger_stop_loss";
+    let tp_sl_flag = if do_tp {
+        tp_sl_action == "trigger_take_profit"
     } else {
-        if tp_sl_action == "trigger_stop_loss" {
-            tp_sl_flag = true;
-        }
-    }
+        tp_sl_action == "trigger_stop_loss"
+    };
+
     if tp_sl_flag {
         msgs.push(internal_close_position(
             deps.storage,
@@ -583,7 +581,6 @@ pub fn trigger_mutiple_tp_sl(
     let config = read_config(deps.storage)?;
     let vamm_addr = deps.api.addr_validate(&vamm)?;
     let mut msgs: Vec<SubMsg> = vec![];
-    let mut tp_sl_flag: bool = false;
 
     let vamm_controller = VammController(vamm_addr.clone());
     let vamm_state = vamm_controller.state(&deps.querier)?;
@@ -635,28 +632,6 @@ pub fn trigger_mutiple_tp_sl(
             // check the position isn't zero
             require_position_not_zero(position.size.value)?;
 
-            // if !take_profit {
-            //     // Can not trigger stop loss position if bad debt
-            //     if position_is_bad_debt(
-            //         deps.as_ref(),
-            //         position,
-            //         tmp_reserve.quote_asset_reserve,
-            //         tmp_reserve.base_asset_reserve,
-            //     )? {
-            //         continue;
-            //     }
-
-            //     // Can not trigger stop loss position if liquidate
-            //     if position_is_liquidated(
-            //         deps.as_ref(),
-            //         &position,
-            //         config.maintenance_margin_ratio,
-            //         &vamm_controller,
-            //     )? {
-            //         continue;
-            //     }
-            // }
-
             let base_asset_amount = position.size.value;
             let quote_asset_amount = get_output_price_with_reserves(
                 &position.direction,
@@ -684,17 +659,14 @@ pub fn trigger_mutiple_tp_sl(
                 sl_spread,
                 &position.side,
             )?;
-            if do_tp {
-                if tp_sl_action == "trigger_take_profit" {
-                    tp_sl_flag = true;
-                }
+
+            let tp_sl_flag = if do_tp {
+                tp_sl_action == "trigger_take_profit"
             } else {
-                if tp_sl_action == "trigger_stop_loss" {
-                    tp_sl_flag = true;
-                }
-            }
+                tp_sl_action == "trigger_stop_loss"
+            };
+
             if tp_sl_flag {
-                tp_sl_flag = false;
                 let _ = update_reserve(
                     &mut tmp_reserve,
                     quote_asset_amount,
@@ -703,7 +675,7 @@ pub fn trigger_mutiple_tp_sl(
                 );
                 msgs.push(internal_close_position(
                     deps.storage,
-                    &position,
+                    position,
                     Uint128::zero(),
                     CLOSE_POSITION_REPLY_ID,
                 )?);
@@ -830,7 +802,7 @@ pub fn pay_funding(
     Ok(Response::new()
         .add_submessage(funding_msg)
         .add_attribute("action", "pay_funding")
-        .add_attribute("vamm", &vamm.to_string()))
+        .add_attribute("vamm", vamm.to_string()))
 }
 
 /// Enables a user to directly deposit margin into their position
@@ -884,9 +856,9 @@ pub fn deposit_margin(
     Ok(response.add_attributes([
         ("action", "deposit_margin"),
         ("position_id", &position_id.to_string()),
-        ("trader", trader.as_ref()),
+        ("trader", trader.as_str()),
         ("deposit_amount", &amount.to_string()),
-        ("vamm", &vamm.to_string()),
+        ("vamm", vamm.as_str()),
     ]))
 }
 
@@ -966,7 +938,7 @@ pub fn withdraw_margin(
             &remain_margin.latest_premium_fraction.to_string(),
         ),
         ("bad_debt", &remain_margin.bad_debt.to_string()),
-        ("vamm", &vamm.to_string()),
+        ("vamm", vamm.as_str()),
     ]))
 }
 
@@ -1004,7 +976,7 @@ pub fn internal_close_position(
             vamm: position.vamm.clone(),
             pair: position.pair.clone(),
             trader: position.trader.clone(),
-            side: side.clone(),
+            side,
             margin_amount: position.size.value,
             leverage: Uint128::zero(),
             open_notional: position.notional,
@@ -1057,7 +1029,7 @@ fn partial_liquidation(
     let PositionUnrealizedPnlResponse {
         position_notional: _,
         unrealized_pnl,
-    } = get_position_notional_unrealized_pnl(deps.as_ref(), &position, PnlCalcOption::SpotPrice)?;
+    } = get_position_notional_unrealized_pnl(deps.as_ref(), position, PnlCalcOption::SpotPrice)?;
 
     let side = position_to_side(position.size);
 

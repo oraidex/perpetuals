@@ -200,7 +200,8 @@ pub type Config = ConfigResponse;
 
 #[cfg(not(tarpaulin_include))]
 pub fn store_config(storage: &mut dyn Storage, config: &Config) -> StdResult<()> {
-    Ok(storage.set(KEY_CONFIG, &to_vec(config)?))
+    storage.set(KEY_CONFIG, &to_vec(config)?);
+    Ok(())
 }
 
 #[cfg(not(tarpaulin_include))]
@@ -225,7 +226,8 @@ pub fn store_price_data(
     price: Uint128,
     _timestamp: u64,
 ) -> StdResult<()> {
-    Ok(storage.set(KEY_PRICES, &to_vec(&price)?))
+    storage.set(KEY_PRICES, &to_vec(&price)?);
+    Ok(())
 }
 
 #[cfg(not(tarpaulin_include))]

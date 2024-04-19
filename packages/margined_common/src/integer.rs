@@ -220,7 +220,7 @@ impl From<i128> for Integer {
     fn from(val: i128) -> Self {
         match val >= 0 {
             true => Self::new_positive(val as u128),
-            false => Self::new_negative(val.unsigned_abs() as u128),
+            false => Self::new_negative(val.unsigned_abs()),
         }
     }
 }
@@ -229,7 +229,7 @@ impl From<i64> for Integer {
     fn from(val: i64) -> Self {
         match val >= 0 {
             true => Self::new_positive(val as u64),
-            false => Self::new_negative(val.unsigned_abs() as u64),
+            false => Self::new_negative(val.unsigned_abs()),
         }
     }
 }
@@ -238,7 +238,7 @@ impl From<i32> for Integer {
     fn from(val: i32) -> Self {
         match val >= 0 {
             true => Self::new_positive(val as u32),
-            false => Self::new_negative(val.unsigned_abs() as u32),
+            false => Self::new_negative(val.unsigned_abs()),
         }
     }
 }
@@ -247,7 +247,7 @@ impl From<i16> for Integer {
     fn from(val: i16) -> Self {
         match val >= 0 {
             true => Self::new_positive(val as u16),
-            false => Self::new_negative(val.unsigned_abs() as u16),
+            false => Self::new_negative(val.unsigned_abs()),
         }
     }
 }
@@ -256,7 +256,7 @@ impl From<i8> for Integer {
     fn from(val: i8) -> Self {
         match val >= 0 {
             true => Self::new_positive(val as u8),
-            false => Self::new_negative(val.unsigned_abs() as u8),
+            false => Self::new_negative(val.unsigned_abs()),
         }
     }
 }
@@ -266,6 +266,7 @@ impl From<&str> for Integer {
         Integer::from_str(val).unwrap()
     }
 }
+
 impl From<String> for Integer {
     fn from(val: String) -> Self {
         Integer::from_str(&val).unwrap()

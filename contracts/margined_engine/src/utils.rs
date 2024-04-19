@@ -431,13 +431,11 @@ pub fn parse_swap(response: &SubMsgResponse) -> StdResult<(Uint128, Uint128, u64
                 u64::from_str(position_id).unwrap(),
             ))
         }
-        _ => {
-            return Err(StdError::generic_err("Cannot parse swap"));
-        }
+        _ => Err(StdError::generic_err("Cannot parse swap")),
     }
 }
 
-pub fn parse_pay_funding<'a>(response: &'a SubMsgResponse) -> StdResult<(Integer, &'a str)> {
+pub fn parse_pay_funding(response: &SubMsgResponse) -> StdResult<(Integer, &str)> {
     // Find swap inputs and output events
     let wasm = read_response("wasm", response)?;
     let premium_str = read_event("premium_fraction", wasm)?;

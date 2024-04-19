@@ -14,7 +14,8 @@ pub type State = StateResponse;
 pub type Config = ConfigResponse;
 
 pub fn store_config(storage: &mut dyn Storage, config: &Config) -> StdResult<()> {
-    Ok(storage.set(KEY_CONFIG, &to_vec(config)?))
+    storage.set(KEY_CONFIG, &to_vec(config)?);
+    Ok(())
 }
 
 pub fn read_config(storage: &dyn Storage) -> StdResult<Config> {
@@ -25,7 +26,8 @@ pub fn read_config(storage: &dyn Storage) -> StdResult<Config> {
 }
 
 pub fn store_state(storage: &mut dyn Storage, state: &State) -> StdResult<()> {
-    Ok(storage.set(KEY_STATE, &to_vec(state)?))
+    storage.set(KEY_STATE, &to_vec(state)?);
+    Ok(())
 }
 
 pub fn read_state(storage: &dyn Storage) -> StdResult<State> {
@@ -67,10 +69,11 @@ pub fn update_current_reserve_snapshot(
 ) -> StdResult<()> {
     let height = read_reserve_snapshot_counter(storage)?;
 
-    Ok(storage.set(
+    storage.set(
         &[KEY_RESERVE_SNAPSHOT, &height.to_be_bytes()].concat(),
         &to_vec(reserve_snapshot)?,
-    ))
+    );
+    Ok(())
 }
 
 pub fn read_reserve_snapshot_counter(storage: &dyn Storage) -> StdResult<u64> {
@@ -83,5 +86,6 @@ pub fn read_reserve_snapshot_counter(storage: &dyn Storage) -> StdResult<u64> {
 pub fn increment_reserve_snapshot_counter(storage: &mut dyn Storage) -> StdResult<()> {
     let val = read_reserve_snapshot_counter(storage)? + 1;
 
-    Ok(storage.set(KEY_RESERVE_SNAPSHOT_COUNTER, &to_vec(&val)?))
+    storage.set(KEY_RESERVE_SNAPSHOT_COUNTER, &to_vec(&val)?);
+    Ok(())
 }

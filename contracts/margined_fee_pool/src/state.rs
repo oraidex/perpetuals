@@ -9,7 +9,8 @@ pub const TOKEN_LIMIT: usize = 3usize;
 pub type Config = ConfigResponse;
 
 pub fn store_config(storage: &mut dyn Storage, config: &Config) -> StdResult<()> {
-    Ok(storage.set(KEY_CONFIG, &to_vec(config)?))
+    storage.set(KEY_CONFIG, &to_vec(config)?);
+    Ok(())
 }
 
 // function checks if an addr is already added and adds it if not
@@ -36,7 +37,8 @@ pub fn save_token(storage: &mut dyn Storage, input: AssetInfo) -> StdResult<()> 
     // add the token
     token_list.push(input);
 
-    Ok(storage.set(TOKEN_LIST, &to_vec(&token_list)?))
+    storage.set(TOKEN_LIST, &to_vec(&token_list)?);
+    Ok(())
 }
 
 // this function reads Addrs stored in the TOKEN_LIST.
@@ -80,5 +82,6 @@ pub fn remove_token(storage: &mut dyn Storage, token: AssetInfo) -> StdResult<()
     }
 
     // saves the updated token_list
-    Ok(storage.set(TOKEN_LIST, &to_vec(&token_list)?))
+    storage.set(TOKEN_LIST, &to_vec(&token_list)?);
+    Ok(())
 }

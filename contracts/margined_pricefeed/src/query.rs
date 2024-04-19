@@ -44,7 +44,7 @@ pub fn query_get_previous_price(
 ) -> StdResult<Uint128> {
     let last_round_id = read_last_round_id(deps.storage, &key)?;
     // check round_id to get last previous price round_id by num_round_back
-    if let Some(round_id) = last_round_id.checked_sub(num_round_back as u64) {
+    if let Some(round_id) = last_round_id.checked_sub(num_round_back) {
         let price_data = read_price_data(deps.storage, key, round_id)?;
         return Ok(price_data.price);
     }
@@ -85,8 +85,7 @@ pub fn query_get_twap_price(
         return Ok(latest_round.price);
     }
 
-    let mut cumulative_time =
-        Uint128::from(env.block.time.seconds()).checked_sub(Uint128::from(timestamp))?;
+    let mut cumulative_time = Uint128::from(env.block.time.seconds()).checked_sub(timestamp)?;
     let mut weighted_price = latest_round.price.checked_mul(cumulative_time)?;
 
     loop {

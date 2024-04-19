@@ -22,7 +22,8 @@ pub fn save_vamm(storage: &mut dyn Storage, input: Addr) -> StdResult<()> {
 
     // add the vamm to the vector
     vamm_list.push(input);
-    Ok(storage.set(VAMM_LIST, &to_vec(&vamm_list)?))
+    storage.set(VAMM_LIST, &to_vec(&vamm_list)?);
+    Ok(())
 }
 
 // this function reads Addrs stored in the VAMM_LIST.
@@ -66,11 +67,13 @@ pub fn remove_vamm(storage: &mut dyn Storage, input: Addr) -> StdResult<()> {
     }
 
     // saves the updated vamm_list
-    Ok(storage.set(VAMM_LIST, &to_vec(&vamm_list)?))
+    storage.set(VAMM_LIST, &to_vec(&vamm_list)?);
+    Ok(())
 }
 
 pub fn store_config(storage: &mut dyn Storage, config: &Config) -> StdResult<()> {
-    Ok(storage.set(KEY_CONFIG, &to_vec(config)?))
+    storage.set(KEY_CONFIG, &to_vec(config)?);
+    Ok(())
 }
 
 pub fn read_config(storage: &dyn Storage) -> StdResult<Config> {
