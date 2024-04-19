@@ -54,3 +54,52 @@ fn test_change_reserve() {
     assert_eq!(state.quote_asset_reserve, to_decimals(100));
     assert_eq!(state.base_asset_reserve, to_decimals(10_000));
 }
+
+#[test]
+fn test_repeg_price() {
+    let mut deps = mock_dependencies();
+    let msg = InstantiateMsg {
+        decimals: 9u8,
+        quote_asset: "ETH".to_string(),
+        base_asset: "USD".to_string(),
+        quote_asset_reserve: to_decimals(100_000),
+        base_asset_reserve: to_decimals(10_000),
+        funding_period: 3_600_u64,
+        toll_ratio: Uint128::zero(),
+        spread_ratio: Uint128::zero(),
+        fluctuation_limit_ratio: Uint128::zero(),
+        margin_engine: Some("addr0000".to_string()),
+        insurance_fund: Some("insurance_fund".to_string()),
+        pricefeed: "oracle".to_string(),
+        initial_margin_ratio: to_decimals(1),
+    };
+    let info = mock_info("addr0000", &[]);
+    instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
+
+    let res = query(deps.as_ref(), mock_env(), QueryMsg::State {}).unwrap();
+    let state: StateResponse = from_binary(&res).unwrap();
+    assert_eq!(state.quote_asset_reserve, to_decimals(100_000));
+    assert_eq!(state.base_asset_reserve, to_decimals(10_000));
+    let old_invariant_k = state.quote_asset_reserve * state.base_asset_reserve;
+
+    let res = query(deps.as_ref(), mock_env(), QueryMsg::SpotPrice {}).unwrap();
+    let sport_price: Uint128 = from_binary(&res).unwrap();
+    let new_spot_price = sport_price.checked_div(Uint128::from(2u128)).unwrap();
+
+    let msg = ExecuteMsg::RepegPrice {
+        new_price: Some(new_spot_price),
+    };
+    let info = mock_info("addr0000", &[]);
+    let _ = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
+    let res = query(deps.as_ref(), mock_env(), QueryMsg::SpotPrice {}).unwrap();
+    let sport_price: Uint128 = from_binary(&res).unwrap();
+    assert!(sport_price.abs_diff(new_spot_price).u128() < 10);
+
+    let res = query(deps.as_ref(), mock_env(), QueryMsg::State {}).unwrap();
+    let state: StateResponse = from_binary(&res).unwrap();
+    let new_invariant_k = state.quote_asset_reserve * state.base_asset_reserve;
+
+    // new_invariant_k does not differ by more than 0.01%
+    assert!(old_invariant_k.abs_diff(new_invariant_k) < old_invariant_k / Uint128::from(10000u128));
+}

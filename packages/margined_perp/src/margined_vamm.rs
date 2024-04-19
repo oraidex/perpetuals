@@ -80,6 +80,9 @@ pub enum ExecuteMsg {
         fluctuation_limit_ratio: Option<Uint128>,
         liquidity_multiplier: Uint128,
     },
+    RepegPrice {
+        new_price: Option<Uint128>,
+    },
 }
 
 #[cw_serde]

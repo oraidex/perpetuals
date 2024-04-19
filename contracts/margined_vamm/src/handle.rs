@@ -1,6 +1,8 @@
 use std::ops::{Div, Mul};
 
-use cosmwasm_std::{DepsMut, Env, MessageInfo, Response, StdError, StdResult, Storage, Uint128};
+use cosmwasm_std::{
+    Decimal256, DepsMut, Env, MessageInfo, Response, StdError, StdResult, Storage, Uint128,
+};
 
 use margined_common::{integer::Integer, validate::validate_ratio};
 use margined_perp::margined_vamm::Direction;
@@ -141,6 +143,74 @@ pub fn set_open(deps: DepsMut, env: Env, info: MessageInfo, open: bool) -> StdRe
         .add_attribute("vamm", &env.contract.address)
         .add_attribute("base_asset", config.base_asset)
         .add_attribute("quote_asset", config.quote_asset))
+}
+
+pub fn repeg_price(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    new_price: Option<Uint128>,
+) -> StdResult<Response> {
+    // check permission and if state matches
+    if !OWNER.is_admin(deps.as_ref(), &info.sender)? {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    let new_price = match new_price {
+        Some(val) => val,
+        None => {
+            let config = read_config(deps.storage)?;
+            let pricefeed_controller = PricefeedController(config.pricefeed);
+
+            pricefeed_controller
+                .get_price(&deps.querier, config.base_asset)
+                .unwrap_or_default()
+        }
+    };
+
+    if new_price.is_zero() {
+        return Err(StdError::generic_err("new price can't be 0"));
+    }
+
+    let config = read_config(deps.storage)?;
+    let mut state = read_state(deps.storage)?;
+
+    // base_asset * quote_asset = k
+    // new_base_asset * new_quote_asset = k
+    // new_quote_asset / new_base_asset = new_price
+    // => new_quote_asset = sqrt(k * new_price)
+    // => new_base_asset = k / new_quote_asset
+
+    let invariant_k = state
+        .quote_asset_reserve
+        .checked_mul(state.base_asset_reserve)?;
+
+    let new_quote_asset = Uint128::try_from(
+        Decimal256::from_atomics(invariant_k, 0)
+            .unwrap()
+            .checked_mul(Decimal256::from_ratio(new_price, config.decimals))?
+            .sqrt()
+            .to_uint_floor(),
+    )?;
+
+    let new_base_asset = invariant_k / new_quote_asset;
+
+    state.quote_asset_reserve = new_quote_asset;
+    state.base_asset_reserve = new_base_asset;
+
+    store_state(deps.storage, &state)?;
+
+    add_reserve_snapshot(
+        deps.storage,
+        env.clone(),
+        state.quote_asset_reserve,
+        state.base_asset_reserve,
+    )?;
+
+    Ok(Response::new().add_attributes(vec![
+        ("action", "repeg_price"),
+        ("new_price", &new_price.to_string()),
+    ]))
 }
 
 pub fn migrate_liquidity(
