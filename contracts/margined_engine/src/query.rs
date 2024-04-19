@@ -320,7 +320,7 @@ pub fn query_position_is_tpsl(
         Order::Ascending
     };
     let vamm_key = keccak_256(vamm.as_bytes());
-    let mut is_tpsl: bool = false;
+
     let ticks = query_ticks(
         deps.storage,
         &vamm_key,
@@ -369,19 +369,20 @@ pub fn query_position_is_tpsl(
                 sl_spread,
                 &position.side,
             )?;
-            if do_tp {
-                if tp_sl_action == "trigger_take_profit" {
-                    is_tpsl = true;
-                }
+
+            let tp_sl_flag = if do_tp {
+                tp_sl_action == "trigger_take_profit"
             } else {
-                if tp_sl_action == "trigger_stop_loss" {
-                    is_tpsl = true;
-                }
+                tp_sl_action == "trigger_stop_loss"
+            };
+
+            if tp_sl_flag {
+                return Ok(PositionTpSlResponse { is_tpsl: true });
             }
         }
     }
 
-    Ok(PositionTpSlResponse { is_tpsl })
+    Ok(PositionTpSlResponse { is_tpsl: false })
 }
 
 pub fn query_position_is_bad_debt(deps: Deps, position_id: u64, vamm: String) -> StdResult<bool> {
