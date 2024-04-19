@@ -83,6 +83,12 @@ pub enum ExecuteMsg {
     RepegPrice {
         new_price: Option<Uint128>,
     },
+    AddWhitelist {
+        address: String,
+    },
+    RemoveWhitelist {
+        address: String,
+    },
 }
 
 #[cw_serde]
@@ -141,6 +147,10 @@ pub enum QueryMsg {
         direction: Direction,
         base_asset_amount: Uint128,
     },
+    #[returns(bool)]
+    IsWhitelisted { address: String },
+    #[returns(cw_controllers::HooksResponse)]
+    GetWhitelist {},
 }
 
 #[cw_serde]
