@@ -83,6 +83,12 @@ pub enum ExecuteMsg {
     RepegPrice {
         new_price: Option<Uint128>,
     },
+    AddWhitelist {
+        address: String,
+    },
+    RemoveWhitelist {
+        address: String,
+    },
 }
 
 #[cw_serde]

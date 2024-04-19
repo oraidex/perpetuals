@@ -102,4 +102,23 @@ fn test_repeg_price() {
 
     // new_invariant_k does not differ by more than 0.01%
     assert!(old_invariant_k.abs_diff(new_invariant_k) < old_invariant_k / Uint128::from(10000u128));
+
+    // update repeg failed,
+    let msg = ExecuteMsg::RepegPrice {
+        new_price: Some(new_spot_price),
+    };
+    let info = mock_info("addr0001", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap_err();
+
+    // whitelist can update repeg price
+    let msg = ExecuteMsg::AddWhitelist {
+        address: "addr0001".to_string(),
+    };
+    let info = mock_info("addr0000", &[]);
+    let _ = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+    let msg = ExecuteMsg::RepegPrice {
+        new_price: Some(new_spot_price),
+    };
+    let info = mock_info("addr0001", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
 }

@@ -14,6 +14,7 @@ use margined_utils::{
 use crate::{
     contract::{
         ONE_DAY_IN_SECONDS, ONE_HOUR_IN_SECONDS, ONE_MINUTE_IN_SECONDS, ONE_WEEK_IN_SECONDS, OWNER,
+        WHITELIST,
     },
     query::query_twap_price,
     state::{read_config, read_state, store_config, store_state, Config},
@@ -117,6 +118,26 @@ pub fn update_owner(deps: DepsMut, info: MessageInfo, owner: String) -> StdResul
         .map_err(|error| StdError::generic_err(error.to_string()))
 }
 
+// Adds an address to the whitelist for base asset holding cap
+pub fn add_whitelist(deps: DepsMut, info: MessageInfo, address: String) -> StdResult<Response> {
+    // validate the address
+    let valid_addr = deps.api.addr_validate(&address)?;
+
+    WHITELIST
+        .execute_add_hook(&OWNER, deps, info, valid_addr)
+        .map_err(|error| StdError::generic_err(error.to_string()))
+}
+
+// Removes an address to the whitelist for base asset holding cap
+pub fn remove_whitelist(deps: DepsMut, info: MessageInfo, address: String) -> StdResult<Response> {
+    // validate the address
+    let valid_addr = deps.api.addr_validate(&address)?;
+
+    WHITELIST
+        .execute_remove_hook(&OWNER, deps, info, valid_addr)
+        .map_err(|error| StdError::generic_err(error.to_string()))
+}
+
 pub fn set_open(deps: DepsMut, env: Env, info: MessageInfo, open: bool) -> StdResult<Response> {
     let config = read_config(deps.storage)?;
     let mut state = read_state(deps.storage)?;
@@ -152,7 +173,9 @@ pub fn repeg_price(
     new_price: Option<Uint128>,
 ) -> StdResult<Response> {
     // check permission and if state matches
-    if !OWNER.is_admin(deps.as_ref(), &info.sender)? {
+    if !WHITELIST.query_hook(deps.as_ref(), info.sender.to_string())?
+        && !OWNER.is_admin(deps.as_ref(), &info.sender)?
+    {
         return Err(StdError::generic_err("unauthorized"));
     }
 

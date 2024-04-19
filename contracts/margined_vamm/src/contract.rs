@@ -4,7 +4,7 @@ use cosmwasm_std::{
     to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Uint128,
 };
 use cw2::set_contract_version;
-use cw_controllers::Admin;
+use cw_controllers::{Admin, Hooks};
 use margined_common::{
     integer::Integer,
     validate::{validate_assets, validate_decimal_places, validate_non_fraction, validate_ratio},
@@ -14,7 +14,7 @@ use margined_utils::contracts::helpers::PricefeedController;
 
 use crate::{
     error::ContractError,
-    handle::{migrate_liquidity, repeg_price},
+    handle::{add_whitelist, migrate_liquidity, remove_whitelist, repeg_price},
     // handle::change_reserve,
     state::read_config,
     utils::{TwapCalcOption, TwapInputAsset},
@@ -35,6 +35,8 @@ const CONTRACT_NAME: &str = "crates.io:margined-vamm";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 /// Owner admin
 pub const OWNER: Admin = Admin::new("owner");
+/// Hooks controller for the base asset holding whitelist
+pub const WHITELIST: Hooks = Hooks::new("whitelist");
 
 pub const ONE_MINUTE_IN_SECONDS: u64 = 60;
 pub const ONE_HOUR_IN_SECONDS: u64 = 60 * 60;
@@ -195,6 +197,8 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             liquidity_multiplier,
         ),
         ExecuteMsg::RepegPrice { new_price } => repeg_price(deps, env, info, new_price),
+        ExecuteMsg::AddWhitelist { address } => add_whitelist(deps, info, address),
+        ExecuteMsg::RemoveWhitelist { address } => remove_whitelist(deps, info, address),
     }
 }
 
