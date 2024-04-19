@@ -14,7 +14,7 @@ use margined_utils::contracts::helpers::PricefeedController;
 
 use crate::{
     error::ContractError,
-    handle::migrate_liquidity,
+    handle::{migrate_liquidity, repeg_price},
     // handle::change_reserve,
     state::read_config,
     utils::{TwapCalcOption, TwapInputAsset},
@@ -194,6 +194,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             fluctuation_limit_ratio,
             liquidity_multiplier,
         ),
+        ExecuteMsg::RepegPrice { new_price } => repeg_price(deps, env, info, new_price),
     }
 }
 
