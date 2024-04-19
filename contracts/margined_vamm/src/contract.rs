@@ -277,6 +277,8 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             direction,
             base_asset_amount,
         )?),
+        QueryMsg::IsWhitelisted { address } => to_binary(&WHITELIST.query_hook(deps, address)?),
+        QueryMsg::GetWhitelist {} => to_binary(&WHITELIST.query_hooks(deps)?),
     }
 }
 
