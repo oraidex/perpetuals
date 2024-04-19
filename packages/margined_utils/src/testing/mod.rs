@@ -304,7 +304,7 @@ impl NativeTokenScenario {
                 .engine
                 .open_position(
                     self.vamm.0.to_string(),
-                    side.clone(),
+                    side,
                     quote_asset_amount,
                     leverage,
                     take_profit,
@@ -633,7 +633,7 @@ impl SimpleScenario {
                 .engine
                 .open_position(
                     self.vamm.0.to_string(),
-                    side.clone(),
+                    side,
                     quote_asset_amount,
                     leverage,
                     take_profit,
@@ -1025,7 +1025,7 @@ pub fn to_decimals(input: u64) -> Uint128 {
 }
 
 pub fn from_decimals(input: Uint128) -> String {
-    Decimal::from_ratio(input, Uint128::from(DECIMAL_MULTIPLIER)).to_string()
+    Decimal::from_ratio(input, DECIMAL_MULTIPLIER).to_string()
 }
 
 pub fn parse_event(res: &Response, key: &str) -> String {

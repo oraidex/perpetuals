@@ -24,6 +24,8 @@ use crate::{
     },
 };
 
+type FilterFn = Box<dyn Fn(&Side) -> bool>;
+
 /// Queries contract Config
 pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
     read_config(deps.storage)
@@ -68,9 +70,9 @@ pub fn query_positions(
     limit: Option<u32>,
     order_by: Option<i32>,
 ) -> StdResult<Vec<Position>> {
-    let order_by = order_by.map_or(None, |val| Order::try_from(val).ok());
+    let order_by = order_by.and_then(|val| Order::try_from(val).ok());
 
-    let (direction_filter, direction_key): (Box<dyn Fn(&Side) -> bool>, Vec<u8>) = match side {
+    let (direction_filter, direction_key): (FilterFn, Vec<u8>) = match side {
         // copy value to closure
         Some(d) => (Box::new(move |x| d.eq(x)), d.as_bytes().to_vec()),
         None => (Box::new(|_| true), Side::Buy.as_bytes().to_vec()),
@@ -217,7 +219,7 @@ pub fn query_margin_ratio(deps: Deps, position: &Position) -> StdResult<Integer>
     let PositionUnrealizedPnlResponse {
         position_notional,
         unrealized_pnl,
-    } = get_position_notional_unrealized_pnl(deps, &position, PnlCalcOption::SpotPrice)?;
+    } = get_position_notional_unrealized_pnl(deps, position, PnlCalcOption::SpotPrice)?;
 
     let remain_margin = calc_remain_margin_with_funding_payment(deps, position, unrealized_pnl)?;
 

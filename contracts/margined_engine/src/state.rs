@@ -32,7 +32,8 @@ pub static PREFIX_TICK: &[u8] = b"tick"; // this is tick with value is the total
 pub type Config = ConfigResponse;
 
 pub fn store_config(storage: &mut dyn Storage, config: &Config) -> StdResult<()> {
-    Ok(storage.set(KEY_CONFIG, &to_vec(config)?))
+    storage.set(KEY_CONFIG, &to_vec(config)?);
+    Ok(())
 }
 
 pub fn read_config(storage: &dyn Storage) -> StdResult<Config> {
@@ -62,7 +63,8 @@ pub fn read_last_position_id(storage: &dyn Storage) -> StdResult<u64> {
 }
 
 pub fn store_state(storage: &mut dyn Storage, state: &State) -> StdResult<()> {
-    Ok(storage.set(KEY_STATE, &to_vec(state)?))
+    storage.set(KEY_STATE, &to_vec(state)?);
+    Ok(())
 }
 
 pub fn read_state(storage: &dyn Storage) -> StdResult<State> {
@@ -236,7 +238,8 @@ impl SentFunds {
 }
 
 pub fn store_sent_funds(storage: &mut dyn Storage, funds: &SentFunds) -> StdResult<()> {
-    Ok(storage.set(KEY_SENT_FUNDS, &to_vec(funds)?))
+    storage.set(KEY_SENT_FUNDS, &to_vec(funds)?);
+    Ok(())
 }
 
 pub fn remove_sent_funds(storage: &mut dyn Storage) {
@@ -271,11 +274,12 @@ pub struct TmpSwapInfo {
 
 pub fn store_tmp_swap(storage: &mut dyn Storage, swap: &TmpSwapInfo) -> StdResult<()> {
     let position_id_key = &swap.position_id.to_be_bytes();
-    Ok(Bucket::new(storage, KEY_TMP_SWAP).save(position_id_key, swap)?)
+    Bucket::new(storage, KEY_TMP_SWAP).save(position_id_key, swap)?;
+    Ok(())
 }
 
-pub fn remove_tmp_swap<'a>(storage: &'a mut dyn Storage, position_id_key: &[u8]) {
-    Bucket::<'a, TmpSwapInfo>::new(storage, KEY_TMP_SWAP).remove(position_id_key)
+pub fn remove_tmp_swap(storage: &mut dyn Storage, position_id_key: &[u8]) {
+    Bucket::<'_, TmpSwapInfo>::new(storage, KEY_TMP_SWAP).remove(position_id_key)
 }
 
 pub fn read_tmp_swap(storage: &dyn Storage, position_id_key: &[u8]) -> StdResult<TmpSwapInfo> {
@@ -283,7 +287,8 @@ pub fn read_tmp_swap(storage: &dyn Storage, position_id_key: &[u8]) -> StdResult
 }
 
 pub fn store_tmp_liquidator(storage: &mut dyn Storage, liquidator: &Addr) -> StdResult<()> {
-    Ok(storage.set(KEY_TMP_LIQUIDATOR, &to_vec(liquidator)?))
+    storage.set(KEY_TMP_LIQUIDATOR, &to_vec(liquidator)?);
+    Ok(())
 }
 
 pub fn remove_tmp_liquidator(storage: &mut dyn Storage) {
@@ -311,10 +316,11 @@ pub struct VammMap {
 }
 
 pub fn store_vamm_map(storage: &mut dyn Storage, vamm: Addr, vamm_map: &VammMap) -> StdResult<()> {
-    Ok(storage.set(
+    storage.set(
         &[KEY_VAMM_MAP, vamm.as_bytes()].concat(),
         &to_vec(vamm_map)?,
-    ))
+    );
+    Ok(())
 }
 
 pub fn read_vamm_map(storage: &dyn Storage, vamm: &Addr) -> StdResult<VammMap> {

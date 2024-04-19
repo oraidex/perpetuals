@@ -8,7 +8,8 @@ pub static KEY_LAST_ROUND_ID: &[u8] = b"last_round_id";
 pub type Config = ConfigResponse;
 
 pub fn store_config(storage: &mut dyn Storage, config: &Config) -> StdResult<()> {
-    Ok(storage.set(KEY_CONFIG, &to_vec(config)?))
+    storage.set(KEY_CONFIG, &to_vec(config)?);
+    Ok(())
 }
 
 pub fn store_price_data(
@@ -24,10 +25,11 @@ pub fn store_price_data(
         timestamp: Timestamp::from_seconds(timestamp),
     };
     store_last_round_id(storage, &key, price_data.round_id)?;
-    Ok(storage.set(
+    storage.set(
         &[PRICES, key.as_bytes(), &price_data.round_id.to_be_bytes()].concat(),
         &to_vec(&price_data)?,
-    ))
+    );
+    Ok(())
 }
 
 pub fn read_price_data(storage: &dyn Storage, key: String, round_id: u64) -> StdResult<PriceData> {
@@ -42,10 +44,11 @@ pub fn store_last_round_id(
     key: &String,
     round_id: u64,
 ) -> StdResult<()> {
-    Ok(storage.set(
+    storage.set(
         &[KEY_LAST_ROUND_ID, key.as_bytes()].concat(),
         &to_vec(&round_id)?,
-    ))
+    );
+    Ok(())
 }
 
 pub fn read_last_round_id(storage: &dyn Storage, key: &String) -> StdResult<u64> {

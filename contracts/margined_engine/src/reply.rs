@@ -39,7 +39,7 @@ pub fn open_position_reply(
         vamm: swap.vamm.clone(),
         trader: swap.trader.clone(),
         pair: swap.pair,
-        side: swap.side.clone(),
+        side: swap.side,
         direction: side_to_direction(&swap.side),
         size: Integer::zero(),
         margin: Uint128::zero(),
@@ -71,11 +71,8 @@ pub fn open_position_reply(
     )?;
 
     // define variables that differ across increase and decrease scenario
-    let swap_margin;
-    let margin_delta;
-
     // calculate margin needed given swap
-    swap_margin = swap
+    let swap_margin = swap
         .open_notional
         .checked_mul(config.decimals)?
         .checked_div(swap.leverage)?;
@@ -84,7 +81,7 @@ pub fn open_position_reply(
         .margin_to_vault
         .checked_add(Integer::new_positive(swap_margin))?;
 
-    margin_delta = Integer::new_positive(swap_margin);
+    let margin_delta = Integer::new_positive(swap_margin);
 
     // calculate the remaining margin
     let RemainMarginResponse {
@@ -210,22 +207,20 @@ pub fn close_position_reply(
         withdraw_amount.value = withdraw_amount
             .value
             .checked_sub(position.spread_fee.checked_add(position.toll_fee)?)?;
-    } else {
-        if !position
-            .spread_fee
-            .checked_add(position.toll_fee)?
-            .is_zero()
-        {
-            // If withdraw_amount < spread_fee + toll_fee, we need to re-caculate fees
-            // new_spread_fee = withdraw_amount * spread_fee / (spread_fee + toll_fee)
-            // new_toll_fee = withdraw_amount - new_spread_fee
-            spread_fee = withdraw_amount
-                .value
-                .checked_mul(position.spread_fee)?
-                .checked_div(position.spread_fee.checked_add(position.toll_fee)?)?;
-            toll_fee = withdraw_amount.value.checked_sub(spread_fee)?;
-            withdraw_amount.value = Uint128::zero();
-        }
+    } else if !position
+        .spread_fee
+        .checked_add(position.toll_fee)?
+        .is_zero()
+    {
+        // If withdraw_amount < spread_fee + toll_fee, we need to re-caculate fees
+        // new_spread_fee = withdraw_amount * spread_fee / (spread_fee + toll_fee)
+        // new_toll_fee = withdraw_amount - new_spread_fee
+        spread_fee = withdraw_amount
+            .value
+            .checked_mul(position.spread_fee)?
+            .checked_div(position.spread_fee.checked_add(position.toll_fee)?)?;
+        toll_fee = withdraw_amount.value.checked_sub(spread_fee)?;
+        withdraw_amount.value = Uint128::zero();
     }
 
     // to prevent attacker to leverage the bad debt to withdraw extra token from insurance fund

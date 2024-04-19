@@ -53,17 +53,16 @@ pub fn execute_transfer_to_insurance_fund(
 
     match config.insurance_fund {
         Some(insurance_fund) => execute_transfer(deps.storage, &insurance_fund, amount_to_send),
-        None => return Err(StdError::generic_err("insurance fund is not registered")),
+        None => Err(StdError::generic_err("insurance fund is not registered")),
     }
 }
 
 pub fn execute_insurance_fund_withdrawal(deps: Deps, amount: Uint128) -> StdResult<SubMsg> {
     let config = read_config(deps.storage)?;
 
-    let insurance_fund = match config.insurance_fund {
-        Some(insurance_fund) => insurance_fund,
-        None => return Err(StdError::generic_err("insurance fund is not registered")),
-    };
+    let insurance_fund = config
+        .insurance_fund
+        .ok_or_else(|| StdError::generic_err("insurance fund is not registered"))?;
 
     let msg = wasm_execute(
         insurance_fund,
