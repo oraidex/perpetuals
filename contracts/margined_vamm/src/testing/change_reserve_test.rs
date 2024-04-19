@@ -87,7 +87,7 @@ fn test_repeg_price() {
     let new_spot_price = sport_price.checked_div(Uint128::from(2u128)).unwrap();
 
     let msg = ExecuteMsg::RepegPrice {
-        new_price: new_spot_price,
+        new_price: Some(new_spot_price),
     };
     let info = mock_info("addr0000", &[]);
     let _ = execute(deps.as_mut(), mock_env(), info, msg).unwrap();

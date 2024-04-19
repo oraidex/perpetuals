@@ -149,12 +149,24 @@ pub fn repeg_price(
     deps: DepsMut,
     env: Env,
     info: MessageInfo,
-    new_price: Uint128,
+    new_price: Option<Uint128>,
 ) -> StdResult<Response> {
     // check permission and if state matches
     if !OWNER.is_admin(deps.as_ref(), &info.sender)? {
         return Err(StdError::generic_err("unauthorized"));
     }
+
+    let new_price = match new_price {
+        Some(val) => val,
+        None => {
+            let config = read_config(deps.storage)?;
+            let pricefeed_controller = PricefeedController(config.pricefeed);
+
+            pricefeed_controller
+                .get_price(&deps.querier, config.base_asset)
+                .unwrap_or_default()
+        }
+    };
 
     if new_price.is_zero() {
         return Err(StdError::generic_err("new price can't be 0"));

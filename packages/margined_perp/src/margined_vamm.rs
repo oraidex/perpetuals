@@ -81,7 +81,7 @@ pub enum ExecuteMsg {
         liquidity_multiplier: Uint128,
     },
     RepegPrice {
-        new_price: Uint128,
+        new_price: Option<Uint128>,
     },
 }
 
