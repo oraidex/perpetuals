@@ -233,6 +233,13 @@ pub fn repeg_price(
     Ok(Response::new().add_attributes(vec![
         ("action", "repeg_price"),
         ("new_price", &new_price.to_string()),
+        ("vamm", env.contract.address.as_str()),
+        ("timestamp", &env.block.time.seconds().to_string()),
+        (
+            "quote_asset_reserve",
+            &state.quote_asset_reserve.to_string(),
+        ),
+        ("base_asset_reserve", &state.base_asset_reserve.to_string()),
     ]))
 }
 
