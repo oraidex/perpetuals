@@ -4,9 +4,9 @@ use margined_perp::margined_insurance_fund::{
     VammStatusResponse,
 };
 
-use cosmwasm_std::{Addr, CosmosMsg, QuerierWrapper, StdResult, Uint128};
+use cosmwasm_std::{Addr, CosmosMsg, QuerierWrapper, StdResult};
 
-use margined_common::{asset::AssetInfo, messages::wasm_execute};
+use margined_common::messages::wasm_execute;
 
 /// InsuranceFundController is a wrapper around Addr that provides a lot of helpers
 /// for working with this.
@@ -40,11 +40,6 @@ impl InsuranceFundController {
 
     pub fn shutdown_vamms(&self) -> StdResult<CosmosMsg> {
         let msg = ExecuteMsg::ShutdownVamms {};
-        wasm_execute(&self.0, &msg, vec![])
-    }
-
-    pub fn withdraw_fund(&self, token: AssetInfo, amount: Uint128) -> StdResult<CosmosMsg> {
-        let msg = ExecuteMsg::WithdrawFund { token, amount };
         wasm_execute(&self.0, &msg, vec![])
     }
 
