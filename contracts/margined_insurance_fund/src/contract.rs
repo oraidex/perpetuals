@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use crate::error::ContractError;
 use crate::{
-    handle::{add_vamm, remove_vamm, shutdown_all_vamm, update_owner, withdraw},
+    handle::{add_vamm, remove_vamm, shutdown_all_vamm, update_owner, withdraw, withdraw_fund},
     query::{
         query_all_vamm, query_config, query_is_vamm, query_owner, query_status_all_vamm,
         query_vamm_status,
@@ -50,6 +50,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
         ExecuteMsg::RemoveVamm { vamm } => remove_vamm(deps, info, vamm),
         ExecuteMsg::Withdraw { token, amount } => withdraw(deps, info, token, amount),
         ExecuteMsg::ShutdownVamms {} => shutdown_all_vamm(deps, env, info),
+        ExecuteMsg::WithdrawFund { token, amount } => withdraw_fund(deps, info, token, amount),
     }
 }
 

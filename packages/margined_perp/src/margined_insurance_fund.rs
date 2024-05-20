@@ -14,6 +14,7 @@ pub enum ExecuteMsg {
     RemoveVamm { vamm: String },
     Withdraw { token: AssetInfo, amount: Uint128 },
     ShutdownVamms {},
+    WithdrawFund { token: AssetInfo, amount: Uint128 },
 }
 
 #[cw_serde]

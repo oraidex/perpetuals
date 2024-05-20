@@ -107,3 +107,25 @@ pub fn withdraw(
             ("amount", &amount.to_string()),
         ]))
 }
+
+pub fn withdraw_fund(
+    deps: DepsMut,
+    info: MessageInfo,
+    token: AssetInfo,
+    amount: Uint128,
+) -> StdResult<Response> {
+    // check permission
+    if !OWNER.is_admin(deps.as_ref(), &info.sender)? {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    // send tokens if native or cw20
+    let transfer_msg = token.into_msg(info.sender.to_string(), amount, None)?;
+
+    Ok(Response::default()
+        .add_message(transfer_msg)
+        .add_attributes(vec![
+            ("action", "insurance_withdraw_to_operator"),
+            ("amount", &amount.to_string()),
+        ]))
+}
