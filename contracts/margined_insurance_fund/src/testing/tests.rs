@@ -1,7 +1,8 @@
 use crate::contract::{execute, instantiate, query};
 use crate::testing::new_shutdown_scenario;
 use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
-use cosmwasm_std::{from_binary, Addr, StdError};
+use cosmwasm_std::{from_binary, Addr, StdError, SubMsg, Uint128};
+use margined_common::asset::AssetInfo;
 use margined_perp::margined_insurance_fund::{
     ConfigResponse, ExecuteMsg, InstantiateMsg, OwnerResponse, QueryMsg,
 };
@@ -681,4 +682,47 @@ fn test_incompatible_decimals() {
         },
         err.downcast().unwrap()
     );
+}
+
+#[test]
+fn tet_withdraw_fund_to_operator() {
+    let mut deps = mock_dependencies();
+    let msg = InstantiateMsg {
+        engine: ENGINE.to_string(),
+    };
+    let info = mock_info("owner", &[]);
+
+    instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
+
+    let token = AssetInfo::Token {
+        contract_addr: Addr::unchecked("usdc"),
+    };
+    let msg = ExecuteMsg::WithdrawFund {
+        token: token.clone(),
+        amount: Uint128::one(),
+    };
+
+    // withdraw fund failed, unauthorized
+    let info = mock_info("addr0000", &[]);
+    let err = execute(deps.as_mut(), mock_env(), info, msg.clone()).unwrap_err();
+    assert_eq!(err, StdError::generic_err("unauthorized"));
+
+    // withdraw fund to operator successful
+    let info = mock_info("owner", &[]);
+    let res = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+    assert_eq!(
+        res.attributes,
+        vec![
+            ("action", "insurance_withdraw_to_operator"),
+            ("amount", &Uint128::one().to_string())
+        ]
+    );
+    assert_eq!(
+        res.messages,
+        vec![SubMsg::new(
+            token
+                .into_msg("owner".to_string(), Uint128::one(), None)
+                .unwrap()
+        )]
+    )
 }
