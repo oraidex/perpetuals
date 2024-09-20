@@ -60,6 +60,8 @@ pub enum QueryMsg {
     GetLastRoundId { key: String },
     #[returns(ExecutorResponse)]
     GetExecutor {},
+    #[returns(PriceDetailResponse)]
+    GetPriceDetail { key: String },
 }
 
 #[cw_serde]
@@ -73,4 +75,10 @@ pub struct OwnerResponse {
 #[cw_serde]
 pub struct ExecutorResponse {
     pub executor: Addr,
+}
+
+#[cw_serde]
+pub struct PriceDetailResponse {
+    pub price: Uint128,
+    pub timestamp: Timestamp,
 }
