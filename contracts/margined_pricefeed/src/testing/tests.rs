@@ -1,8 +1,8 @@
 use crate::contract::{execute, instantiate, query};
 use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
-use cosmwasm_std::{from_binary, Addr, Uint128};
+use cosmwasm_std::{from_binary, Addr, Timestamp, Uint128};
 use margined_perp::margined_pricefeed::{
-    ConfigResponse, ExecuteMsg, InstantiateMsg, OwnerResponse, QueryMsg,
+    ConfigResponse, ExecuteMsg, InstantiateMsg, OwnerResponse, PriceDetailResponse, QueryMsg,
 };
 
 #[test]
@@ -116,6 +116,19 @@ fn test_set_and_get_price() {
     .unwrap();
     let price: Uint128 = from_binary(&res).unwrap();
     assert_eq!(price, Uint128::from(600_000_000u128),);
+
+    // get price detail
+    let res = query(
+        deps.as_ref(),
+        mock_env(),
+        QueryMsg::GetPriceDetail {
+            key: "ETHUSD".to_string(),
+        },
+    )
+    .unwrap();
+    let price_detail: PriceDetailResponse = from_binary(&res).unwrap();
+    assert_eq!(price_detail.price, Uint128::from(600_000_000u128));
+    assert_eq!(price_detail.timestamp, Timestamp::from_seconds(1_000_001));
 }
 
 #[test]

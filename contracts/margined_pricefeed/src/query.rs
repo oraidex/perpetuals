@@ -1,5 +1,7 @@
 use cosmwasm_std::{Deps, Env, StdError, StdResult, Uint128};
-use margined_perp::margined_pricefeed::{ConfigResponse, ExecutorResponse, OwnerResponse};
+use margined_perp::margined_pricefeed::{
+    ConfigResponse, ExecutorResponse, OwnerResponse, PriceDetailResponse,
+};
 
 use crate::{
     contract::{EXECUTOR, OWNER},
@@ -34,6 +36,16 @@ pub fn query_get_price(deps: Deps, key: String) -> StdResult<Uint128> {
     let last_round_id = read_last_round_id(deps.storage, &key)?;
     let price_data = read_price_data(deps.storage, key, last_round_id)?;
     Ok(price_data.price)
+}
+
+/// Queries latest price for pair stored with key
+pub fn query_get_price_detail(deps: Deps, key: String) -> StdResult<PriceDetailResponse> {
+    let last_round_id = read_last_round_id(deps.storage, &key)?;
+    let price_data = read_price_data(deps.storage, key, last_round_id)?;
+    Ok(PriceDetailResponse {
+        price: price_data.price,
+        timestamp: price_data.timestamp,
+    })
 }
 
 /// Queries previous price for pair stored with key

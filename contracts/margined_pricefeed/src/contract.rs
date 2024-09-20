@@ -1,6 +1,6 @@
 use crate::error::ContractError;
 use crate::handle::update_executor;
-use crate::query::{query_executor, query_last_round_id};
+use crate::query::{query_executor, query_get_price_detail, query_last_round_id};
 use crate::{
     handle::{append_multiple_price, append_price, update_owner},
     query::{
@@ -81,6 +81,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         }
         QueryMsg::GetLastRoundId { key } => to_binary(&query_last_round_id(deps, key)?),
         QueryMsg::GetExecutor {} => to_binary(&query_executor(deps)?),
+        QueryMsg::GetPriceDetail { key } => to_binary(&query_get_price_detail(deps, key)?),
     }
 }
 
