@@ -147,6 +147,9 @@ pub fn open_position(
     stop_loss: Option<Uint128>,
     base_asset_limit: Uint128,
 ) -> StdResult<Response> {
+
+     return Err(StdError::generic_err("Paused"));
+
     // validate address inputs
     let vamm = deps.api.addr_validate(&vamm)?;
     let vamm_controller = VammController(vamm.clone());
