@@ -627,3 +627,14 @@ pub fn position_is_liquidated(
         Ok(false)
     }
 }
+
+pub fn require_is_not_over_spread_limit(
+    deps: Deps,
+    vamm_controller: &VammController,
+) -> StdResult<Response> {
+    if vamm_controller.is_over_spread_limit(&deps.querier)? {
+        return Err(StdError::generic_err("Over spread limit"));
+    }
+
+    Ok(Response::new())
+}
