@@ -43,7 +43,7 @@ impl VammController {
                 insurance_fund,
                 pricefeed,
                 spot_price_twap_interval,
-                initial_margin_ratio
+                initial_margin_ratio,
             },
             vec![],
         )
@@ -64,7 +64,7 @@ impl VammController {
             insurance_fund: None,
             pricefeed: None,
             spot_price_twap_interval: None,
-            initial_margin_ratio: None
+            initial_margin_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -80,7 +80,7 @@ impl VammController {
             insurance_fund: None,
             pricefeed: None,
             spot_price_twap_interval: None,
-            initial_margin_ratio: None
+            initial_margin_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -99,7 +99,7 @@ impl VammController {
             insurance_fund: None,
             pricefeed: None,
             spot_price_twap_interval: None,
-            initial_margin_ratio: None
+            initial_margin_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -118,7 +118,7 @@ impl VammController {
             insurance_fund: None,
             pricefeed: None,
             spot_price_twap_interval: None,
-            initial_margin_ratio: None
+            initial_margin_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -137,7 +137,7 @@ impl VammController {
             insurance_fund: None,
             pricefeed: None,
             spot_price_twap_interval: None,
-            initial_margin_ratio: None
+            initial_margin_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -186,6 +186,11 @@ impl VammController {
         wasm_execute(&self.0, &msg, vec![])
     }
 
+    pub fn repeg_price(&self, new_price: Option<Uint128>) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::RepegPrice { new_price };
+        wasm_execute(&self.0, &msg, vec![])
+    }
+
     /// get margin vamm configuration
     pub fn config(&self, querier: &QuerierWrapper) -> StdResult<ConfigResponse> {
         querier.query_wasm_smart(&self.0, &QueryMsg::Config {})
@@ -205,7 +210,7 @@ impl VammController {
     ) -> StdResult<Uint128> {
         querier.query_wasm_smart(&self.0, &QueryMsg::InputPrice { direction, amount })
     }
-    
+
     /// get output price
     pub fn output_price(
         &self,

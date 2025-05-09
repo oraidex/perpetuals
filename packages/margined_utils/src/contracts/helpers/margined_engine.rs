@@ -280,6 +280,26 @@ impl EngineController {
         wasm_execute(&self.0, &msg, vec![])
     }
 
+    pub fn set_relayer(&self, relayers: Vec<Addr>) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::SetRelayer { relayers };
+        wasm_execute(&self.0, &msg, vec![])
+    }
+
+    pub fn remove_relayer(&self, relayers: Vec<Addr>) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::RemoveRelayer { relayers };
+        wasm_execute(&self.0, &msg, vec![])
+    }
+
+    pub fn whitelist_trader(&self, traders: Vec<Addr>) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::WhitelistTrader { traders };
+        wasm_execute(&self.0, &msg, vec![])
+    }
+
+    pub fn remove_whitelist_trader(&self, traders: Vec<Addr>) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::RemoveWhitelistTrader { traders };
+        wasm_execute(&self.0, &msg, vec![])
+    }
+
     /// get margin engine configuration
     pub fn config(&self, querier: &QuerierWrapper) -> StdResult<ConfigResponse> {
         let msg = QueryMsg::Config {};

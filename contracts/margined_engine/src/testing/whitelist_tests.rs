@@ -546,3 +546,33 @@ fn test_whitelist_wont_stop_trading_if_reduce_pos() {
 
     assert!(res.is_ok())
 }
+
+#[test]
+fn test_whitelist_relayer() {
+    let SimpleScenario {
+        mut router,
+        alice,
+        owner,
+        engine,
+        ..
+    } = new_simple_scenario();
+
+    // add alice to whitelist fail, unathorized
+    let msg = engine.set_relayer(vec![alice.clone()]).unwrap();
+    let err = router.execute(alice.clone(), msg).unwrap_err();
+
+    assert_eq!(
+        StdError::GenericErr {
+            msg: "Unauthorized".to_string(),
+        },
+        err.downcast().unwrap()
+    );
+
+    // add alice to whitelist success
+    let msg = engine.set_relayer(vec![alice.clone()]).unwrap();
+    router.execute(owner.clone(), msg).unwrap();
+
+    // remove alice from whitelist success
+    let msg = engine.remove_relayer(vec![alice.clone()]).unwrap();
+    router.execute(owner.clone(), msg).unwrap();
+}
