@@ -1,10 +1,4 @@
-use cosmwasm_std::{
-    Addr, DepsMut, Env, MessageInfo, Order, Response, StdError, StdResult, Storage, SubMsg, Uint128,
-};
-use margined_utils::{
-    contracts::helpers::VammController, tools::price_swap::get_output_price_with_reserves,
-};
-
+use crate::auth::is_whitelisted;
 use crate::{
     contract::{
         CLOSE_POSITION_REPLY_ID, INCREASE_POSITION_REPLY_ID, LIQUIDATION_REPLY_ID,
@@ -27,6 +21,9 @@ use crate::{
         require_position_not_zero, require_vamm, side_to_direction, update_reserve,
     },
 };
+use cosmwasm_std::{
+    Addr, DepsMut, Env, MessageInfo, Order, Response, StdError, StdResult, Storage, SubMsg, Uint128,
+};
 use margined_common::{
     asset::{Asset, AssetInfo},
     integer::Integer,
@@ -37,6 +34,9 @@ use margined_perp::margined_engine::{
     PnlCalcOption, Position, PositionFilter, PositionUnrealizedPnlResponse, Side,
 };
 use margined_perp::margined_vamm::{CalcFeeResponse, Direction, ExecuteMsg};
+use margined_utils::{
+    contracts::helpers::VammController, tools::price_swap::get_output_price_with_reserves,
+};
 
 pub fn update_operator(
     deps: DepsMut,
@@ -153,6 +153,9 @@ pub fn open_position(
     let config = read_config(deps.storage)?;
     let state = read_state(deps.storage)?;
     let trader = info.sender.clone();
+
+    // check if trader is whitelisted
+    is_whitelisted(deps.as_ref(), trader.clone())?;
 
     require_not_paused(state.pause)?;
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;

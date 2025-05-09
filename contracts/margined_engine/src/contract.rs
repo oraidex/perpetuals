@@ -9,6 +9,7 @@ use margined_common::validate::{
 };
 use margined_perp::margined_engine::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
+use crate::auth::{remove_relayer, remove_whitelist_trader, set_relayer, whitelist_trader};
 use crate::error::ContractError;
 use crate::handle::{trigger_mutiple_tp_sl, trigger_tp_sl, update_operator, update_tp_sl};
 use crate::query::{
@@ -94,7 +95,6 @@ pub fn instantiate(
 
     // validate that the maintenance margin is not greater than the initial
     validate_margin_ratios(msg.initial_margin_ratio, msg.maintenance_margin_ratio)?;
-
     // config parameters
     let config = Config {
         owner: info.sender,
@@ -108,6 +108,7 @@ pub fn instantiate(
         partial_liquidation_ratio: Uint128::zero(), // set as zero by default
         tp_sl_spread: msg.tp_sl_spread,
         liquidation_fee: msg.liquidation_fee,
+        enable_whitelist: false,
     };
 
     // Initialize last position id
@@ -217,6 +218,12 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             amount,
         } => withdraw_margin(deps, env, info, vamm, position_id, amount),
         ExecuteMsg::SetPause { pause } => set_pause(deps, env, info, pause),
+        ExecuteMsg::WhitelistTrader { traders } => whitelist_trader(deps, info, traders),
+        ExecuteMsg::RemoveWhitelistTrader { traders } => {
+            remove_whitelist_trader(deps, info, traders)
+        }
+        ExecuteMsg::SetRelayer { relayers } => set_relayer(deps, info, relayers),
+        ExecuteMsg::RemoveRelayer { relayers } => remove_relayer(deps, info, relayers),
     }
 }
 

@@ -53,6 +53,7 @@ fn test_instantiation() {
             partial_liquidation_ratio: Uint128::zero(),
             tp_sl_spread: Uint128::from(50_000u128),
             liquidation_fee: Uint128::from(100u128),
+            enable_whitelist: false,
         }
     );
 }
@@ -107,6 +108,7 @@ fn test_update_config() {
             partial_liquidation_ratio: Uint128::zero(),
             tp_sl_spread: Uint128::from(50_000u128),
             liquidation_fee: Uint128::from(100u128),
+            enable_whitelist: false,
         }
     );
 

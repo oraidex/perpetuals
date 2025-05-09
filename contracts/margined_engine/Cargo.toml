@@ -27,6 +27,7 @@ cosmwasm-std = { workspace = true }
 cosmwasm-schema = { workspace = true }
 thiserror = { workspace = true }
 cosmwasm-storage = { workspace = true }
+cw-storage-plus = { workspace = true }
 
 margined_utils = { workspace = true }
 margined_perp = { workspace = true }

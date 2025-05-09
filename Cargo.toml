@@ -35,6 +35,7 @@ cw20-base = { version = "1.0.1" }
 cw-multi-test = { git = "https://github.com/oraichain/cw-multi-test.git" } # fix _contract_address attribute
 cw-utils = "1.0.1"
 subtle = "2.5"
+cw-storage-plus = "1.0.1"
 
 margined_utils = { path = "./packages/margined_utils" }
 margined_perp = { path = "./packages/margined_perp" }

@@ -122,6 +122,18 @@ pub enum ExecuteMsg {
     SetPause {
         pause: bool,
     },
+    WhitelistTrader {
+        traders: Vec<Addr>,
+    },
+    RemoveWhitelistTrader {
+        traders: Vec<Addr>,
+    },
+    SetRelayer {
+        relayers: Vec<Addr>,
+    },
+    RemoveRelayer {
+        relayers: Vec<Addr>,
+    },
 }
 
 #[cw_serde]
@@ -215,6 +227,8 @@ pub struct ConfigResponse {
     pub tp_sl_spread: Uint128,
     pub liquidation_fee: Uint128,
     pub operator: Option<Addr>,
+    #[serde(default)]
+    pub enable_whitelist: bool,
 }
 
 #[cw_serde]
