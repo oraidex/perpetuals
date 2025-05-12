@@ -7,7 +7,7 @@ use cosmwasm_storage::{singleton, singleton_read, Bucket, ReadonlyBucket};
 use std::cmp::Ordering;
 
 use margined_common::{asset::Asset, integer::Integer};
-use margined_perp::margined_engine::{ConfigResponse, Position, Side};
+use margined_perp::margined_engine::{ConfigResponse, Position, Side, TradingConfigResponse};
 
 use crate::utils::calc_range_start;
 
@@ -15,6 +15,7 @@ use crate::utils::calc_range_start;
 pub const MAX_LIMIT: u32 = 100;
 pub const DEFAULT_LIMIT: u32 = 10;
 
+pub static KEY_TRADING_CONFIG: &[u8] = b"trading_config";
 pub static KEY_CONFIG: &[u8] = b"config";
 pub static KEY_STATE: &[u8] = b"state";
 pub static KEY_SENT_FUNDS: &[u8] = b"sent-funds";
@@ -30,6 +31,7 @@ pub static PREFIX_POSITION_BY_TRADER: &[u8] = b"position_by_trader"; // position
 pub static PREFIX_TICK: &[u8] = b"tick"; // this is tick with value is the total positions
 
 pub type Config = ConfigResponse;
+pub type TradingConfig = TradingConfigResponse;
 
 pub fn store_config(storage: &mut dyn Storage, config: &Config) -> StdResult<()> {
     storage.set(KEY_CONFIG, &to_vec(config)?);
@@ -43,6 +45,17 @@ pub fn read_config(storage: &dyn Storage) -> StdResult<Config> {
     }
 }
 
+pub fn store_trading_config(storage: &mut dyn Storage, config: &TradingConfig) -> StdResult<()> {
+    storage.set(KEY_TRADING_CONFIG, &to_vec(config)?);
+    Ok(())
+}
+
+pub fn read_trading_config(storage: &dyn Storage) -> StdResult<TradingConfig> {
+    match storage.get(KEY_TRADING_CONFIG) {
+        Some(data) => from_slice(&data),
+        None => Err(StdError::generic_err("Trading config not found")),
+    }
+}
 #[cw_serde]
 pub struct State {
     pub open_interest_notional: Uint128,

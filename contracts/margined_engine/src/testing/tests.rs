@@ -30,8 +30,6 @@ fn test_instantiation() {
         maintenance_margin_ratio: Uint128::from(50_000u128), // 0.05
         tp_sl_spread: Uint128::from(50_000u128),         // 0.05
         liquidation_fee: Uint128::from(100u128),
-        enable_whitelist: None,
-        max_notional_size: None,
     };
     let info = mock_info(OWNER, &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -55,8 +53,6 @@ fn test_instantiation() {
             partial_liquidation_ratio: Uint128::zero(),
             tp_sl_spread: Uint128::from(50_000u128),
             liquidation_fee: Uint128::from(100u128),
-            enable_whitelist: false,
-            max_notional_size: Uint128::MAX,
         }
     );
 }
@@ -74,8 +70,6 @@ fn test_update_config() {
         maintenance_margin_ratio: Uint128::from(50_000u128), // 0.05
         tp_sl_spread: Uint128::from(50_000u128),         // 0.05
         liquidation_fee: Uint128::from(100u128),
-        enable_whitelist: None,
-        max_notional_size: None,
     };
     let info = mock_info(OWNER, &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -113,8 +107,6 @@ fn test_update_config() {
             partial_liquidation_ratio: Uint128::zero(),
             tp_sl_spread: Uint128::from(50_000u128),
             liquidation_fee: Uint128::from(100u128),
-            enable_whitelist: false,
-            max_notional_size: Uint128::MAX,
         }
     );
 
@@ -164,8 +156,6 @@ fn test_update_pauser() {
         maintenance_margin_ratio: Uint128::from(50_000u128), // 0.05
         tp_sl_spread: Uint128::from(50_000u128),         // 0.05
         liquidation_fee: Uint128::from(100u128),
-        enable_whitelist: None,
-        max_notional_size: None,
     };
     let info = mock_info(OWNER, &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();

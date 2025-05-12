@@ -1,7 +1,7 @@
 use cosmwasm_std::{Addr, Deps, DepsMut, MessageInfo, Response, StdError, StdResult};
 use cw_storage_plus::Map;
 
-use crate::state::read_config;
+use crate::state::{read_config, read_trading_config};
 
 /// Whitelisted trader can open position
 pub const WHITELIST_TRADER: Map<Addr, bool> = Map::new("whitelist_trader");
@@ -85,8 +85,8 @@ pub fn remove_whitelist_trader(
 }
 
 pub fn is_whitelisted(deps: Deps, trader: Addr) -> StdResult<Response> {
-    let config = read_config(deps.storage)?;
-    if !config.enable_whitelist {
+    let trading_config = read_trading_config(deps.storage)?;
+    if !trading_config.enable_whitelist {
         return Ok(Response::new());
     }
 

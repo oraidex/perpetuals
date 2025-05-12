@@ -170,8 +170,6 @@ impl TestTubeScenario {
                     maintenance_margin_ratio: Uint128::from(50_000_000u128), // 0.05
                     tp_sl_spread: Uint128::from(50_000_000u128),         // 0.05
                     liquidation_fee: Uint128::from(50_000_000u128),      // 0.05
-                    enable_whitelist: None,
-                    max_notional_size: None,
                 },
                 Some(&owner.address()),
                 Some("engine"),

@@ -8,18 +8,18 @@ use crate::{
     messages::{execute_transfer_from, withdraw},
     query::{query_free_collateral, query_margin_ratio, query_positions},
     state::{
-        increase_last_position_id, read_config, read_position, read_state, store_config,
-        store_position, store_sent_funds, store_state, store_tmp_liquidator, store_tmp_swap,
-        SentFunds, TmpReserveInfo, TmpSwapInfo,
+        increase_last_position_id, read_config, read_position, read_state, read_trading_config,
+        store_config, store_position, store_sent_funds, store_state, store_tmp_liquidator,
+        store_tmp_swap, SentFunds, TmpReserveInfo, TmpSwapInfo,
     },
     tick::query_ticks,
     utils::{
         calc_remain_margin_with_funding_payment, calculate_tp_sl_spread, check_max_notional_size,
-        check_tp_sl_price, direction_to_side, get_asset, get_position_notional_unrealized_pnl,
-        keccak_256, position_to_side, require_additional_margin, require_bad_debt,
-        require_insufficient_margin, require_non_zero_input, require_not_paused,
-        require_not_restriction_mode, require_position_not_zero, require_vamm, side_to_direction,
-        update_reserve,
+        check_min_leverage, check_tp_sl_price, direction_to_side, get_asset,
+        get_position_notional_unrealized_pnl, keccak_256, position_to_side,
+        require_additional_margin, require_bad_debt, require_insufficient_margin,
+        require_non_zero_input, require_not_paused, require_not_restriction_mode,
+        require_position_not_zero, require_vamm, side_to_direction, update_reserve,
     },
 };
 use cosmwasm_std::{
@@ -154,6 +154,7 @@ pub fn open_position(
     let config = read_config(deps.storage)?;
     let state = read_state(deps.storage)?;
     let trader = info.sender.clone();
+    let trading_config = read_trading_config(deps.storage)?;
 
     // check if trader is whitelisted
     is_whitelisted(deps.as_ref(), trader.clone())?;
@@ -208,8 +209,9 @@ pub fn open_position(
         .checked_mul(leverage)?
         .checked_div(config.decimals)?;
 
-    // check max notional size
-    check_max_notional_size(open_notional, config.max_notional_size)?;
+    // check max notional size and min leverage
+    check_max_notional_size(open_notional, trading_config.max_notional_size)?;
+    check_min_leverage(leverage, trading_config.min_leverage)?;
 
     let entry_price =
         vamm_controller.input_price(&deps.querier, side_to_direction(&side), open_notional)?;

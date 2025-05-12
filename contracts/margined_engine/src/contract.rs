@@ -33,7 +33,7 @@ use crate::{
         close_position_reply, liquidate_reply, open_position_reply, partial_close_position_reply,
         partial_liquidation_reply, pay_funding_reply,
     },
-    state::{store_config, store_state, Config, State},
+    state::{store_config, store_state, store_trading_config, Config, State, TradingConfig},
     utils::{
         add_whitelist, parse_pay_funding, parse_swap, remove_whitelist, set_pause, update_pauser,
     },
@@ -108,14 +108,20 @@ pub fn instantiate(
         partial_liquidation_ratio: Uint128::zero(), // set as zero by default
         tp_sl_spread: msg.tp_sl_spread,
         liquidation_fee: msg.liquidation_fee,
-        enable_whitelist: msg.enable_whitelist.unwrap_or(false),
-        max_notional_size: msg.max_notional_size.unwrap_or(Uint128::MAX),
+    };
+
+    let trading_config = TradingConfig {
+        enable_whitelist: false,
+        max_notional_size: Uint128::MAX,
+        min_leverage: decimals,
     };
 
     // Initialize last position id
     init_last_position_id(deps.storage)?;
 
     store_config(deps.storage, &config)?;
+
+    store_trading_config(deps.storage, &trading_config)?;
 
     // store default state
     store_state(

@@ -640,3 +640,10 @@ pub fn check_max_notional_size(
 
     Ok(Response::new())
 }
+
+pub fn check_min_leverage(leverage: Uint128, min_leverage: Uint128) -> StdResult<Response> {
+    if leverage < min_leverage {
+        return Err(StdError::generic_err("Leverage is less than min leverage"));
+    }
+    Ok(Response::new())
+}
