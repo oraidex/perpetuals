@@ -10,7 +10,7 @@ use crate::{
     state::{
         increase_last_position_id, read_config, read_position, read_state, read_trading_config,
         store_config, store_position, store_sent_funds, store_state, store_tmp_liquidator,
-        store_tmp_swap, SentFunds, TmpReserveInfo, TmpSwapInfo,
+        store_tmp_swap, store_trading_config, SentFunds, TmpReserveInfo, TmpSwapInfo,
     },
     tick::query_ticks,
     utils::{
@@ -60,6 +60,37 @@ pub fn update_operator(
     store_config(deps.storage, &config)?;
 
     Ok(Response::default().add_attribute("action", "update_operator"))
+}
+
+pub fn update_trading_config(
+    deps: DepsMut,
+    info: MessageInfo,
+    enable_whitelist: Option<bool>,
+    max_notional_size: Option<Uint128>,
+    min_leverage: Option<Uint128>,
+) -> StdResult<Response> {
+    let config = read_config(deps.storage)?;
+    let mut trading_config = read_trading_config(deps.storage)?;
+    // check permission
+    if info.sender != config.owner {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    if let Some(enable_whitelist) = enable_whitelist {
+        trading_config.enable_whitelist = enable_whitelist;
+    }
+
+    if let Some(max_notional_size) = max_notional_size {
+        trading_config.max_notional_size = max_notional_size;
+    }
+
+    if let Some(min_leverage) = min_leverage {
+        trading_config.min_leverage = min_leverage;
+    }
+
+    store_trading_config(deps.storage, &trading_config)?;
+
+    Ok(Response::default().add_attribute("action", "update_trading_config"))
 }
 
 #[allow(clippy::too_many_arguments)]

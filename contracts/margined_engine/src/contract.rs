@@ -22,7 +22,7 @@ use crate::utils::{get_margin_ratio_calc_option, keccak_256};
 use crate::{
     handle::{
         close_position, deposit_margin, liquidate, open_position, pay_funding, update_config,
-        withdraw_margin,
+        update_trading_config, withdraw_margin,
     },
     query::{
         query_config, query_cumulative_premium_fraction, query_free_collateral, query_margin_ratio,
@@ -141,6 +141,17 @@ pub fn instantiate(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
+        ExecuteMsg::UpdateTradingConfig {
+            enable_whitelist,
+            max_notional_size,
+            min_leverage,
+        } => update_trading_config(
+            deps,
+            info,
+            enable_whitelist,
+            max_notional_size,
+            min_leverage,
+        ),
         ExecuteMsg::UpdateConfig {
             owner,
             insurance_fund,

@@ -48,6 +48,11 @@ pub struct InstantiateMsg {
 
 #[cw_serde]
 pub enum ExecuteMsg {
+    UpdateTradingConfig {
+        enable_whitelist: Option<bool>,
+        max_notional_size: Option<Uint128>,
+        min_leverage: Option<Uint128>,
+    },
     UpdateConfig {
         owner: Option<String>,
         insurance_fund: Option<String>,
