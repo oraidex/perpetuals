@@ -58,17 +58,25 @@ pub fn validate_margin_ratios(
 
 /// Validates that the address used for collateral is native token or cw token and returns as type AssetInfo
 pub fn validate_eligible_collateral(deps: Deps, input: String) -> StdResult<AssetInfo> {
-    // verify if the string is any of the native tokens for the deployed network
+    // // verify if the string is any of the native tokens for the deployed network
     if input.eq(NATIVE_DENOM) {
         return Ok(AssetInfo::NativeToken {
             denom: input.to_string(),
         });
     }
 
-    // check that the input is a valid address else
-    // this should throw
-    let valid_addr = deps.api.addr_validate(&input)?;
-    Ok(AssetInfo::Token {
-        contract_addr: valid_addr,
-    })
+    // // check that the input is a valid address else
+    // // this should throw
+    // let valid_addr = deps.api.addr_validate(&input)?;
+    // Ok(AssetInfo::Token {
+    //     contract_addr: valid_addr,
+    // })
+
+    if let Ok(contract_addr) = deps.api.addr_validate(&input) {
+        Ok(AssetInfo::Token { contract_addr })
+    } else {
+        Ok(AssetInfo::NativeToken {
+            denom: input.to_string(),
+        })
+    }
 }

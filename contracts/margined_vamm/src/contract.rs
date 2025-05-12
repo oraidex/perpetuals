@@ -62,8 +62,8 @@ pub fn instantiate(
     validate_ratio(msg.spread_ratio, decimals)?;
     validate_ratio(msg.fluctuation_limit_ratio, decimals)?;
 
-    validate_assets(&msg.base_asset)?;
-    validate_assets(&msg.quote_asset)?;
+    // validate_assets(&msg.base_asset)?;
+    // validate_assets(&msg.quote_asset)?;
 
     let mut config = Config {
         margin_engine: Addr::unchecked(""), // default to nothing, must be set

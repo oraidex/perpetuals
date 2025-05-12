@@ -82,7 +82,11 @@ pub fn instantiate(
     let eligible_collateral = validate_eligible_collateral(deps.as_ref(), msg.eligible_collateral)?;
 
     // find decimals of asset
-    let decimal_response = eligible_collateral.get_decimals(&deps.querier)?;
+    let decimal_response = if let Some(decimals) = msg.decimals {
+        decimals
+    } else {
+        eligible_collateral.get_decimals(&deps.querier)?
+    };
 
     // validate decimal places are correct, and return ratio max.
     let decimals = validate_decimal_places(decimal_response)?;

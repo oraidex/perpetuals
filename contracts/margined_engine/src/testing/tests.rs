@@ -30,6 +30,7 @@ fn test_instantiation() {
         maintenance_margin_ratio: Uint128::from(50_000u128), // 0.05
         tp_sl_spread: Uint128::from(50_000u128),         // 0.05
         liquidation_fee: Uint128::from(100u128),
+        decimals: None,
     };
     let info = mock_info(OWNER, &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -70,6 +71,7 @@ fn test_update_config() {
         maintenance_margin_ratio: Uint128::from(50_000u128), // 0.05
         tp_sl_spread: Uint128::from(50_000u128),         // 0.05
         liquidation_fee: Uint128::from(100u128),
+        decimals: None,
     };
     let info = mock_info(OWNER, &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -156,6 +158,7 @@ fn test_update_pauser() {
         maintenance_margin_ratio: Uint128::from(50_000u128), // 0.05
         tp_sl_spread: Uint128::from(50_000u128),         // 0.05
         liquidation_fee: Uint128::from(100u128),
+        decimals: None,
     };
     let info = mock_info(OWNER, &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();

@@ -44,6 +44,7 @@ pub struct InstantiateMsg {
     pub maintenance_margin_ratio: Uint128,
     pub tp_sl_spread: Uint128,
     pub liquidation_fee: Uint128,
+    pub decimals: Option<u8>,
 }
 
 #[cw_serde]
