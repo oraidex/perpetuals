@@ -44,6 +44,8 @@ pub struct InstantiateMsg {
     pub maintenance_margin_ratio: Uint128,
     pub tp_sl_spread: Uint128,
     pub liquidation_fee: Uint128,
+    pub enable_whitelist: Option<bool>,
+    pub max_notional_size: Option<Uint128>,
 }
 
 #[cw_serde]
@@ -229,6 +231,7 @@ pub struct ConfigResponse {
     pub operator: Option<Addr>,
     #[serde(default)]
     pub enable_whitelist: bool,
+    pub max_notional_size: Uint128,
 }
 
 #[cw_serde]

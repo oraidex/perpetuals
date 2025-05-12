@@ -108,7 +108,8 @@ pub fn instantiate(
         partial_liquidation_ratio: Uint128::zero(), // set as zero by default
         tp_sl_spread: msg.tp_sl_spread,
         liquidation_fee: msg.liquidation_fee,
-        enable_whitelist: false,
+        enable_whitelist: msg.enable_whitelist.unwrap_or(false),
+        max_notional_size: msg.max_notional_size.unwrap_or(Uint128::MAX),
     };
 
     // Initialize last position id
