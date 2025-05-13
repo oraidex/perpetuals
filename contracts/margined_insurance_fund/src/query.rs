@@ -11,7 +11,7 @@ use crate::{
 };
 
 const DEFAULT_PAGINATION_LIMIT: u32 = 10u32;
-pub const MAX_PAGINATION_LIMIT: u32 = 30u32;
+pub const MAX_PAGINATION_LIMIT: u32 = 100u32;
 
 /// Queries contract owner from the admin
 pub fn query_owner(deps: Deps) -> StdResult<OwnerResponse> {
@@ -67,9 +67,8 @@ pub fn query_vamm_status(deps: Deps, vamm: String) -> StdResult<VammStatusRespon
 /// Queries the status of multiple vAMMs, returning the vAMM address and whether it is on/off
 pub fn query_status_all_vamm(deps: Deps, limit: Option<u32>) -> StdResult<AllVammStatusResponse> {
     // set the limit for pagination
-    let limit = limit
-        .unwrap_or(DEFAULT_PAGINATION_LIMIT)
-        .min(MAX_PAGINATION_LIMIT) as usize;
+    let limit = limit.unwrap_or(DEFAULT_PAGINATION_LIMIT) as usize;
+    // .min(MAX_PAGINATION_LIMIT) as usize;
 
     let mut status_list: Vec<(Addr, bool)> = vec![];
 
