@@ -25,7 +25,8 @@ fn test_instantiation() {
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -83,7 +84,8 @@ fn test_update_owner() {
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -120,7 +122,8 @@ fn test_bad_decimals() {
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -148,7 +151,8 @@ fn test_bad_reserves() {
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -172,7 +176,8 @@ fn test_bad_reserves() {
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -202,7 +207,8 @@ fn test_bad_asset_strings() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -224,7 +230,8 @@ fn test_bad_asset_strings() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -249,7 +256,8 @@ fn test_bad_twap_interval() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -265,7 +273,7 @@ fn test_bad_twap_interval() {
         insurance_fund: None,
         pricefeed: None,
         spot_price_twap_interval: Some(59u64),
-        initial_margin_ratio: None
+        initial_margin_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -287,7 +295,7 @@ fn test_bad_twap_interval() {
         insurance_fund: None,
         pricefeed: None,
         spot_price_twap_interval: Some(ONE_WEEK_IN_SECONDS + 1),
-        initial_margin_ratio: None
+        initial_margin_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -315,7 +323,8 @@ fn test_update_config() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -331,7 +340,7 @@ fn test_update_config() {
         insurance_fund: Some("new_insurance_fund".to_string()),
         pricefeed: None,
         spot_price_twap_interval: Some(ONE_MINUTE_IN_SECONDS),
-        initial_margin_ratio: None
+        initial_margin_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -376,7 +385,8 @@ fn test_update_config_fail() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -392,7 +402,7 @@ fn test_update_config_fail() {
         insurance_fund: None,
         pricefeed: None,
         spot_price_twap_interval: None,
-        initial_margin_ratio: None
+        initial_margin_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -419,7 +429,8 @@ fn test_swap_input_zero_amount() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("addr0000".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -440,7 +451,7 @@ fn test_swap_input_zero_amount() {
         quote_asset_amount: Uint128::zero(),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -476,7 +487,8 @@ fn test_swap_output_zero_amount() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("addr0000".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -532,7 +544,8 @@ fn test_swap_input_long() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -553,7 +566,7 @@ fn test_swap_input_long() {
         quote_asset_amount: to_decimals(600),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -589,7 +602,8 @@ fn test_swap_input_short() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -610,7 +624,7 @@ fn test_swap_input_short() {
         quote_asset_amount: to_decimals(600),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -646,7 +660,8 @@ fn test_swap_output_short() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -666,7 +681,7 @@ fn test_swap_output_short() {
         direction: Direction::AddToAmm,
         base_asset_amount: to_decimals(150),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -702,7 +717,8 @@ fn test_swap_output_long() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -722,7 +738,7 @@ fn test_swap_output_long() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: to_decimals(50),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -758,7 +774,8 @@ fn test_swap_input_short_long() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -779,7 +796,7 @@ fn test_swap_input_short_long() {
         quote_asset_amount: to_decimals(480),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -805,7 +822,7 @@ fn test_swap_input_short_long() {
         quote_asset_amount: to_decimals(960),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -841,7 +858,8 @@ fn test_swap_input_short_long_long() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -861,7 +879,7 @@ fn test_swap_input_short_long_long() {
         quote_asset_amount: to_decimals(200),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -886,7 +904,7 @@ fn test_swap_input_short_long_long() {
         quote_asset_amount: to_decimals(100),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -911,7 +929,7 @@ fn test_swap_input_short_long_long() {
         quote_asset_amount: to_decimals(200),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -948,7 +966,8 @@ fn test_swap_input_short_long_short() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -968,7 +987,7 @@ fn test_swap_input_short_long_short() {
         quote_asset_amount: to_decimals(200),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -993,7 +1012,7 @@ fn test_swap_input_short_long_short() {
         quote_asset_amount: to_decimals(450),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -1018,7 +1037,7 @@ fn test_swap_input_short_long_short() {
         quote_asset_amount: to_decimals(250),
         base_asset_limit: Uint128::zero(),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -1055,7 +1074,8 @@ fn test_swap_output_short_and_indivisable() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1085,7 +1105,7 @@ fn test_swap_output_short_and_indivisable() {
         direction: Direction::AddToAmm,
         base_asset_amount: to_decimals(5),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     let result = execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -1117,7 +1137,8 @@ fn test_swap_output_long_and_indivisable() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1147,7 +1168,7 @@ fn test_swap_output_long_and_indivisable() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: to_decimals(5),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     let result = execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -1179,7 +1200,8 @@ fn test_swap_output_long_short_same_size_should_get_diff_base_asset_amount() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1210,7 +1232,7 @@ fn test_swap_output_long_short_same_size_should_get_diff_base_asset_amount() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: to_decimals(10),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -1254,7 +1276,8 @@ fn test_force_error_swapinput_long_but_less_than_min_base_amount() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1276,7 +1299,7 @@ fn test_force_error_swapinput_long_but_less_than_min_base_amount() {
         quote_asset_amount: to_decimals(600),
         base_asset_limit: Uint128::from(37_500_000_000u128),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     let result = execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap_err();
@@ -1302,7 +1325,8 @@ fn test_force_error_swapinput_short_but_more_than_min_base_amount() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1324,7 +1348,7 @@ fn test_force_error_swapinput_short_but_more_than_min_base_amount() {
         quote_asset_amount: to_decimals(600),
         base_asset_limit: to_decimals(150),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     let result = execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap_err();
@@ -1350,7 +1374,8 @@ fn test_swapoutput_short_slippage_limit() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1369,7 +1394,7 @@ fn test_swapoutput_short_slippage_limit() {
         direction: Direction::AddToAmm,
         base_asset_amount: to_decimals(20),
         quote_asset_limit: to_decimals(100),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -1396,7 +1421,8 @@ fn test_swapoutput_short_at_slippage_limit() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1415,7 +1441,7 @@ fn test_swapoutput_short_at_slippage_limit() {
         direction: Direction::AddToAmm,
         base_asset_amount: to_decimals(20),
         quote_asset_limit: to_decimals(249),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -1442,7 +1468,8 @@ fn test_swapoutput_short_force_error_min_quote_251() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1461,7 +1488,7 @@ fn test_swapoutput_short_force_error_min_quote_251() {
         direction: Direction::AddToAmm,
         base_asset_amount: to_decimals(20),
         quote_asset_limit: to_decimals(400),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     let result = execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap_err();
@@ -1487,7 +1514,8 @@ fn test_swapoutput_short_force_error_min_quote_400() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1506,7 +1534,7 @@ fn test_swapoutput_short_force_error_min_quote_400() {
         direction: Direction::AddToAmm,
         base_asset_amount: to_decimals(20),
         quote_asset_limit: to_decimals(400),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     let result = execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap_err();
@@ -1532,7 +1560,8 @@ fn test_swapoutput_long_slippage_limit() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1551,7 +1580,7 @@ fn test_swapoutput_long_slippage_limit() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: to_decimals(25),
         quote_asset_limit: to_decimals(400),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -1578,7 +1607,8 @@ fn test_swapoutput_long_at_slippage_limit() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1597,7 +1627,7 @@ fn test_swapoutput_long_at_slippage_limit() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: to_decimals(25),
         quote_asset_limit: to_decimals(201),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap();
@@ -1624,7 +1654,8 @@ fn test_swapoutput_long_force_error_min_quote_199() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1643,7 +1674,7 @@ fn test_swapoutput_long_force_error_min_quote_199() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: to_decimals(25),
         quote_asset_limit: to_decimals(199),
-        position_id: 0u64
+        position_id: 0u64,
     };
     let info = mock_info("addr0000", &[]);
     let result = execute(deps.as_mut(), mock_env(), info, swap_msg).unwrap_err();
@@ -1669,7 +1700,8 @@ fn test_swapoutput_long_force_error_min_quote_100() {
         pricefeed: "oracle".to_string(),
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: Some("relayer".to_string()),
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1688,7 +1720,7 @@ fn test_swapoutput_long_force_error_min_quote_100() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: to_decimals(25),
         quote_asset_limit: to_decimals(100),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);

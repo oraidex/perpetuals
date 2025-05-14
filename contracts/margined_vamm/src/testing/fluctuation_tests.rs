@@ -28,7 +28,8 @@ fn setup() -> TestingEnv {
         margin_engine: Some("addr0000".to_string()),
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
-        initial_margin_ratio: Uint128::from(50_000u128)
+        initial_margin_ratio: Uint128::from(50_000u128),
+        relayer: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -55,7 +56,7 @@ fn test_swap_input_price_goes_up_within_fluctuation_limit() {
         quote_asset_amount: to_decimals(24),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -76,7 +77,7 @@ fn test_swap_input_price_goes_down_within_fluctuation_limit() {
         quote_asset_amount: to_decimals(25),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -96,7 +97,7 @@ fn test_swap_input_price_goes_down_then_up_and_down_within_fluctuation_limit() {
         quote_asset_amount: to_decimals(25),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -108,7 +109,7 @@ fn test_swap_input_price_goes_down_then_up_and_down_within_fluctuation_limit() {
         quote_asset_amount: to_decimals(49),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -120,7 +121,7 @@ fn test_swap_input_price_goes_down_then_up_and_down_within_fluctuation_limit() {
         quote_asset_amount: to_decimals(49),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -141,7 +142,7 @@ fn test_swap_input_price_goes_can_go_over_fluctuation_limit_once() {
         quote_asset_amount: to_decimals(25),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: true,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -160,7 +161,7 @@ fn test_swap_output_price_goes_up_within_fluctuation_limit() {
         direction: Direction::AddToAmm,
         base_asset_amount: Uint128::from(2_400_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -179,7 +180,7 @@ fn test_swap_output_price_goes_down_within_fluctuation_limit() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: Uint128::from(2_500_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -199,7 +200,7 @@ fn test_force_error_swap_input_price_down_over_limit() {
         quote_asset_amount: to_decimals(26),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -222,7 +223,7 @@ fn test_force_error_swap_input_can_go_over_limit_but_fails_second_time() {
         quote_asset_amount: to_decimals(25),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: true,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -233,7 +234,7 @@ fn test_force_error_swap_input_can_go_over_limit_but_fails_second_time() {
         quote_asset_amount: to_decimals(1),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: true,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -256,7 +257,7 @@ fn test_force_error_swap_input_short_can_go_over_limit_but_fails_second_time() {
         quote_asset_amount: to_decimals(30),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: true,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -267,7 +268,7 @@ fn test_force_error_swap_input_short_can_go_over_limit_but_fails_second_time() {
         quote_asset_amount: to_decimals(1),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: true,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -288,7 +289,7 @@ fn test_force_error_swap_output_can_go_over_limit_but_fails_second_time() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: Uint128::from(25_000_000_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -298,7 +299,7 @@ fn test_force_error_swap_output_can_go_over_limit_but_fails_second_time() {
         direction: Direction::RemoveFromAmm,
         base_asset_amount: Uint128::from(100_000_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -319,7 +320,7 @@ fn test_force_error_swap_output_short_can_go_over_limit_but_fails_second_time() 
         direction: Direction::AddToAmm,
         base_asset_amount: Uint128::from(3_000_000_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -329,7 +330,7 @@ fn test_force_error_swap_output_short_can_go_over_limit_but_fails_second_time() 
         direction: Direction::AddToAmm,
         base_asset_amount: Uint128::from(3_000_000_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -350,7 +351,7 @@ fn test_force_error_swap_output_short_can_go_over_limit_but_fails_larger_price()
         direction: Direction::AddToAmm,
         base_asset_amount: Uint128::from(3_000_000_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -360,7 +361,7 @@ fn test_force_error_swap_output_short_can_go_over_limit_but_fails_larger_price()
         direction: Direction::AddToAmm,
         base_asset_amount: Uint128::from(3_000_000_000u64),
         quote_asset_limit: Uint128::zero(),
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -386,7 +387,7 @@ fn test_force_error_swap_many_times() {
         quote_asset_amount: to_decimals(10),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -397,7 +398,7 @@ fn test_force_error_swap_many_times() {
         quote_asset_amount: to_decimals(10),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -408,7 +409,7 @@ fn test_force_error_swap_many_times() {
         quote_asset_amount: to_decimals(10),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -426,7 +427,7 @@ fn test_force_error_compare_price_fluctuation_with_previous_blocks() {
         quote_asset_amount: to_decimals(10),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -442,7 +443,7 @@ fn test_force_error_compare_price_fluctuation_with_previous_blocks() {
         quote_asset_amount: to_decimals(26),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -458,7 +459,7 @@ fn test_force_error_compare_price_fluctuation_with_previous_blocks() {
         quote_asset_amount: to_decimals(30),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -474,7 +475,7 @@ fn test_force_error_compare_price_fluctuation_with_previous_blocks() {
         quote_asset_amount: to_decimals(10),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -485,7 +486,7 @@ fn test_force_error_compare_price_fluctuation_with_previous_blocks() {
         quote_asset_amount: to_decimals(20),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -508,7 +509,7 @@ fn test_force_error_value_of_fluctuation_is_same_even_no_trading_for_multiple_bl
         quote_asset_amount: to_decimals(10),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -524,7 +525,7 @@ fn test_force_error_value_of_fluctuation_is_same_even_no_trading_for_multiple_bl
         quote_asset_amount: to_decimals(25),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -547,7 +548,7 @@ fn test_force_error_value_of_fluctuation_is_same_even_no_trading_for_multiple_bl
         quote_asset_amount: to_decimals(10),
         base_asset_limit: to_decimals(0u64),
         can_go_over_fluctuation: false,
-        position_id: 0u64
+        position_id: 0u64,
     };
 
     let info = mock_info("addr0000", &[]);

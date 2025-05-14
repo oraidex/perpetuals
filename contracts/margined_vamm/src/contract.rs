@@ -1,7 +1,8 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult, Uint128,
+    to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
+    Uint128,
 };
 use cw2::set_contract_version;
 use cw_controllers::{Admin, Hooks};
@@ -119,6 +120,14 @@ pub fn instantiate(
     };
 
     store_reserve_snapshot(deps.storage, &reserve)?;
+
+    // whitelist the relayer
+    if let Some(relayer) = msg.relayer {
+        let valid_addr = deps.api.addr_validate(&relayer)?;
+        WHITELIST
+            .add_hook(deps.storage, valid_addr)
+            .map_err(|error| StdError::generic_err(error.to_string()))?;
+    }
 
     OWNER.set(deps, Some(info.sender))?;
 

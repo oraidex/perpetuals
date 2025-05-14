@@ -21,6 +21,7 @@ fn test_change_reserve() {
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
         initial_margin_ratio: to_decimals(1),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -72,6 +73,7 @@ fn test_repeg_price() {
         insurance_fund: Some("insurance_fund".to_string()),
         pricefeed: "oracle".to_string(),
         initial_margin_ratio: to_decimals(1),
+        relayer: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
