@@ -172,6 +172,7 @@ pub struct ConfigResponse {
     pub funding_period: u64,
     pub spot_price_twap_interval: u64,
     pub initial_margin_ratio: Uint128,
+    #[serde(default)]
     pub price_diff_limit_ratio: Uint128,
 }
 
