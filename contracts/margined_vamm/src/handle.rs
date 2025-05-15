@@ -38,6 +38,7 @@ pub fn update_config(
     pricefeed: Option<String>,
     spot_price_twap_interval: Option<u64>,
     initial_margin_ratio: Option<Uint128>,
+    price_diff_limit_ratio: Option<Uint128>,
 ) -> StdResult<Response> {
     let mut config: Config = read_config(deps.storage)?;
 
@@ -102,6 +103,12 @@ pub fn update_config(
     if let Some(initial_margin_ratio) = initial_margin_ratio {
         validate_ratio(initial_margin_ratio, config.decimals)?;
         config.initial_margin_ratio = initial_margin_ratio;
+    }
+
+    // update price diff limit ratio
+    if let Some(price_diff_limit_ratio) = price_diff_limit_ratio {
+        validate_ratio(price_diff_limit_ratio, config.decimals)?;
+        config.price_diff_limit_ratio = price_diff_limit_ratio;
     }
 
     store_config(deps.storage, &config)?;

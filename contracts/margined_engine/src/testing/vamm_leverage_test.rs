@@ -103,6 +103,7 @@ fn test_vamm_leverage() {
             None,
             None,
             Some(Uint128::from(100_000_000u128)),
+            None,
         )
         .unwrap();
     router.execute(owner.clone(), msg).unwrap();
