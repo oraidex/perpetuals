@@ -149,6 +149,26 @@ impl VammController {
         wasm_execute(&self.0, &msg, vec![])
     }
 
+    pub fn set_price_diff_limit_ratio(
+        &self,
+        price_diff_limit_ratio: Uint128,
+    ) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::UpdateConfig {
+            base_asset_holding_cap: None,
+            open_interest_notional_cap: None,
+            toll_ratio: None,
+            spread_ratio: None,
+            fluctuation_limit_ratio: None,
+            margin_engine: None,
+            insurance_fund: None,
+            pricefeed: None,
+            spot_price_twap_interval: None,
+            initial_margin_ratio: None,
+            price_diff_limit_ratio: Some(price_diff_limit_ratio),
+        };
+        wasm_execute(&self.0, &msg, vec![])
+    }
+
     pub fn set_open(&self, open: bool) -> StdResult<CosmosMsg> {
         let msg = ExecuteMsg::SetOpen { open };
         wasm_execute(&self.0, &msg, vec![])
