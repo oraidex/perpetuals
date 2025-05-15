@@ -628,12 +628,14 @@ pub fn position_is_liquidated(
     }
 }
 
-pub fn require_is_not_over_spread_limit(
+pub fn require_is_not_over_price_diff_limit(
     deps: Deps,
     vamm_controller: &VammController,
 ) -> StdResult<Response> {
-    if vamm_controller.is_over_spread_limit(&deps.querier)? {
-        return Err(StdError::generic_err("Over spread limit"));
+    if vamm_controller.is_over_price_diff_limit(&deps.querier)? {
+        return Err(StdError::generic_err(
+            "Over price diff limit oracle & vamm price",
+        ));
     }
 
     Ok(Response::new())

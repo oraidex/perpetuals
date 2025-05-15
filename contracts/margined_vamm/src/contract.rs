@@ -23,8 +23,9 @@ use crate::{
     handle::{set_open, settle_funding, swap_input, swap_output, update_config, update_owner},
     query::{
         query_calc_fee, query_config, query_input_amount, query_input_price,
-        query_is_over_fluctuation_limit, query_is_over_spread_limit, query_output_amount,
-        query_output_price, query_owner, query_spot_price, query_state, query_twap_price,
+        query_is_over_fluctuation_limit, query_is_over_price_diff_limit,
+        query_is_over_spread_limit, query_output_amount, query_output_price, query_owner,
+        query_spot_price, query_state, query_twap_price,
     },
     state::{store_config, store_reserve_snapshot, store_state, Config, ReserveSnapshot, State},
 };
@@ -80,6 +81,7 @@ pub fn instantiate(
         spot_price_twap_interval: ONE_HOUR_IN_SECONDS,
         funding_period: msg.funding_period,
         initial_margin_ratio: msg.initial_margin_ratio,
+        price_diff_limit_ratio: msg.fluctuation_limit_ratio, // default equal to fluctuation limit ratio
     };
 
     // set and update margin engine
@@ -139,6 +141,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             pricefeed,
             spot_price_twap_interval,
             initial_margin_ratio,
+            price_diff_limit_ratio,
         } => update_config(
             deps,
             info,
@@ -152,6 +155,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             pricefeed,
             spot_price_twap_interval,
             initial_margin_ratio,
+            price_diff_limit_ratio,
         ),
         ExecuteMsg::UpdateOwner { owner } => update_owner(deps, info, owner),
         ExecuteMsg::SwapInput {
@@ -268,6 +272,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
             None,
         )?),
         QueryMsg::IsOverSpreadLimit {} => to_binary(&query_is_over_spread_limit(deps)?),
+        QueryMsg::IsOverPriceDiffLimit {} => to_binary(&query_is_over_price_diff_limit(deps)?),
         QueryMsg::IsOverFluctuationLimit {
             direction,
             base_asset_amount,

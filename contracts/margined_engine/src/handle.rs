@@ -23,8 +23,9 @@ use crate::{
         calc_remain_margin_with_funding_payment, calculate_tp_sl_spread, check_tp_sl_price,
         direction_to_side, get_asset, get_position_notional_unrealized_pnl, keccak_256,
         position_to_side, require_additional_margin, require_bad_debt, require_insufficient_margin,
-        require_non_zero_input, require_not_paused, require_not_restriction_mode,
-        require_position_not_zero, require_vamm, require_is_not_over_spread_limit, side_to_direction, update_reserve,
+        require_is_not_over_price_diff_limit, require_non_zero_input, require_not_paused,
+        require_not_restriction_mode, require_position_not_zero, require_vamm, side_to_direction,
+        update_reserve,
     },
 };
 use margined_common::{
@@ -147,8 +148,6 @@ pub fn open_position(
     stop_loss: Option<Uint128>,
     base_asset_limit: Uint128,
 ) -> StdResult<Response> {
-
-
     // validate address inputs
     let vamm = deps.api.addr_validate(&vamm)?;
     let vamm_controller = VammController(vamm.clone());
@@ -156,7 +155,7 @@ pub fn open_position(
     let state = read_state(deps.storage)?;
     let trader = info.sender.clone();
 
-    require_is_not_over_spread_limit(deps.as_ref(), &vamm_controller)?;
+    require_is_not_over_price_diff_limit(deps.as_ref(), &vamm_controller)?;
 
     require_not_paused(state.pause)?;
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
@@ -394,9 +393,8 @@ pub fn close_position(
         return Err(StdError::generic_err("Unauthorized"));
     }
 
-
     let vamm_controller = VammController(vamm.clone());
-    require_is_not_over_spread_limit(deps.as_ref(), &vamm_controller)?;
+    require_is_not_over_price_diff_limit(deps.as_ref(), &vamm_controller)?;
 
     // check the position isn't zero
     require_not_paused(state.pause)?;
@@ -410,7 +408,6 @@ pub fn close_position(
         Direction::RemoveFromAmm
     };
 
-    
     let is_over_fluctuation_limit = vamm_controller.is_over_fluctuation_limit(
         &deps.querier,
         Direction::RemoveFromAmm,

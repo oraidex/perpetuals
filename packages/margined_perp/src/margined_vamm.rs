@@ -55,6 +55,7 @@ pub enum ExecuteMsg {
         pricefeed: Option<String>,
         spot_price_twap_interval: Option<u64>,
         initial_margin_ratio: Option<Uint128>,
+        price_diff_limit_ratio: Option<Uint128>,
     },
     UpdateOwner {
         owner: String,
@@ -143,6 +144,8 @@ pub enum QueryMsg {
     #[returns(bool)]
     IsOverSpreadLimit {},
     #[returns(bool)]
+    IsOverPriceDiffLimit {},
+    #[returns(bool)]
     IsOverFluctuationLimit {
         direction: Direction,
         base_asset_amount: Uint128,
@@ -169,6 +172,7 @@ pub struct ConfigResponse {
     pub funding_period: u64,
     pub spot_price_twap_interval: u64,
     pub initial_margin_ratio: Uint128,
+    pub price_diff_limit_ratio: Uint128,
 }
 
 #[cw_serde]
