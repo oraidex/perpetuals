@@ -30,6 +30,7 @@ impl VammController {
         pricefeed: Option<String>,
         spot_price_twap_interval: Option<u64>,
         initial_margin_ratio: Option<Uint128>,
+        price_diff_limit_ratio: Option<Uint128>,
     ) -> StdResult<CosmosMsg> {
         wasm_execute(
             &self.0,
@@ -44,6 +45,7 @@ impl VammController {
                 pricefeed,
                 spot_price_twap_interval,
                 initial_margin_ratio,
+                price_diff_limit_ratio,
             },
             vec![],
         )
@@ -65,6 +67,7 @@ impl VammController {
             pricefeed: None,
             spot_price_twap_interval: None,
             initial_margin_ratio: None,
+            price_diff_limit_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -81,6 +84,7 @@ impl VammController {
             pricefeed: None,
             spot_price_twap_interval: None,
             initial_margin_ratio: None,
+            price_diff_limit_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -100,6 +104,7 @@ impl VammController {
             pricefeed: None,
             spot_price_twap_interval: None,
             initial_margin_ratio: None,
+            price_diff_limit_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -119,6 +124,7 @@ impl VammController {
             pricefeed: None,
             spot_price_twap_interval: None,
             initial_margin_ratio: None,
+            price_diff_limit_ratio: None,
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -138,6 +144,27 @@ impl VammController {
             pricefeed: None,
             spot_price_twap_interval: None,
             initial_margin_ratio: None,
+            price_diff_limit_ratio: None,
+        };
+        wasm_execute(&self.0, &msg, vec![])
+    }
+
+    pub fn set_price_diff_limit_ratio(
+        &self,
+        price_diff_limit_ratio: Uint128,
+    ) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::UpdateConfig {
+            base_asset_holding_cap: None,
+            open_interest_notional_cap: None,
+            toll_ratio: None,
+            spread_ratio: None,
+            fluctuation_limit_ratio: None,
+            margin_engine: None,
+            insurance_fund: None,
+            pricefeed: None,
+            spot_price_twap_interval: None,
+            initial_margin_ratio: None,
+            price_diff_limit_ratio: Some(price_diff_limit_ratio),
         };
         wasm_execute(&self.0, &msg, vec![])
     }
@@ -245,6 +272,11 @@ impl VammController {
     /// returns bool if vamm is over spread limit
     pub fn is_over_spread_limit(&self, querier: &QuerierWrapper) -> StdResult<bool> {
         querier.query_wasm_smart(&self.0, &QueryMsg::IsOverSpreadLimit {})
+    }
+
+    /// returns bool if vamm is over price diff limit
+    pub fn is_over_price_diff_limit(&self, querier: &QuerierWrapper) -> StdResult<bool> {
+        querier.query_wasm_smart(&self.0, &QueryMsg::IsOverPriceDiffLimit {})
     }
 
     // returns the state of the request vamm

@@ -49,7 +49,8 @@ fn test_instantiation() {
             pricefeed: Addr::unchecked("oracle".to_string()),
             funding_period: 3_600u64,
             spot_price_twap_interval: ONE_HOUR_IN_SECONDS,
-            initial_margin_ratio: Uint128::from(50_000u128)
+            initial_margin_ratio: Uint128::from(50_000u128),
+            price_diff_limit_ratio: Uint128::zero(),
         }
     );
 
@@ -274,6 +275,7 @@ fn test_bad_twap_interval() {
         pricefeed: None,
         spot_price_twap_interval: Some(59u64),
         initial_margin_ratio: None,
+        price_diff_limit_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -296,6 +298,7 @@ fn test_bad_twap_interval() {
         pricefeed: None,
         spot_price_twap_interval: Some(ONE_WEEK_IN_SECONDS + 1),
         initial_margin_ratio: None,
+        price_diff_limit_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -341,6 +344,7 @@ fn test_update_config() {
         pricefeed: None,
         spot_price_twap_interval: Some(ONE_MINUTE_IN_SECONDS),
         initial_margin_ratio: None,
+        price_diff_limit_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);
@@ -364,7 +368,8 @@ fn test_update_config() {
             pricefeed: Addr::unchecked("oracle".to_string()),
             funding_period: 3_600u64,
             spot_price_twap_interval: ONE_MINUTE_IN_SECONDS,
-            initial_margin_ratio: Uint128::from(50_000u128)
+            initial_margin_ratio: Uint128::from(50_000u128),
+            price_diff_limit_ratio: Uint128::zero(),
         }
     );
 }
@@ -403,6 +408,7 @@ fn test_update_config_fail() {
         pricefeed: None,
         spot_price_twap_interval: None,
         initial_margin_ratio: None,
+        price_diff_limit_ratio: None,
     };
 
     let info = mock_info("addr0000", &[]);

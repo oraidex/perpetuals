@@ -18,8 +18,9 @@ use crate::{
         check_min_leverage, check_tp_sl_price, direction_to_side, get_asset,
         get_position_notional_unrealized_pnl, keccak_256, position_to_side,
         require_additional_margin, require_bad_debt, require_insufficient_margin,
-        require_non_zero_input, require_not_paused, require_not_restriction_mode,
-        require_position_not_zero, require_vamm, side_to_direction, update_reserve,
+        require_is_not_over_price_diff_limit, require_non_zero_input, require_not_paused,
+        require_not_restriction_mode, require_position_not_zero, require_vamm, side_to_direction,
+        update_reserve,
     },
 };
 use cosmwasm_std::{
@@ -185,6 +186,8 @@ pub fn open_position(
     let config = read_config(deps.storage)?;
     let state = read_state(deps.storage)?;
     let trader = info.sender.clone();
+
+    require_is_not_over_price_diff_limit(deps.as_ref(), &vamm_controller)?;
     let trading_config = read_trading_config(deps.storage)?;
 
     // check if trader is whitelisted
@@ -430,6 +433,9 @@ pub fn close_position(
         return Err(StdError::generic_err("Unauthorized"));
     }
 
+    let vamm_controller = VammController(vamm.clone());
+    require_is_not_over_price_diff_limit(deps.as_ref(), &vamm_controller)?;
+
     // check the position isn't zero
     require_not_paused(state.pause)?;
     require_position_not_zero(position.size.value)?;
@@ -442,7 +448,6 @@ pub fn close_position(
         Direction::RemoveFromAmm
     };
 
-    let vamm_controller = VammController(vamm.clone());
     let is_over_fluctuation_limit = vamm_controller.is_over_fluctuation_limit(
         &deps.querier,
         Direction::RemoveFromAmm,

@@ -286,6 +286,7 @@ impl TestTubeScenario {
                 pricefeed: None,
                 spot_price_twap_interval: None,
                 initial_margin_ratio: None,
+                price_diff_limit_ratio: None,
             },
             &[],
             owner,
