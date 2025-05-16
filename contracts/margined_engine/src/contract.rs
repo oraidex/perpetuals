@@ -20,6 +20,7 @@ use crate::state::{init_last_position_id, read_position};
 use crate::tick::{query_tick, query_ticks};
 use crate::utils::{get_margin_ratio_calc_option, keccak_256};
 use crate::{
+    auth::WHITELIST_TRADER,
     handle::{
         close_position, deposit_margin, liquidate, open_position, pay_funding, update_config,
         update_trading_config, withdraw_margin,
@@ -256,6 +257,11 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::State {} => to_binary(&query_state(deps)?),
         QueryMsg::GetPauser {} => to_binary(&query_pauser(deps)?),
         QueryMsg::IsWhitelisted { address } => to_binary(&WHITELIST.query_hook(deps, address)?),
+        QueryMsg::IsTraderWhitelisted { address } => to_binary(
+            &WHITELIST_TRADER
+                .may_load(deps.storage, address)?
+                .unwrap_or(false),
+        ),
         QueryMsg::GetWhitelist {} => to_binary(&WHITELIST.query_hooks(deps)?),
         QueryMsg::Positions {
             vamm,

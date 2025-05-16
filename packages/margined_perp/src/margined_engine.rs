@@ -156,6 +156,8 @@ pub enum QueryMsg {
     GetPauser {},
     #[returns(bool)]
     IsWhitelisted { address: String },
+    #[returns(bool)]
+    IsTraderWhitelisted { address: Addr },
     #[returns(cw_controllers::HooksResponse)]
     GetWhitelist {},
     #[returns(Position)]
