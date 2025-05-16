@@ -79,7 +79,7 @@ pub fn instantiate(
         fluctuation_limit_ratio: msg.fluctuation_limit_ratio,
         pricefeed: deps.api.addr_validate(&msg.pricefeed)?,
         decimals,
-        spot_price_twap_interval: ONE_HOUR_IN_SECONDS,
+        spot_price_twap_interval: 2 * ONE_MINUTE_IN_SECONDS, // default to 2 minutes
         funding_period: msg.funding_period,
         initial_margin_ratio: msg.initial_margin_ratio,
         price_diff_limit_ratio: msg.fluctuation_limit_ratio, // default equal to fluctuation limit ratio

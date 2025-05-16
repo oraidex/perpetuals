@@ -48,7 +48,7 @@ fn test_instantiation() {
             insurance_fund: Addr::unchecked("insurance_fund".to_string()),
             pricefeed: Addr::unchecked("oracle".to_string()),
             funding_period: 3_600u64,
-            spot_price_twap_interval: ONE_HOUR_IN_SECONDS,
+            spot_price_twap_interval: 2 * ONE_MINUTE_IN_SECONDS,
             initial_margin_ratio: Uint128::from(50_000u128),
             price_diff_limit_ratio: Uint128::zero(),
         }
