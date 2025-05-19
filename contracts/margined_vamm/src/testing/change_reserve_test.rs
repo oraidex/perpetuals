@@ -22,6 +22,7 @@ fn test_change_reserve() {
         pricefeed: "oracle".to_string(),
         initial_margin_ratio: to_decimals(1),
         relayer: None,
+        owner: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -74,6 +75,7 @@ fn test_repeg_price() {
         pricefeed: "oracle".to_string(),
         initial_margin_ratio: to_decimals(1),
         relayer: None,
+        owner: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();

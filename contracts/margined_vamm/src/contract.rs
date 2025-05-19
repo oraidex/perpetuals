@@ -131,7 +131,7 @@ pub fn instantiate(
             .map_err(|error| StdError::generic_err(error.to_string()))?;
     }
 
-    OWNER.set(deps, Some(info.sender))?;
+    OWNER.set(deps, Some(msg.owner.unwrap_or(info.sender)))?;
 
     Ok(Response::default())
 }

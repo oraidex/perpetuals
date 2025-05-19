@@ -150,6 +150,8 @@ pub struct MigrateMsg {}
 pub enum QueryMsg {
     #[returns(ConfigResponse)]
     Config {},
+    #[returns(TradingConfigResponse)]
+    TradingConfig {},
     #[returns(StateResponse)]
     State {},
     #[returns(PauserResponse)]

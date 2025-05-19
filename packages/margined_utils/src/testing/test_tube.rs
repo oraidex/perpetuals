@@ -261,6 +261,7 @@ impl TestTubeScenario {
                     insurance_fund: Some(insurance_fund_addr.to_string()),
                     initial_margin_ratio: Uint128::from(50_000u128),
                     relayer: None,
+                    owner: None,
                 },
                 Some(&owner.address()),
                 Some("vamm"),

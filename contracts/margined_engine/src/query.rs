@@ -3,6 +3,7 @@ use margined_common::integer::Integer;
 use margined_perp::margined_engine::{
     ConfigResponse, LastPositionIdResponse, PauserResponse, PnlCalcOption, Position,
     PositionFilter, PositionTpSlResponse, PositionUnrealizedPnlResponse, Side, StateResponse,
+    TradingConfigResponse,
 };
 use margined_utils::{
     contracts::helpers::{InsuranceFundController, VammController},
@@ -13,8 +14,9 @@ use crate::{
     contract::PAUSER,
     state::{
         read_config, read_last_position_id, read_position, read_positions,
-        read_positions_with_indexer, read_state, read_vamm_map, TmpReserveInfo,
-        PREFIX_POSITION_BY_PRICE, PREFIX_POSITION_BY_SIDE, PREFIX_POSITION_BY_TRADER,
+        read_positions_with_indexer, read_state, read_trading_config, read_vamm_map,
+        TmpReserveInfo, PREFIX_POSITION_BY_PRICE, PREFIX_POSITION_BY_SIDE,
+        PREFIX_POSITION_BY_TRADER,
     },
     tick::query_ticks,
     utils::{
@@ -29,6 +31,11 @@ type FilterFn = Box<dyn Fn(&Side) -> bool>;
 /// Queries contract Config
 pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
     read_config(deps.storage)
+}
+
+/// Queries contract Config
+pub fn query__trading_config(deps: Deps) -> StdResult<TradingConfigResponse> {
+    read_trading_config(deps.storage)
 }
 
 /// Queries contract State

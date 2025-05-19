@@ -13,8 +13,8 @@ use crate::auth::{remove_relayer, remove_whitelist_trader, set_relayer, whitelis
 use crate::error::ContractError;
 use crate::handle::{trigger_mutiple_tp_sl, trigger_tp_sl, update_operator, update_tp_sl};
 use crate::query::{
-    query_last_position_id, query_position_is_bad_debt, query_position_is_liquidated,
-    query_position_is_tpsl, query_positions,
+    query__trading_config, query_last_position_id, query_position_is_bad_debt,
+    query_position_is_liquidated, query_position_is_tpsl, query_positions,
 };
 use crate::state::{init_last_position_id, read_position};
 use crate::tick::{query_tick, query_ticks};
@@ -254,6 +254,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::Config {} => to_binary(&query_config(deps)?),
+        QueryMsg::TradingConfig {} => to_binary(&query__trading_config(deps)?),
         QueryMsg::State {} => to_binary(&query_state(deps)?),
         QueryMsg::GetPauser {} => to_binary(&query_pauser(deps)?),
         QueryMsg::IsWhitelisted { address } => to_binary(&WHITELIST.query_hook(deps, address)?),

@@ -40,6 +40,7 @@ pub struct InstantiateMsg {
     pub fluctuation_limit_ratio: Uint128,
     pub initial_margin_ratio: Uint128,
     pub relayer: Option<String>,
+    pub owner: Option<Addr>,
 }
 
 #[cw_serde]
