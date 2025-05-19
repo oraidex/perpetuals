@@ -41,6 +41,7 @@ pub struct InstantiateMsg {
     pub initial_margin_ratio: Uint128,
     pub relayer: Option<String>,
     pub owner: Option<Addr>,
+    pub open: Option<bool>,
 }
 
 #[cw_serde]

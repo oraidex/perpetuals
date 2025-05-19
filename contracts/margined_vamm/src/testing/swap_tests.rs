@@ -28,6 +28,7 @@ fn test_instantiation() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -89,6 +90,7 @@ fn test_update_owner() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -128,6 +130,7 @@ fn test_bad_decimals() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -158,6 +161,7 @@ fn test_bad_reserves() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -184,6 +188,7 @@ fn test_bad_reserves() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
 
@@ -267,6 +272,7 @@ fn test_bad_twap_interval() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -337,6 +343,7 @@ fn test_update_config() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -402,6 +409,7 @@ fn test_update_config_fail() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -448,6 +456,7 @@ fn test_swap_input_zero_amount() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -507,6 +516,7 @@ fn test_swap_output_zero_amount() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -565,6 +575,7 @@ fn test_swap_input_long() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -624,6 +635,7 @@ fn test_swap_input_short() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -683,6 +695,7 @@ fn test_swap_output_short() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -741,6 +754,7 @@ fn test_swap_output_long() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -799,6 +813,7 @@ fn test_swap_input_short_long() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -884,6 +899,7 @@ fn test_swap_input_short_long_long() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -993,6 +1009,7 @@ fn test_swap_input_short_long_short() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1102,6 +1119,7 @@ fn test_swap_output_short_and_indivisable() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1166,6 +1184,7 @@ fn test_swap_output_long_and_indivisable() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1230,6 +1249,7 @@ fn test_swap_output_long_short_same_size_should_get_diff_base_asset_amount() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1307,6 +1327,7 @@ fn test_force_error_swapinput_long_but_less_than_min_base_amount() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1357,6 +1378,7 @@ fn test_force_error_swapinput_short_but_more_than_min_base_amount() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1407,6 +1429,7 @@ fn test_swapoutput_short_slippage_limit() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1455,6 +1478,7 @@ fn test_swapoutput_short_at_slippage_limit() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1503,6 +1527,7 @@ fn test_swapoutput_short_force_error_min_quote_251() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1550,6 +1575,7 @@ fn test_swapoutput_short_force_error_min_quote_400() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1597,6 +1623,7 @@ fn test_swapoutput_long_slippage_limit() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1645,6 +1672,7 @@ fn test_swapoutput_long_at_slippage_limit() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1693,6 +1721,7 @@ fn test_swapoutput_long_force_error_min_quote_199() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
@@ -1740,6 +1769,7 @@ fn test_swapoutput_long_force_error_min_quote_100() {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: Some("relayer".to_string()),
         owner: None,
+        open: None,
     };
     let info = mock_info("addr0000", &[]);
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();

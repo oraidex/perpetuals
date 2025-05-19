@@ -262,6 +262,7 @@ impl TestTubeScenario {
                     initial_margin_ratio: Uint128::from(50_000u128),
                     relayer: None,
                     owner: None,
+                    open: None,
                 },
                 Some(&owner.address()),
                 Some("vamm"),

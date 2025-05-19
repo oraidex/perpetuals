@@ -31,6 +31,7 @@ fn setup() -> TestingEnv {
         initial_margin_ratio: Uint128::from(50_000u128),
         relayer: None,
                     owner: None,
+                    open: None,
     };
 
     let info = mock_info("addr0000", &[]);

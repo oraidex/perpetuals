@@ -104,7 +104,7 @@ pub fn instantiate(
     validate_non_fraction(msg.quote_asset_reserve, decimals)?;
 
     let state = State {
-        open: false,
+        open: msg.open.unwrap_or_default(),
         base_asset_reserve: msg.base_asset_reserve,
         quote_asset_reserve: msg.quote_asset_reserve,
         total_position_size: Integer::zero(),
