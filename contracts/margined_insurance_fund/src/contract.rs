@@ -1,7 +1,10 @@
 #[cfg(not(feature = "library"))]
 use crate::error::ContractError;
 use crate::{
-    handle::{add_vamm, remove_vamm, shutdown_all_vamm, update_owner, withdraw, withdraw_fund},
+    handle::{
+        add_vamm, remove_vamm, shutdown_all_vamm, update_owner, update_relayer, withdraw,
+        withdraw_fund,
+    },
     query::{
         query_all_vamm, query_config, query_is_vamm, query_owner, query_status_all_vamm,
         query_vamm_status,
@@ -21,6 +24,8 @@ const CONTRACT_NAME: &str = "crates.io:margined-insurance-fund";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 /// Owner admin
 pub const OWNER: Admin = Admin::new("owner");
+/// relayer
+pub const RELAYER: Admin = Admin::new("relayer");
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -46,6 +51,7 @@ pub fn instantiate(
 pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
         ExecuteMsg::UpdateOwner { owner } => update_owner(deps, info, owner),
+        ExecuteMsg::UpdateRelayer { relayer } => update_relayer(deps, info, relayer),
         ExecuteMsg::AddVamm { vamm } => add_vamm(deps, info, vamm),
         ExecuteMsg::RemoveVamm { vamm } => remove_vamm(deps, info, vamm),
         ExecuteMsg::Withdraw { token, amount } => withdraw(deps, info, token, amount),

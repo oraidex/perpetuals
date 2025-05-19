@@ -1,5 +1,5 @@
 use crate::{
-    contract::OWNER,
+    contract::{OWNER, RELAYER},
     query::MAX_PAGINATION_LIMIT,
     state::{read_config, read_vammlist, remove_vamm as remove_amm, save_vamm},
 };
@@ -18,11 +18,27 @@ pub fn update_owner(deps: DepsMut, info: MessageInfo, owner: String) -> StdResul
         .map_err(|error| StdError::generic_err(error.to_string()))
 }
 
-pub fn add_vamm(deps: DepsMut, info: MessageInfo, vamm: String) -> StdResult<Response> {
-    let config = read_config(deps.storage)?;
+pub fn update_relayer(deps: DepsMut, info: MessageInfo, relayer: String) -> StdResult<Response> {
+    // validate the address
+    let valid_relayer = deps.api.addr_validate(&relayer)?;
 
     // check permission
     if !OWNER.is_admin(deps.as_ref(), &info.sender)? {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    RELAYER.set(deps, Some(valid_relayer))?;
+
+    Ok(Response::new().add_attributes(vec![("action", "update_relayer"), ("relayer", &relayer)]))
+}
+
+pub fn add_vamm(deps: DepsMut, info: MessageInfo, vamm: String) -> StdResult<Response> {
+    let config = read_config(deps.storage)?;
+
+    // check permission: owner or relayer can add vamm
+    if !OWNER.is_admin(deps.as_ref(), &info.sender)?
+        && !RELAYER.is_admin(deps.as_ref(), &info.sender)?
+    {
         return Err(StdError::generic_err("unauthorized"));
     }
 
@@ -49,8 +65,10 @@ pub fn add_vamm(deps: DepsMut, info: MessageInfo, vamm: String) -> StdResult<Res
 }
 
 pub fn remove_vamm(deps: DepsMut, info: MessageInfo, vamm: String) -> StdResult<Response> {
-    // check permission
-    if !OWNER.is_admin(deps.as_ref(), &info.sender)? {
+    // check permission: owner or relayer can remove vamm
+    if !OWNER.is_admin(deps.as_ref(), &info.sender)?
+        && !RELAYER.is_admin(deps.as_ref(), &info.sender)?
+    {
         return Err(StdError::generic_err("unauthorized"));
     }
 

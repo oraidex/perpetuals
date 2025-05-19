@@ -624,6 +624,14 @@ fn test_not_owner() {
 
     instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
 
+    // update relayer
+    let msg = ExecuteMsg::UpdateRelayer {
+        relayer: "addr0001".to_string(),
+    };
+
+    let info = mock_info("owner", &[]);
+    execute(deps.as_mut(), mock_env(), info, msg).unwrap();
+
     // try to update the config
     let msg = ExecuteMsg::UpdateOwner {
         owner: "addr0001".to_string(),

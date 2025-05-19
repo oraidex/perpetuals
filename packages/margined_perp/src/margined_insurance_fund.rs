@@ -10,6 +10,7 @@ pub struct InstantiateMsg {
 #[cw_serde]
 pub enum ExecuteMsg {
     UpdateOwner { owner: String },
+    UpdateRelayer { relayer: String },
     AddVamm { vamm: String },
     RemoveVamm { vamm: String },
     Withdraw { token: AssetInfo, amount: Uint128 },
