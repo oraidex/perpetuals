@@ -6,7 +6,10 @@ use crate::{
         WHITELIST,
     },
     messages::{execute_transfer_from, withdraw},
-    query::{query_free_collateral, query_margin_ratio, query_positions},
+    query::{
+        query_cumulative_premium_fraction, query_free_collateral, query_margin_ratio,
+        query_positions,
+    },
     state::{
         increase_last_position_id, read_config, read_position, read_state, read_trading_config,
         store_config, store_position, store_sent_funds, store_state, store_tmp_liquidator,
@@ -314,6 +317,9 @@ pub fn open_position(
         },
     )?;
 
+    let latest_premium_fraction =
+        query_cumulative_premium_fraction(deps.as_ref(), vamm.to_string())?;
+
     Ok(Response::new().add_submessage(msg).add_attributes(vec![
         ("action", "open_position"),
         ("position_id", &position_id.to_string()),
@@ -328,6 +334,10 @@ pub fn open_position(
         ("leverage", &leverage.to_string()),
         ("take_profit", &take_profit.unwrap_or_default().to_string()),
         ("stop_loss", &stop_loss.unwrap_or_default().to_string()),
+        (
+            "latest_premium_fraction",
+            &latest_premium_fraction.to_string(),
+        ),
     ]))
 }
 

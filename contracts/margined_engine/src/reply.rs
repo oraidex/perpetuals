@@ -612,7 +612,8 @@ pub fn pay_funding_reply(
     let vamm = deps.api.addr_validate(sender)?;
 
     // update the cumulative premium fraction
-    append_cumulative_premium_fraction(deps.storage, vamm.clone(), premium_fraction)?;
+    let latest_premium_fraction =
+        append_cumulative_premium_fraction(deps.storage, vamm.clone(), premium_fraction)?;
 
     let vamm_controller = VammController(vamm);
     let total_position_size = vamm_controller.state(&deps.querier)?.total_position_size;
@@ -635,5 +636,9 @@ pub fn pay_funding_reply(
     Ok(response.add_attributes(vec![
         ("action", "pay_funding_reply"),
         ("funding_payment", &funding_payment.to_string()),
+        (
+            "latest_premium_fraction",
+            &latest_premium_fraction.to_string(),
+        ),
     ]))
 }

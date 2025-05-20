@@ -349,15 +349,16 @@ pub fn append_cumulative_premium_fraction(
     storage: &mut dyn Storage,
     vamm: Addr,
     premium_fraction: Integer,
-) -> StdResult<()> {
+) -> StdResult<Integer> {
     let mut vamm_map = read_vamm_map(storage, &vamm)?;
+    let mut latest_premium_fraction = premium_fraction;
     // we push the first premium fraction to an empty array
     // else we add them together prior to pushing
     match vamm_map.cumulative_premium_fractions.len() {
         0 => vamm_map.cumulative_premium_fractions.push(premium_fraction),
         n => {
             let current_premium_fraction = vamm_map.cumulative_premium_fractions[n - 1];
-            let latest_premium_fraction = premium_fraction + current_premium_fraction;
+            latest_premium_fraction = premium_fraction + current_premium_fraction;
 
             vamm_map
                 .cumulative_premium_fractions
@@ -365,7 +366,9 @@ pub fn append_cumulative_premium_fraction(
         }
     }
 
-    store_vamm_map(storage, vamm, &vamm_map)
+    store_vamm_map(storage, vamm, &vamm_map)?;
+
+    Ok(latest_premium_fraction)
 }
 
 pub fn enter_restriction_mode(
