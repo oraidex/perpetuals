@@ -1,8 +1,9 @@
 use cosmwasm_schema::cw_serde;
 use cw_controllers::HooksResponse;
 use margined_perp::margined_engine::{
-    ConfigResponse, ExecuteMsg, PnlCalcOption, Position, PositionFilter, PositionTpSlResponse,
-    PositionUnrealizedPnlResponse, QueryMsg, Side, StateResponse, TickResponse, TicksResponse,
+    ConfigResponse, ExecuteMsg, PauseType, PnlCalcOption, Position, PositionFilter,
+    PositionTpSlResponse, PositionUnrealizedPnlResponse, QueryMsg, Side, StateResponse,
+    TickResponse, TicksResponse,
 };
 
 use cosmwasm_std::{Addr, Coin, CosmosMsg, QuerierWrapper, StdResult, Uint128};
@@ -134,7 +135,7 @@ impl EngineController {
         wasm_execute(&self.0, &msg, vec![])
     }
 
-    pub fn set_pause(&self, pause: bool) -> StdResult<CosmosMsg> {
+    pub fn set_pause(&self, pause: PauseType) -> StdResult<CosmosMsg> {
         let msg = ExecuteMsg::SetPause { pause };
         wasm_execute(&self.0, &msg, vec![])
     }

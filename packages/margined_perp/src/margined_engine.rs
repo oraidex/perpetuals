@@ -126,7 +126,7 @@ pub enum ExecuteMsg {
         amount: Uint128,
     },
     SetPause {
-        pause: bool,
+        pause: PauseType,
     },
     WhitelistTrader {
         traders: Vec<Addr>,
@@ -250,7 +250,16 @@ pub struct TradingConfigResponse {
 pub struct StateResponse {
     pub open_interest_notional: Uint128,
     pub bad_debt: Uint128,
-    pub pause: bool,
+    pub pause: PauseType,
+}
+
+#[cw_serde]
+#[derive(Copy)]
+pub enum PauseType {
+    All,
+    Open,
+    Close,
+    None,
 }
 
 #[cw_serde]
@@ -353,4 +362,15 @@ pub struct TransferResponse {
     pub messages: Vec<SubMsg>,
     pub spread_fee: Uint128,
     pub toll_fee: Uint128,
+}
+
+#[cw_serde]
+pub enum UserAction {
+    OpenPosition,
+    ClosePosition,
+    UpdateTpSl,
+    TriggerTpSl,
+    Liquidate,
+    DepositMargin,
+    WithdrawMargin,
 }

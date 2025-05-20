@@ -16,7 +16,8 @@ use margined_common::{
     messages::{read_event, read_response},
 };
 use margined_perp::margined_engine::{
-    PnlCalcOption, Position, PositionUnrealizedPnlResponse, RemainMarginResponse, Side,
+    PauseType, PnlCalcOption, Position, PositionUnrealizedPnlResponse, RemainMarginResponse, Side,
+    UserAction,
 };
 use margined_perp::margined_vamm::Direction;
 
@@ -291,7 +292,12 @@ pub fn remove_whitelist(deps: DepsMut, info: MessageInfo, address: String) -> St
         .map_err(|error| StdError::generic_err(error.to_string()))
 }
 
-pub fn set_pause(deps: DepsMut, _env: Env, info: MessageInfo, pause: bool) -> StdResult<Response> {
+pub fn set_pause(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    pause: PauseType,
+) -> StdResult<Response> {
     let mut state = read_state(deps.storage)?;
 
     // check permission and if state matches
@@ -388,12 +394,15 @@ pub fn require_not_restriction_mode(
 }
 
 // check margin engine is not paused
-pub fn require_not_paused(paused: bool) -> StdResult<Response> {
-    if paused {
-        return Err(StdError::generic_err("Margin engine is paused"));
+pub fn require_not_paused(pause_type: PauseType, user_action: UserAction) -> StdResult<Response> {
+    match (pause_type, user_action) {
+        (PauseType::All, _)
+        | (PauseType::Open, UserAction::OpenPosition)
+        | (PauseType::Close, UserAction::ClosePosition) => {
+            Err(StdError::generic_err("Margin engine is paused"))
+        }
+        _ => Ok(Response::new()),
     }
-
-    Ok(Response::new())
 }
 
 // check an input is non-zero

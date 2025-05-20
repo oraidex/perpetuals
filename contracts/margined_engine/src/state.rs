@@ -7,7 +7,9 @@ use cosmwasm_storage::{singleton, singleton_read, Bucket, ReadonlyBucket};
 use std::cmp::Ordering;
 
 use margined_common::{asset::Asset, integer::Integer};
-use margined_perp::margined_engine::{ConfigResponse, Position, Side, TradingConfigResponse};
+use margined_perp::margined_engine::{
+    ConfigResponse, PauseType, Position, Side, TradingConfigResponse,
+};
 
 use crate::utils::calc_range_start;
 
@@ -60,15 +62,7 @@ pub fn read_trading_config(storage: &dyn Storage) -> StdResult<TradingConfig> {
 pub struct State {
     pub open_interest_notional: Uint128,
     pub prepaid_bad_debt: Uint128,
-    pub pause: bool,
-}
-
-#[cw_serde]
-pub enum PauseStatus {
-    All,
-    Open,
-    Close,
-    None,
+    pub pause: PauseType,
 }
 
 pub fn init_last_position_id(storage: &mut dyn Storage) -> StdResult<()> {
@@ -390,3 +384,5 @@ pub fn enter_restriction_mode(
 
     store_vamm_map(storage, vamm, &vamm_map)
 }
+
+

@@ -36,7 +36,7 @@ use margined_common::{
     validate::{validate_margin_ratios, validate_ratio},
 };
 use margined_perp::margined_engine::{
-    PnlCalcOption, Position, PositionFilter, PositionUnrealizedPnlResponse, Side,
+    PnlCalcOption, Position, PositionFilter, PositionUnrealizedPnlResponse, Side, UserAction,
 };
 use margined_perp::margined_vamm::{CalcFeeResponse, Direction, ExecuteMsg};
 use margined_utils::{
@@ -196,7 +196,7 @@ pub fn open_position(
     // check if trader is whitelisted
     is_whitelisted(deps.as_ref(), trader.clone())?;
 
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::OpenPosition)?;
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
 
     require_not_restriction_mode(&deps.as_ref(), &vamm, env.block.height, &trader)?;
@@ -358,7 +358,7 @@ pub fn update_tp_sl(
     let mut position = read_position(deps.storage, &vamm_key, position_id)?;
 
     let state = read_state(deps.storage)?;
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::UpdateTpSl)?;
     require_position_not_zero(position.size.value)?;
 
     if position.trader != trader {
@@ -447,7 +447,7 @@ pub fn close_position(
     require_is_not_over_price_diff_limit(deps.as_ref(), &vamm_controller)?;
 
     // check the position isn't zero
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::ClosePosition)?;
     require_position_not_zero(position.size.value)?;
     require_not_restriction_mode(&deps.as_ref(), &vamm, env.block.height, &trader)?;
 
@@ -570,7 +570,7 @@ pub fn trigger_tp_sl(
     }
 
     let state = read_state(deps.storage)?;
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::TriggerTpSl)?;
     // check the position isn't zero
     require_position_not_zero(position.size.value)?;
 
@@ -646,7 +646,7 @@ pub fn trigger_mutiple_tp_sl(
     }
 
     let state = read_state(deps.storage)?;
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::TriggerTpSl)?;
 
     // query pool reserves of the vamm so that we can simulate it while triggering tp sl.
     // after simulating, we will know if the position is qualified to close or not
@@ -763,7 +763,7 @@ pub fn liquidate(
 ) -> StdResult<Response> {
     let config = read_config(deps.storage)?;
     let state = read_state(deps.storage)?;
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::Liquidate)?;
     // validate address inputs
     let vamm = deps.api.addr_validate(&vamm)?;
 
@@ -873,7 +873,7 @@ pub fn deposit_margin(
     let trader = info.sender.clone();
 
     let state = read_state(deps.storage)?;
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::DepositMargin)?;
     require_non_zero_input(amount)?;
 
     // first try to execute the transfer
@@ -933,7 +933,7 @@ pub fn withdraw_margin(
     let config = read_config(deps.storage)?;
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
     let mut state = read_state(deps.storage)?;
-    require_not_paused(state.pause)?;
+    require_not_paused(state.pause, UserAction::WithdrawMargin)?;
     require_non_zero_input(amount)?;
 
     // read the position for the trader from vamm

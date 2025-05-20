@@ -7,7 +7,7 @@ use cw_controllers::{Admin, Hooks};
 use margined_common::validate::{
     validate_decimal_places, validate_eligible_collateral, validate_margin_ratios, validate_ratio,
 };
-use margined_perp::margined_engine::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
+use margined_perp::margined_engine::{ExecuteMsg, InstantiateMsg, MigrateMsg, PauseType, QueryMsg};
 
 use crate::auth::{remove_relayer, remove_whitelist_trader, set_relayer, whitelist_trader};
 use crate::error::ContractError;
@@ -134,7 +134,7 @@ pub fn instantiate(
         &State {
             open_interest_notional: Uint128::zero(),
             prepaid_bad_debt: Uint128::zero(),
-            pause: false,
+            pause: PauseType::None,
         },
     )?;
 
