@@ -63,6 +63,14 @@ pub struct State {
     pub pause: bool,
 }
 
+#[cw_serde]
+pub enum PauseStatus {
+    All,
+    Open,
+    Close,
+    None,
+}
+
 pub fn init_last_position_id(storage: &mut dyn Storage) -> StdResult<()> {
     singleton(storage, KEY_LAST_POSITION_ID).save(&0u64)
 }

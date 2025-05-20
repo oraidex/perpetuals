@@ -1,6 +1,6 @@
 use cosmwasm_schema::serde::Serialize;
 use cosmwasm_std::{
-    to_binary, Coin, CosmosMsg, Event, StdError, StdResult, SubMsgResponse, WasmMsg,
+    to_json_binary, Coin, CosmosMsg, Event, StdError, StdResult, SubMsgResponse, WasmMsg,
 };
 
 // util to create Wasm execute message as CosmosMsg
@@ -9,7 +9,7 @@ pub fn wasm_execute<T: Serialize + ?Sized>(
     msg: &T,
     funds: Vec<Coin>,
 ) -> StdResult<CosmosMsg> {
-    let msg = to_binary(msg)?;
+    let msg = to_json_binary(msg)?;
     Ok(WasmMsg::Execute {
         contract_addr: contract_addr.into(),
         msg,

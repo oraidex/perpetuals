@@ -4,7 +4,7 @@ use cosmwasm_std::{from_slice, to_vec};
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
+    to_json_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
     Storage, Timestamp, Uint128,
 };
 
@@ -151,14 +151,14 @@ pub fn append_multiple_price(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::Config {} => to_binary(&query_config(deps)?),
-        QueryMsg::GetPrice { key } => to_binary(&query_get_price(deps, key)?),
+        QueryMsg::Config {} => to_json_binary(&query_config(deps)?),
+        QueryMsg::GetPrice { key } => to_json_binary(&query_get_price(deps, key)?),
         QueryMsg::GetPreviousPrice {
             key,
             num_round_back,
-        } => to_binary(&query_get_previous_price(deps, key, num_round_back)?),
+        } => to_json_binary(&query_get_previous_price(deps, key, num_round_back)?),
         QueryMsg::GetTwapPrice { key, interval } => {
-            to_binary(&query_get_twap_price(deps, env, key, interval)?)
+            to_json_binary(&query_get_twap_price(deps, env, key, interval)?)
         }
     }
 }

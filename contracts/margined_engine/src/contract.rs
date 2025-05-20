@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    entry_point, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdError,
-    StdResult, SubMsgResult, Uint128,
+    entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response,
+    StdError, StdResult, SubMsgResult, Uint128,
 };
 use cw2::set_contract_version;
 use cw_controllers::{Admin, Hooks};
@@ -13,8 +13,8 @@ use crate::auth::{remove_relayer, remove_whitelist_trader, set_relayer, whitelis
 use crate::error::ContractError;
 use crate::handle::{trigger_mutiple_tp_sl, trigger_tp_sl, update_operator, update_tp_sl};
 use crate::query::{
-    query__trading_config, query_last_position_id, query_position_is_bad_debt,
-    query_position_is_liquidated, query_position_is_tpsl, query_positions,
+    query_last_position_id, query_position_is_bad_debt, query_position_is_liquidated,
+    query_position_is_tpsl, query_positions, query_trading_config,
 };
 use crate::state::{init_last_position_id, read_position};
 use crate::tick::{query_tick, query_ticks};
@@ -253,17 +253,19 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::Config {} => to_binary(&query_config(deps)?),
-        QueryMsg::TradingConfig {} => to_binary(&query__trading_config(deps)?),
-        QueryMsg::State {} => to_binary(&query_state(deps)?),
-        QueryMsg::GetPauser {} => to_binary(&query_pauser(deps)?),
-        QueryMsg::IsWhitelisted { address } => to_binary(&WHITELIST.query_hook(deps, address)?),
-        QueryMsg::IsTraderWhitelisted { address } => to_binary(
+        QueryMsg::Config {} => to_json_binary(&query_config(deps)?),
+        QueryMsg::TradingConfig {} => to_json_binary(&query_trading_config(deps)?),
+        QueryMsg::State {} => to_json_binary(&query_state(deps)?),
+        QueryMsg::GetPauser {} => to_json_binary(&query_pauser(deps)?),
+        QueryMsg::IsWhitelisted { address } => {
+            to_json_binary(&WHITELIST.query_hook(deps, address)?)
+        }
+        QueryMsg::IsTraderWhitelisted { address } => to_json_binary(
             &WHITELIST_TRADER
                 .may_load(deps.storage, address)?
                 .unwrap_or(false),
         ),
-        QueryMsg::GetWhitelist {} => to_binary(&WHITELIST.query_hooks(deps)?),
+        QueryMsg::GetWhitelist {} => to_json_binary(&WHITELIST.query_hooks(deps)?),
         QueryMsg::Positions {
             vamm,
             filter,
@@ -271,7 +273,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             start_after,
             limit,
             order_by,
-        } => to_binary(&query_positions(
+        } => to_json_binary(&query_positions(
             deps.storage,
             &keccak_256(vamm.as_bytes()),
             side,
@@ -281,7 +283,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             order_by,
         )?),
         QueryMsg::Position { vamm, position_id } => {
-            to_binary(&query_position(deps, vamm, position_id)?)
+            to_json_binary(&query_position(deps, vamm, position_id)?)
         }
         QueryMsg::Ticks {
             vamm,
@@ -289,7 +291,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             start_after,
             limit,
             order_by,
-        } => to_binary(&query_ticks(
+        } => to_json_binary(&query_ticks(
             deps.storage,
             &keccak_256(vamm.as_bytes()),
             side,
@@ -301,7 +303,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             vamm,
             side,
             entry_price,
-        } => to_binary(&query_tick(
+        } => to_json_binary(&query_tick(
             deps.storage,
             &keccak_256(vamm.as_bytes()),
             side,
@@ -310,7 +312,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::MarginRatio { vamm, position_id } => {
             let vamm_key = keccak_256(vamm.as_bytes());
             let position = read_position(deps.storage, &vamm_key, position_id)?;
-            to_binary(&query_margin_ratio(deps, &position)?)
+            to_json_binary(&query_margin_ratio(deps, &position)?)
         }
         QueryMsg::MarginRatioByCalcOption {
             vamm,
@@ -319,28 +321,28 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         } => {
             let vamm_key = keccak_256(vamm.as_bytes());
             let position = read_position(deps.storage, &vamm_key, position_id)?;
-            to_binary(&get_margin_ratio_calc_option(deps, &position, calc_option)?)
+            to_json_binary(&get_margin_ratio_calc_option(deps, &position, calc_option)?)
         }
         QueryMsg::CumulativePremiumFraction { vamm } => {
-            to_binary(&query_cumulative_premium_fraction(deps, vamm)?)
+            to_json_binary(&query_cumulative_premium_fraction(deps, vamm)?)
         }
         QueryMsg::UnrealizedPnl {
             vamm,
             position_id,
             calc_option,
-        } => to_binary(&query_position_notional_unrealized_pnl(
+        } => to_json_binary(&query_position_notional_unrealized_pnl(
             deps,
             vamm,
             position_id,
             calc_option,
         )?),
         QueryMsg::FreeCollateral { vamm, position_id } => {
-            to_binary(&query_free_collateral(deps, vamm, position_id)?)
+            to_json_binary(&query_free_collateral(deps, vamm, position_id)?)
         }
-        QueryMsg::BalanceWithFundingPayment { position_id } => to_binary(
+        QueryMsg::BalanceWithFundingPayment { position_id } => to_json_binary(
             &query_trader_balance_with_funding_payment(deps, position_id)?,
         ),
-        QueryMsg::PositionWithFundingPayment { vamm, position_id } => to_binary(
+        QueryMsg::PositionWithFundingPayment { vamm, position_id } => to_json_binary(
             &query_trader_position_with_funding_payment(deps, vamm, position_id)?,
         ),
         QueryMsg::PositionIsTpSl {
@@ -348,7 +350,7 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             side,
             take_profit,
             limit,
-        } => to_binary(&query_position_is_tpsl(
+        } => to_json_binary(&query_position_is_tpsl(
             deps,
             vamm,
             side,
@@ -356,12 +358,12 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
             limit,
         )?),
         QueryMsg::IsBadDebt { vamm, position_id } => {
-            to_binary(&query_position_is_bad_debt(deps, position_id, vamm)?)
+            to_json_binary(&query_position_is_bad_debt(deps, position_id, vamm)?)
         }
         QueryMsg::IsLiquidated { vamm, position_id } => {
-            to_binary(&query_position_is_liquidated(deps, position_id, vamm)?)
+            to_json_binary(&query_position_is_liquidated(deps, position_id, vamm)?)
         }
-        QueryMsg::LastPositionId {} => to_binary(&query_last_position_id(deps)?),
+        QueryMsg::LastPositionId {} => to_json_binary(&query_last_position_id(deps)?),
     }
 }
 

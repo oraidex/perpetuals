@@ -34,7 +34,7 @@ pub fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
 }
 
 /// Queries contract Config
-pub fn query__trading_config(deps: Deps) -> StdResult<TradingConfigResponse> {
+pub fn query_trading_config(deps: Deps) -> StdResult<TradingConfigResponse> {
     read_trading_config(deps.storage)
 }
 

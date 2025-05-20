@@ -12,7 +12,7 @@ use crate::{
     state::{store_config, Config},
 };
 use cosmwasm_std::{
-    entry_point, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
+    entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
 };
 use cw2::set_contract_version;
 use cw_controllers::Admin;
@@ -63,12 +63,14 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::Config {} => to_binary(&query_config(deps)?),
-        QueryMsg::GetOwner {} => to_binary(&query_owner(deps)?),
-        QueryMsg::IsVamm { vamm } => to_binary(&query_is_vamm(deps, vamm)?),
-        QueryMsg::GetAllVamm { limit } => to_binary(&query_all_vamm(deps, limit)?),
-        QueryMsg::GetVammStatus { vamm } => to_binary(&query_vamm_status(deps, vamm)?),
-        QueryMsg::GetAllVammStatus { limit } => to_binary(&query_status_all_vamm(deps, limit)?),
+        QueryMsg::Config {} => to_json_binary(&query_config(deps)?),
+        QueryMsg::GetOwner {} => to_json_binary(&query_owner(deps)?),
+        QueryMsg::IsVamm { vamm } => to_json_binary(&query_is_vamm(deps, vamm)?),
+        QueryMsg::GetAllVamm { limit } => to_json_binary(&query_all_vamm(deps, limit)?),
+        QueryMsg::GetVammStatus { vamm } => to_json_binary(&query_vamm_status(deps, vamm)?),
+        QueryMsg::GetAllVammStatus { limit } => {
+            to_json_binary(&query_status_all_vamm(deps, limit)?)
+        }
     }
 }
 

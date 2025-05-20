@@ -2,7 +2,7 @@ use crate::contract::{execute, instantiate, query};
 use crate::testing::{new_native_token_scenario, new_simple_scenario};
 use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
 use cosmwasm_std::{
-    from_binary, to_binary, Addr, BankMsg, Coin, CosmosMsg, StdError, Uint128, WasmMsg,
+    from_binary, to_json_binary, Addr, BankMsg, Coin, CosmosMsg, StdError, Uint128, WasmMsg,
 };
 use cw20::Cw20ExecuteMsg;
 use margined_common::asset::AssetInfo;
@@ -692,7 +692,7 @@ fn test_send_cw20_token() {
     let msg = CosmosMsg::Wasm(WasmMsg::Execute {
         contract_addr: usdc.addr().to_string(),
         funds: vec![],
-        msg: to_binary(&Cw20ExecuteMsg::Mint {
+        msg: to_json_binary(&Cw20ExecuteMsg::Mint {
             recipient: fee_pool.addr().clone().to_string(),
             amount: Uint128::from(5000u128 * 10u128.pow(9)),
         })
@@ -747,7 +747,7 @@ fn test_send_cw20_token() {
     let msg = CosmosMsg::Wasm(WasmMsg::Execute {
         contract_addr: usdc.addr().to_string(),
         funds: vec![],
-        msg: to_binary(&Cw20ExecuteMsg::Mint {
+        msg: to_json_binary(&Cw20ExecuteMsg::Mint {
             recipient: fee_pool.addr().clone().to_string(),
             amount: Uint128::from(5000u128 * 10u128.pow(9)),
         })
@@ -788,7 +788,7 @@ fn test_send_cw20_token() {
     let msg = CosmosMsg::Wasm(WasmMsg::Execute {
         contract_addr: usdc.addr().to_string(),
         funds: vec![],
-        msg: to_binary(&Cw20ExecuteMsg::Mint {
+        msg: to_json_binary(&Cw20ExecuteMsg::Mint {
             recipient: fee_pool.addr().clone().to_string(),
             amount: Uint128::from(1000u128 * 10u128.pow(9)),
         })

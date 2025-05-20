@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
+    to_json_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdError, StdResult,
     Uint128,
 };
 use cw2::set_contract_version;
@@ -218,22 +218,22 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::Config {} => to_binary(&query_config(deps)?),
-        QueryMsg::State {} => to_binary(&query_state(deps)?),
-        QueryMsg::GetOwner {} => to_binary(&query_owner(deps)?),
+        QueryMsg::Config {} => to_json_binary(&query_config(deps)?),
+        QueryMsg::State {} => to_json_binary(&query_state(deps)?),
+        QueryMsg::GetOwner {} => to_json_binary(&query_owner(deps)?),
         QueryMsg::InputPrice { direction, amount } => {
-            to_binary(&query_input_price(deps, direction, amount)?)
+            to_json_binary(&query_input_price(deps, direction, amount)?)
         }
         QueryMsg::OutputPrice { direction, amount } => {
-            to_binary(&query_output_price(deps, direction, amount)?)
+            to_json_binary(&query_output_price(deps, direction, amount)?)
         }
         QueryMsg::InputAmount { direction, amount } => {
-            to_binary(&query_input_amount(deps, direction, amount)?)
+            to_json_binary(&query_input_amount(deps, direction, amount)?)
         }
         QueryMsg::OutputAmount { direction, amount } => {
-            to_binary(&query_output_amount(deps, direction, amount)?)
+            to_json_binary(&query_output_amount(deps, direction, amount)?)
         }
-        QueryMsg::InputTwap { direction, amount } => to_binary(&query_twap_price(
+        QueryMsg::InputTwap { direction, amount } => to_json_binary(&query_twap_price(
             deps,
             env,
             FIFTEEN_MINUTES,
@@ -244,7 +244,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
                 quote: true,
             }),
         )?),
-        QueryMsg::OutputTwap { direction, amount } => to_binary(&query_twap_price(
+        QueryMsg::OutputTwap { direction, amount } => to_json_binary(&query_twap_price(
             deps,
             env,
             FIFTEEN_MINUTES,
@@ -258,41 +258,41 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::UnderlyingPrice {} => {
             let config = read_config(deps.storage)?;
             let pricefeed_controller = PricefeedController(config.pricefeed);
-            to_binary(&pricefeed_controller.get_price(&deps.querier, config.base_asset)?)
+            to_json_binary(&pricefeed_controller.get_price(&deps.querier, config.base_asset)?)
         }
         QueryMsg::UnderlyingTwapPrice { interval } => {
             let config = read_config(deps.storage)?;
             let pricefeed_controller = PricefeedController(config.pricefeed);
-            to_binary(&pricefeed_controller.twap_price(
+            to_json_binary(&pricefeed_controller.twap_price(
                 &deps.querier,
                 config.base_asset,
                 interval,
             )?)
         }
         QueryMsg::CalcFee { quote_asset_amount } => {
-            to_binary(&query_calc_fee(deps, quote_asset_amount)?)
+            to_json_binary(&query_calc_fee(deps, quote_asset_amount)?)
         }
-        QueryMsg::SpotPrice {} => to_binary(&query_spot_price(deps)?),
-        QueryMsg::TwapPrice { interval } => to_binary(&query_twap_price(
+        QueryMsg::SpotPrice {} => to_json_binary(&query_spot_price(deps)?),
+        QueryMsg::TwapPrice { interval } => to_json_binary(&query_twap_price(
             deps,
             env,
             interval,
             TwapCalcOption::Reserve,
             None,
         )?),
-        QueryMsg::IsOverSpreadLimit {} => to_binary(&query_is_over_spread_limit(deps)?),
-        QueryMsg::IsOverPriceDiffLimit {} => to_binary(&query_is_over_price_diff_limit(deps)?),
+        QueryMsg::IsOverSpreadLimit {} => to_json_binary(&query_is_over_spread_limit(deps)?),
+        QueryMsg::IsOverPriceDiffLimit {} => to_json_binary(&query_is_over_price_diff_limit(deps)?),
         QueryMsg::IsOverFluctuationLimit {
             direction,
             base_asset_amount,
-        } => to_binary(&query_is_over_fluctuation_limit(
+        } => to_json_binary(&query_is_over_fluctuation_limit(
             deps,
             env,
             direction,
             base_asset_amount,
         )?),
-        QueryMsg::IsWhitelisted { address } => to_binary(&WHITELIST.query_hook(deps, address)?),
-        QueryMsg::GetWhitelist {} => to_binary(&WHITELIST.query_hooks(deps)?),
+        QueryMsg::IsWhitelisted { address } => to_json_binary(&WHITELIST.query_hook(deps, address)?),
+        QueryMsg::GetWhitelist {} => to_json_binary(&WHITELIST.query_hooks(deps)?),
     }
 }
 
