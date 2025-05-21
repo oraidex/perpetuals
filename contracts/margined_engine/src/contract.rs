@@ -190,6 +190,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             take_profit,
             stop_loss,
             base_asset_limit,
+            expire_period,
         } => open_position(
             deps,
             env,
@@ -201,6 +202,7 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
             take_profit,
             stop_loss,
             base_asset_limit,
+            expire_period,
         ),
         ExecuteMsg::UpdateTpSl {
             vamm,

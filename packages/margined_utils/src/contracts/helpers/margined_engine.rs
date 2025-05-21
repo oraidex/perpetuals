@@ -159,6 +159,32 @@ impl EngineController {
             base_asset_limit,
             take_profit,
             stop_loss,
+            expire_period: None,
+        };
+        wasm_execute(&self.0, &msg, funds)
+    }
+
+    pub fn open_position_with_expire_period(
+        &self,
+        vamm: String,
+        side: Side,
+        margin_amount: Uint128,
+        leverage: Uint128,
+        take_profit: Option<Uint128>,
+        stop_loss: Option<Uint128>,
+        base_asset_limit: Uint128,
+        expire_period: Option<u64>,
+        funds: Vec<Coin>,
+    ) -> StdResult<CosmosMsg> {
+        let msg = ExecuteMsg::OpenPosition {
+            vamm,
+            side,
+            margin_amount,
+            leverage,
+            base_asset_limit,
+            take_profit,
+            stop_loss,
+            expire_period,
         };
         wasm_execute(&self.0, &msg, funds)
     }

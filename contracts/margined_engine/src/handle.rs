@@ -182,6 +182,7 @@ pub fn open_position(
     take_profit: Option<Uint128>,
     stop_loss: Option<Uint128>,
     base_asset_limit: Uint128,
+    expire_period: Option<u64>,
 ) -> StdResult<Response> {
     // validate address inputs
     let vamm = deps.api.addr_validate(&vamm)?;
@@ -288,6 +289,12 @@ pub fn open_position(
         base_asset_limit,
     )?;
 
+    let expire_time = if let Some(expire_period) = expire_period {
+        env.block.time.seconds() + expire_period
+    } else {
+        0u64
+    };
+
     store_tmp_swap(
         deps.storage,
         &TmpSwapInfo {
@@ -306,6 +313,7 @@ pub fn open_position(
             toll_fee,
             take_profit,
             stop_loss,
+            expire_time,
         },
     )?;
 
@@ -433,11 +441,17 @@ pub fn close_position(
 
     // validate address inputs
     let vamm = deps.api.addr_validate(&vamm)?;
-    let trader = info.sender;
 
     // read the position for the trader from vamm
     let vamm_key = keccak_256(vamm.as_bytes());
     let position = read_position(deps.storage, &vamm_key, position_id)?;
+
+    // if this position is expired, allow any trader to close it
+    let trader = if position.expire_time > 0 && position.expire_time <= env.block.time.seconds() {
+        position.trader.clone()
+    } else {
+        info.sender
+    };
 
     if position.trader != trader {
         return Err(StdError::generic_err("Unauthorized"));
@@ -506,6 +520,7 @@ pub fn close_position(
                 toll_fee: position.toll_fee,
                 take_profit: position.take_profit,
                 stop_loss: position.stop_loss,
+                expire_time: 0u64,
             },
         )?;
 
@@ -1042,6 +1057,7 @@ pub fn internal_close_position(
             stop_loss: position.stop_loss,
             spread_fee: position.spread_fee,
             toll_fee: position.toll_fee,
+            expire_time: position.expire_time,
         },
     )?;
 
@@ -1106,6 +1122,7 @@ fn partial_liquidation(
             stop_loss: position.stop_loss,
             spread_fee: position.spread_fee,
             toll_fee: position.toll_fee,
+            expire_time: position.expire_time,
         },
     )?;
 

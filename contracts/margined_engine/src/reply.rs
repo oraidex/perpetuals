@@ -51,6 +51,7 @@ pub fn open_position_reply(
         spread_fee: swap.spread_fee,
         toll_fee: swap.toll_fee,
         block_time: env.block.time.seconds(),
+        expire_time: swap.expire_time,
     };
 
     // depending on the direction the output is positive or negative

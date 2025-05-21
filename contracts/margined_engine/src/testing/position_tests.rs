@@ -1696,3 +1696,102 @@ fn test_bad_debt_recorded() {
     let bad_debt = engine.state(&router.wrap()).unwrap().bad_debt;
     assert_eq!(bad_debt, to_decimals(20u64));
 }
+
+#[test]
+fn test_close_expired_position() {
+    let SimpleScenario {
+        mut router,
+        alice,
+        bob,
+        engine,
+        usdc,
+        vamm,
+        ..
+    } = new_simple_scenario();
+
+    let msg = engine
+        .open_position_with_expire_period(
+            vamm.addr().to_string(),
+            Side::Sell,
+            to_decimals(50u64),
+            to_decimals(2u64),
+            Some(to_decimals(7)),
+            Some(to_decimals(13)),
+            to_decimals(0u64),
+            Some(10),
+            vec![],
+        )
+        .unwrap();
+    router.execute(alice.clone(), msg).unwrap();
+
+    // retrieve the vamm state
+    let position = engine
+        .position(&router.wrap(), vamm.addr().to_string(), 1)
+        .unwrap();
+    assert_eq!(position.size, Integer::new_negative(11_111_111_112u128));
+
+    let msg = engine
+        .open_position(
+            vamm.addr().to_string(),
+            Side::Buy,
+            to_decimals(10u64),
+            to_decimals(6u64),
+            Some(to_decimals(10)),
+            Some(Uint128::zero()),
+            to_decimals(0u64),
+            vec![],
+        )
+        .unwrap();
+    router.execute(bob.clone(), msg).unwrap();
+
+    let state = vamm.state(&router.wrap()).unwrap();
+    assert_eq!(state.quote_asset_reserve, to_decimals(960));
+    assert_eq!(state.base_asset_reserve, Uint128::from(104_166_666_668u128));
+
+    // other trader cannot close the position because it is not expired
+    let msg = engine
+        .close_position(vamm.addr().to_string(), 1, to_decimals(0u64))
+        .unwrap();
+
+    let err = router.execute(bob.clone(), msg).unwrap_err();
+
+    assert_eq!(
+        StdError::GenericErr {
+            msg: "Unauthorized".to_string()
+        },
+        err.downcast().unwrap()
+    );
+
+    // bob can close the position because it is expired
+    router.update_block(|block| {
+        block.time = block.time.plus_seconds(10);
+        block.height += 1;
+    });
+
+    let msg = engine
+        .close_position(vamm.addr().to_string(), 1, to_decimals(0u64))
+        .unwrap();
+    router.execute(bob.clone(), msg).unwrap();
+
+    let err = engine
+        .position(&router.wrap(), vamm.addr().to_string(), 1)
+        .unwrap_err();
+    assert_eq!(
+        StdError::GenericErr {
+            msg: "Querier contract error: margined_perp::margined_engine::Position not found"
+                .to_string()
+        },
+        err
+    );
+
+    let state = vamm.state(&router.wrap()).unwrap();
+    assert_eq!(
+        state.quote_asset_reserve,
+        Uint128::from(1_074_626_865_681u128)
+    );
+    assert_eq!(state.base_asset_reserve, Uint128::from(93_055_555_556u128));
+
+    // alice balance should be 4985.373134319
+    let engine_balance = usdc.balance(&router.wrap(), alice.clone()).unwrap();
+    assert_eq!(engine_balance, Uint128::from(4_985_373_134_319u128));
+}

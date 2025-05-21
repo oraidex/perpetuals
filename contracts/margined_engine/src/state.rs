@@ -285,6 +285,7 @@ pub struct TmpSwapInfo {
     pub stop_loss: Option<Uint128>,   // stop loss price of position
     pub spread_fee: Uint128,          // spread fee
     pub toll_fee: Uint128,            // toll fee
+    pub expire_time: u64,             // expire time of position
 }
 
 pub fn store_tmp_swap(storage: &mut dyn Storage, swap: &TmpSwapInfo) -> StdResult<()> {
@@ -384,5 +385,3 @@ pub fn enter_restriction_mode(
 
     store_vamm_map(storage, vamm, &vamm_map)
 }
-
-

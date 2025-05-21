@@ -84,6 +84,7 @@ pub enum ExecuteMsg {
         take_profit: Option<Uint128>,
         stop_loss: Option<Uint128>,
         base_asset_limit: Uint128,
+        expire_period: Option<u64>,
     },
     UpdateTpSl {
         vamm: String,
@@ -306,6 +307,8 @@ pub struct Position {
     pub toll_fee: Uint128,
     pub last_updated_premium_fraction: Integer,
     pub block_time: u64,
+    #[serde(default)]
+    pub expire_time: u64,
 }
 
 impl Default for Position {
@@ -327,6 +330,7 @@ impl Default for Position {
             spread_fee: Uint128::zero(),
             toll_fee: Uint128::zero(),
             block_time: 0u64,
+            expire_time: 0u64,
         }
     }
 }
