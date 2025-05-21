@@ -346,6 +346,7 @@ pub fn open_position(
             "latest_premium_fraction",
             &latest_premium_fraction.to_string(),
         ),
+        ("expire_time", &expire_time.to_string()),
     ]))
 }
 
