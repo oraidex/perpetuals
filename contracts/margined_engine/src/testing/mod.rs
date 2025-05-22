@@ -28,6 +28,8 @@ mod gas_integration_tests;
 mod price_diff_tests;
 mod vamm_leverage_test;
 
+mod position_max_notional;
+
 use margined_utils::{
     create_entry_points_testing,
     testing::{NativeTokenScenario, SimpleScenario},

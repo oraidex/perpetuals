@@ -21,7 +21,7 @@ use crate::utils::{get_margin_ratio_calc_option, keccak_256};
 use crate::{
     handle::{
         close_position, deposit_margin, liquidate, open_position, pay_funding, update_config,
-        withdraw_margin,
+        update_trading_config, withdraw_margin,
     },
     query::{
         query_config, query_cumulative_premium_fraction, query_free_collateral, query_margin_ratio,
@@ -32,7 +32,7 @@ use crate::{
         close_position_reply, liquidate_reply, open_position_reply, partial_close_position_reply,
         partial_liquidation_reply, pay_funding_reply,
     },
-    state::{store_config, store_state, Config, State},
+    state::{store_config, store_state, store_trading_config, Config, State, TradingConfig},
     utils::{
         add_whitelist, parse_pay_funding, parse_swap, remove_whitelist, set_pause, update_pauser,
     },
@@ -110,10 +110,18 @@ pub fn instantiate(
         liquidation_fee: msg.liquidation_fee,
     };
 
+    let trading_config = TradingConfig {
+        enable_whitelist: false,
+        max_notional_size: Uint128::MAX,
+        min_leverage: decimals,
+    };
+
     // Initialize last position id
     init_last_position_id(deps.storage)?;
 
     store_config(deps.storage, &config)?;
+
+    store_trading_config(deps.storage, &trading_config)?;
 
     // store default state
     store_state(
@@ -133,6 +141,17 @@ pub fn instantiate(
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
+        ExecuteMsg::UpdateTradingConfig {
+            enable_whitelist,
+            max_notional_size,
+            min_leverage,
+        } => update_trading_config(
+            deps,
+            info,
+            enable_whitelist,
+            max_notional_size,
+            min_leverage,
+        ),
         ExecuteMsg::UpdateConfig {
             owner,
             insurance_fund,

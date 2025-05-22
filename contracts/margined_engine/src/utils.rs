@@ -628,6 +628,18 @@ pub fn position_is_liquidated(
     }
 }
 
+pub fn check_max_notional_size(
+    notional_size: Uint128,
+    max_notional_size: Uint128,
+) -> StdResult<Response> {
+    if notional_size > max_notional_size {
+        return Err(StdError::generic_err(
+            "Notional size exceeds max notional size",
+        ));
+    }
+    Ok(Response::new())
+}
+
 pub fn require_is_not_over_price_diff_limit(
     deps: Deps,
     vamm_controller: &VammController,

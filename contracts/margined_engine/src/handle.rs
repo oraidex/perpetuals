@@ -14,18 +14,18 @@ use crate::{
     messages::{execute_transfer_from, withdraw},
     query::{query_free_collateral, query_margin_ratio, query_positions},
     state::{
-        increase_last_position_id, read_config, read_position, read_state, store_config,
-        store_position, store_sent_funds, store_state, store_tmp_liquidator, store_tmp_swap,
-        SentFunds, TmpReserveInfo, TmpSwapInfo,
+        increase_last_position_id, read_config, read_position, read_state, read_trading_config,
+        store_config, store_position, store_sent_funds, store_state, store_tmp_liquidator,
+        store_tmp_swap, store_trading_config, SentFunds, TmpReserveInfo, TmpSwapInfo,
     },
     tick::query_ticks,
     utils::{
-        calc_remain_margin_with_funding_payment, calculate_tp_sl_spread, check_tp_sl_price,
-        direction_to_side, get_asset, get_position_notional_unrealized_pnl, keccak_256,
-        position_to_side, require_additional_margin, require_bad_debt, require_insufficient_margin,
-        require_is_not_over_price_diff_limit, require_non_zero_input, require_not_paused,
-        require_not_restriction_mode, require_position_not_zero, require_vamm, side_to_direction,
-        update_reserve,
+        calc_remain_margin_with_funding_payment, calculate_tp_sl_spread, check_max_notional_size,
+        check_tp_sl_price, direction_to_side, get_asset, get_position_notional_unrealized_pnl,
+        keccak_256, position_to_side, require_additional_margin, require_bad_debt,
+        require_insufficient_margin, require_is_not_over_price_diff_limit, require_non_zero_input,
+        require_not_paused, require_not_restriction_mode, require_position_not_zero, require_vamm,
+        side_to_direction, update_reserve,
     },
 };
 use margined_common::{
@@ -60,6 +60,37 @@ pub fn update_operator(
     store_config(deps.storage, &config)?;
 
     Ok(Response::default().add_attribute("action", "update_operator"))
+}
+
+pub fn update_trading_config(
+    deps: DepsMut,
+    info: MessageInfo,
+    enable_whitelist: Option<bool>,
+    max_notional_size: Option<Uint128>,
+    min_leverage: Option<Uint128>,
+) -> StdResult<Response> {
+    let config = read_config(deps.storage)?;
+    let mut trading_config = read_trading_config(deps.storage)?;
+    // check permission
+    if info.sender != config.owner {
+        return Err(StdError::generic_err("unauthorized"));
+    }
+
+    if let Some(enable_whitelist) = enable_whitelist {
+        trading_config.enable_whitelist = enable_whitelist;
+    }
+
+    if let Some(max_notional_size) = max_notional_size {
+        trading_config.max_notional_size = max_notional_size;
+    }
+
+    if let Some(min_leverage) = min_leverage {
+        trading_config.min_leverage = min_leverage;
+    }
+
+    store_trading_config(deps.storage, &trading_config)?;
+
+    Ok(Response::default().add_attribute("action", "update_trading_config"))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -156,6 +187,7 @@ pub fn open_position(
     let trader = info.sender.clone();
 
     require_is_not_over_price_diff_limit(deps.as_ref(), &vamm_controller)?;
+    let trading_config = read_trading_config(deps.storage)?;
 
     require_not_paused(state.pause)?;
     require_vamm(deps.as_ref(), &config.insurance_fund, &vamm)?;
@@ -206,6 +238,9 @@ pub fn open_position(
     open_notional = new_margin_amount
         .checked_mul(leverage)?
         .checked_div(config.decimals)?;
+
+    // check max notional size and min leverage
+    check_max_notional_size(open_notional, trading_config.max_notional_size)?;
 
     let entry_price =
         vamm_controller.input_price(&deps.querier, side_to_direction(&side), open_notional)?;

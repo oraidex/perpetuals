@@ -21,6 +21,23 @@ impl EngineController {
         self.0.clone()
     }
 
+    pub fn update_trading_config(
+        &self,
+        enable_whitelist: Option<bool>,
+        max_notional_size: Option<Uint128>,
+        min_leverage: Option<Uint128>,
+    ) -> StdResult<CosmosMsg> {
+        wasm_execute(
+            &self.0,
+            &ExecuteMsg::UpdateTradingConfig {
+                enable_whitelist,
+                max_notional_size,
+                min_leverage,
+            },
+            vec![],
+        )
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub fn update_config(
         &self,
